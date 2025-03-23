@@ -16,3 +16,10 @@
 
 1. **Download**: Get the latest release from the [GitHub repository](https://github.com/activebook/clash_forge/releases)
 2. **Supporting OS**: Right now macOS support only.
+
+## Screenshots
+| Main Theme | Settings |
+| ------------ | ------------ |
+| ![Screen 1](screenshots/screen1.png) | ![Screen 2](screenshots/screen2.png) |
+| How to use | Logs |
+| ![Screen 3](screenshots/screen3.png) | ![Screen 4](screenshots/screen4.png) |
