@@ -9,13 +9,14 @@
 - **DNS Resolution**: Automatically resolve proxy server DNS to bypass blocks, ensuring accessibility.
 - **Protocol Support**: Handles all modern protocols, including VMess, VLESS, Shadowsocks (SS), and Trojan.
 - **Individual URLs**: Supports single or multiple proxy URLs (e.g., `vmess://`, `vless://`, `trojan://`, `ss://`) alongside subscriptions(`https://`).
+- **System Network Proxy Support**: Enables the use of system-level proxies to improve connectivity.
 - **Clear Logs**: Provides detailed logs of the conversion process for transparency and troubleshooting.
 - **Import/Export**: Save and share your subscription lists with import and export functionality.
 
 ## Installation
 
 1. **Download**: Get the latest release from the [GitHub repository](https://github.com/activebook/clash_forge/releases)
-2. **Supporting OS**: Right now macOS support only.
+2. **Supporting OS**: Right now macOS support only. (Using swift code for system network proxy)
 
 ## Screenshots
 | Main Theme | Settings |

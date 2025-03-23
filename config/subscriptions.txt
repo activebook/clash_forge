@@ -7,3 +7,5 @@ https://raw.githubusercontent.com/barry-far/V2ray-Configs/main/Sub4.txt
 vless://b56db9c4-0620-11f0-a0a7-9f7c0e970add@usa3.vpnjantit.com:10002?encryption=none&security=tls&type=ws&path=%2fvpnjantit#himurokaoru-vpnjantit.com
 vless://2ed6d566-063a-11f0-9ec9-52ac0074670e@premiusa3.vpnjantit.com:10002?encryption=none&security=tls&type=ws&path=%2fvpnjantit#himurokaoru-vpnjantit.com
 https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/sub.txt
+https://www.v2nodes.com/subscriptions/country/all/?key=8F99F0D52FF773C
+https://www.google.com

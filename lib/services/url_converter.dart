@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 import 'protocols.dart';
 import 'dns.dart';
+import 'http_client.dart' as http_client;
 import 'loginfo.dart';
 
 class UrlConverter {
@@ -49,11 +50,13 @@ class UrlConverter {
         case 'http':
         case 'https':
           // 1. Fetch the content from the URL
+          /*
           final response = await http.get(Uri.parse(scriptionUrl));
           if (response.statusCode != 200) {
             throw Exception('Failed to load URL: ${response.statusCode}');
           }
-          content = response.body;
+          */
+          content = await http_client.request(scriptionUrl);
           break;
         case 'ss':
         case 'vmess':

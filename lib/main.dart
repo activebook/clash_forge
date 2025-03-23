@@ -17,6 +17,7 @@ class AppInfo {
   AppInfo({required this.appName, required this.appVersion});
 }
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final packageInfo = await PackageInfo.fromPlatform();
@@ -25,7 +26,7 @@ void main() async {
     appName: packageInfo.appName,
     appVersion: packageInfo.version,
   );
-
+  
   runApp(MyApp(appInfo: appInfo));
 }
 
@@ -385,7 +386,11 @@ class MyAppState extends State<MyApp> {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             'Delete "${_formatUrlWithFilename(_subscriptions[index], onlyFilename: true)}"?',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(buttonContext).extension<AppColors>()!.folderAction),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color:
+                  Theme.of(buttonContext).extension<AppColors>()!.folderAction,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -731,7 +736,7 @@ class MyAppState extends State<MyApp> {
                 // Handle theme changes
                 _toggleTheme(value);
               },
-              onDnsProviderChanged:(selectedDnsProvider) {
+              onDnsProviderChanged: (selectedDnsProvider) {
                 _toggleDnsProvider(selectedDnsProvider);
               },
             ),
@@ -848,7 +853,7 @@ class MyAppState extends State<MyApp> {
   Widget _buildLogDrawer(BuildContext context) {
     // Track which log entry is being hovered
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.70, // 70% of screen width      
+      width: MediaQuery.of(context).size.width * 0.70, // 70% of screen width
       child: Column(
         children: [
           AppBar(
@@ -860,7 +865,7 @@ class MyAppState extends State<MyApp> {
             actions: [
               IconButton(
                 icon: Icon(Icons.close),
-                onPressed: () => _scaffoldKey.currentState?.closeDrawer(),                
+                onPressed: () => _scaffoldKey.currentState?.closeDrawer(),
                 //onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -1307,7 +1312,11 @@ class _ControlBottomAppBar extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             'Want to quit ?',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(buttonContext).extension<AppColors>()!.folderAction),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color:
+                  Theme.of(buttonContext).extension<AppColors>()!.folderAction,
+            ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -1417,7 +1426,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
     'Alibaba',
     'CNNIC',
     'DNSPod',
-    'NextDNS'
+    'NextDNS',
   ];
 
   @override
@@ -1441,7 +1450,11 @@ class SettingsDrawerState extends State<SettingsDrawer> {
               // Header
               Row(
                 children: [
-                  Icon(Icons.settings, color: Theme.of(context).extension<AppColors>()!.folderAction),
+                  Icon(
+                    Icons.settings,
+                    color:
+                        Theme.of(context).extension<AppColors>()!.folderAction,
+                  ),
                   SizedBox(width: 12),
                   Text(
                     'Settings',
@@ -1502,7 +1515,8 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                             'Why this matters:',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).cardTheme.surfaceTintColor,
+                              color:
+                                  Theme.of(context).cardTheme.surfaceTintColor,
                             ),
                           ),
                         ],
@@ -1518,7 +1532,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
               ),
 
               // DNS Provider Selection Chips
-              if (_useDns) ... [
+              if (_useDns) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
                   child: Column(
@@ -1535,23 +1549,30 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: _dnsProviders.map((provider) {
-                          return ChoiceChip(
-                            label: Text(provider),
-                            selected: _selectedDnsProvider == provider,
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() {
-                                  _selectedDnsProvider = provider;
-                                });
-                                // Handle provider change
-                                widget.onDnsProviderChanged(provider);
-                              }
-                            },
-                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
-                            selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                          );
-                        }).toList(),
+                        children:
+                            _dnsProviders.map((provider) {
+                              return ChoiceChip(
+                                label: Text(provider),
+                                selected: _selectedDnsProvider == provider,
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    setState(() {
+                                      _selectedDnsProvider = provider;
+                                    });
+                                    // Handle provider change
+                                    widget.onDnsProviderChanged(provider);
+                                  }
+                                },
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHigh
+                                    .withValues(alpha: 0.5),
+                                selectedColor:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.primaryContainer,
+                              );
+                            }).toList(),
                       ),
                     ],
                   ),
