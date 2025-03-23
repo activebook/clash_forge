@@ -13,6 +13,7 @@ class UrlConverter {
   // List to store logs
   final List<LogInfo> _logsList = [];
   bool _needResolveDns = false;
+  String _dnsProvider = '';
 
   void _addLog(String log, LogLevel level) {
     _logsList.add(LogInfo(message: log, level: level));
@@ -24,6 +25,10 @@ class UrlConverter {
 
   set needResolveDns(bool value) {
     _needResolveDns = value;
+  }
+
+  set dnsProvider(String value) {
+    _dnsProvider = value;
   }
 
   Future<List<LogInfo>> processSubscription(
@@ -1200,7 +1205,7 @@ class UrlConverter {
         final hostname = server['server'];
         if (!isIpAddressFast(hostname)) {
           // If not IP address
-          final ipAddresses = await getDnsIpAddresses(hostname);
+          final ipAddresses = await getDnsIpAddresses(hostname, firstChoice: _dnsProvider);
           if (ipAddresses.isNotEmpty) {
             server['server'] = ipAddresses.first;
           }

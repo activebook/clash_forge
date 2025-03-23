@@ -92,12 +92,7 @@ class AppColors extends ThemeExtension<AppColors> {
 /// only add extensions here
 ThemeData macOSLightThemeFollow() {
   // macOS light mode color palette
-  const primaryBlue = Color(0xFF007AFF);
   const backgroundColor = Color(0xFFF5F5F7);
-  const surfaceColor = Color(0xFFFFFFFF);
-  const borderColor = Color(0xFFE6E6E6);
-  const textColor = Color(0xFF000000);
-  const secondaryTextColor = Color(0xFF86868B);
 
   return ThemeData.light().copyWith(
     colorScheme: ThemeData.light().colorScheme.copyWith(
@@ -118,6 +113,8 @@ ThemeData macOSLightThemeFollow() {
     // Add text field styling
     // Text theme with defaults preserved
     textTheme: ThemeData.light().textTheme.copyWith(
+      // headline
+      bodyMedium: TextStyle(color: Colors.blueGrey[700]),
       // title
       bodyLarge: TextStyle(color: Colors.grey[700]),
       // subtitle

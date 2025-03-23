@@ -58,6 +58,8 @@ class MyAppState extends State<MyApp> {
   bool _isBatchProcessing = false;
   // Resolve DNS Flag
   bool _needResolveDNS = false;
+  // Default DNS Provider
+  String _dnsProvider = '';
 
   // Add new subscription Flag
   String _newSubscriptionUrl = '';
@@ -153,6 +155,7 @@ class MyAppState extends State<MyApp> {
       _themeMode =
           prefs.getBool('darkMode') ?? false ? ThemeMode.dark : ThemeMode.light;
       _needResolveDNS = prefs.getBool('needResolveDNS') ?? false;
+      _dnsProvider = prefs.getString('dnsProvider') ?? 'Google';
     });
   }
 
@@ -171,6 +174,14 @@ class MyAppState extends State<MyApp> {
       _themeMode = darkMode ? ThemeMode.dark : ThemeMode.light;
     });
     prefs.setBool('darkMode', darkMode);
+  }
+
+  Future<void> _toggleDnsProvider(String selectedDnsProvider) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _dnsProvider = selectedDnsProvider;
+    });
+    prefs.setString('dnsProvider', _dnsProvider);
   }
 
   // Load subscriptions from SharedPreferences
@@ -424,6 +435,7 @@ class MyAppState extends State<MyApp> {
     // Create instance
     final converter = UrlConverter();
     converter.needResolveDns = _needResolveDNS;
+    converter.dnsProvider = _dnsProvider;
     try {
       _configTemplate ??= await rootBundle.loadString('config/template.yaml');
       List<LogInfo> logs = await converter.processSubscription(
@@ -710,6 +722,7 @@ class MyAppState extends State<MyApp> {
             endDrawer: SettingsDrawer(
               initialIsDarkMode: _themeMode == ThemeMode.dark,
               initialUseDns: _needResolveDNS,
+              initialSelectedDnsProvider: _dnsProvider,
               onDnsChanged: (value) {
                 // Update your main app state
                 _toggleDNS(value);
@@ -717,6 +730,9 @@ class MyAppState extends State<MyApp> {
               onThemeModeChanged: (value) {
                 // Handle theme changes
                 _toggleTheme(value);
+              },
+              onDnsProviderChanged:(selectedDnsProvider) {
+                _toggleDnsProvider(selectedDnsProvider);
               },
             ),
             body: Padding(
@@ -1025,6 +1041,7 @@ class MyAppState extends State<MyApp> {
           decoration: InputDecoration(
             hintText: "Select Clash Config Folder ...",
           ),
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1369,15 +1386,19 @@ class _ControlBottomAppBar extends StatelessWidget {
 class SettingsDrawer extends StatefulWidget {
   final bool initialUseDns;
   final bool initialIsDarkMode;
+  final String initialSelectedDnsProvider;
   final Function(bool useDns) onDnsChanged;
   final Function(bool isDarkMode) onThemeModeChanged;
+  final Function(String selectedDnsProvider) onDnsProviderChanged;
 
   const SettingsDrawer({
     super.key,
     required this.initialUseDns,
     required this.initialIsDarkMode,
+    required this.initialSelectedDnsProvider,
     required this.onDnsChanged,
     required this.onThemeModeChanged,
+    required this.onDnsProviderChanged,
   });
 
   @override
@@ -1387,12 +1408,24 @@ class SettingsDrawer extends StatefulWidget {
 class SettingsDrawerState extends State<SettingsDrawer> {
   bool _useDns = true;
   bool _isDarkMode = false;
+  String _selectedDnsProvider = 'Google'; // Default selection
+
+  // List of DNS providers
+  final List<String> _dnsProviders = [
+    'Google',
+    'Cloudflare',
+    'Alibaba',
+    'CNNIC',
+    'DNSPod',
+    'NextDNS'
+  ];
 
   @override
   void initState() {
     super.initState();
     _useDns = widget.initialUseDns;
     _isDarkMode = widget.initialIsDarkMode;
+    _selectedDnsProvider = widget.initialSelectedDnsProvider;
   }
 
   @override
@@ -1483,6 +1516,47 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                   ),
                 ),
               ),
+
+              // DNS Provider Selection Chips
+              if (_useDns) ... [
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0, bottom: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'DNS Provider:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _dnsProviders.map((provider) {
+                          return ChoiceChip(
+                            label: Text(provider),
+                            selected: _selectedDnsProvider == provider,
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedDnsProvider = provider;
+                                });
+                                // Handle provider change
+                                widget.onDnsProviderChanged(provider);
+                              }
+                            },
+                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0.5),
+                            selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               Divider(),
 

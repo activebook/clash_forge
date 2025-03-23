@@ -15,6 +15,7 @@ Future<List<String>> getDnsIpAddresses(String hostname, {String firstChoice = 'c
 
   try {
     // Try the preferred provider first
+    firstChoice = firstChoice.trim().toLowerCase();
     if (providers.containsKey(firstChoice)) {
       try {
         return await _queryDnsProvider(providers[firstChoice]!);
