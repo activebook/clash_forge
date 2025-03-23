@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-//import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'services/url_converter.dart';
 import 'services/loginfo.dart';
+import 'themes.dart';
 
 // Model class to hold app info
 class AppInfo {
@@ -30,35 +31,15 @@ void main() async {
 
 enum NotificationStatus { success, error, warning, info }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final AppInfo appInfo;
-
   const MyApp({super.key, required this.appInfo});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: appInfo.appName,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: SubscriptionListScreen(appInfo: appInfo),
-    );
-  }
+  MyAppState createState() => MyAppState();
 }
 
-class SubscriptionListScreen extends StatefulWidget {
-  final AppInfo appInfo;
-
-  const SubscriptionListScreen({super.key, required this.appInfo});
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _SubscriptionListScreenState createState() => _SubscriptionListScreenState();
-}
-
-class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
+class MyAppState extends State<MyApp> {
   late final AppInfo _appInfo;
 
   // List of log entries
@@ -332,6 +313,8 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
 
   // Show confirmation dialog before deleting
   Future<void> _showDeleteAllConfirmation(BuildContext context) async {
+    // Ensure we're in a mounted state
+    if (!mounted) return;
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -696,68 +679,87 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //return CupertinoApp(
+    // the context parameter represents the location of MyApp widget in the tree, which is above the MaterialApp you're creating.
+    // The MaterialApp widget is not the root of your application. the root is the MyApp widget.
+    // If we directly use the context of the MyApp widget, we can't access the MaterialApp widget.
+    // So we must use a builder to get the context of the MaterialApp widget.
     return MaterialApp(
-      theme: ThemeData.light(), // Your light theme (optional if you only use dark)
-      darkTheme: ThemeData.dark(), // Dark theme definition
+      title: widget.appInfo.appName,
+      //theme: macOSLightTheme(), // Your light theme
+      theme: macOSLightThemeFollow(), // default light theme
+      darkTheme: macOSDarkThemeFollow(), // Your dark theme
       themeMode: _themeMode, // Force dark mode
+      // Add these localization delegates
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''), // English
+        // Add more locales as needed
+      ],
       scaffoldMessengerKey: _scaffoldMessengerKey, // Add the key to MaterialApp
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: _buildAppBar(context),
-        drawer: _buildLogDrawer(context),
-        endDrawer: SettingsDrawer(
-          initialIsDarkMode: _themeMode == ThemeMode.dark,
-          initialUseDns: _needResolveDNS,
-          onDnsChanged: (value) {
-            // Update your main app state
-            _toggleDNS(value);
-          },
-          onThemeModeChanged: (value) {
-            // Handle theme changes
-            _toggleTheme(value);
-          },
-        ),
-        body: Container(
-          color: Colors.white70,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                // Subscription List (takes most of the space)
-                Expanded(child: _buildSubscriptionList()),
-
-                // Spacing
-                SizedBox(height: 8),
-
-                // Batch Process Bar
-                _buildBatchProcessBar(context),
-
-                // Spacing
-                SizedBox(height: 8),
-
-                // Control Panel
-                _buildInputPanel(context),
-              ],
+      home: Builder(
+        builder: (context) {
+          // ** Here is the key: The Builder widget creates a new context that's positioned inside the MaterialApp**
+          return Scaffold(
+            key: _scaffoldKey,
+            appBar: _buildAppBar(context),
+            drawer: _buildLogDrawer(context),
+            endDrawer: SettingsDrawer(
+              initialIsDarkMode: _themeMode == ThemeMode.dark,
+              initialUseDns: _needResolveDNS,
+              onDnsChanged: (value) {
+                // Update your main app state
+                _toggleDNS(value);
+              },
+              onThemeModeChanged: (value) {
+                // Handle theme changes
+                _toggleTheme(value);
+              },
             ),
-          ),
-        ),
-        // Floating Action Button
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _addNewSubscription();
-          },
-          tooltip: 'Add new subscription',
-          child: const Icon(Icons.add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        // Bottom Navigation Bar
-        bottomNavigationBar: _ControlBottomAppBar(
-          fabLocation: FloatingActionButtonLocation.centerDocked,
-          shape: null,
-          onExport: exportSubscriptions,
-          onImport: importSubscriptions,
-        ),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Subscription List (takes most of the space)
+                  Expanded(child: _buildSubscriptionList()),
+
+                  // Spacing
+                  SizedBox(height: 8),
+
+                  // Batch Process Bar
+                  _buildBatchProcessBar(context),
+
+                  // Spacing
+                  SizedBox(height: 8),
+
+                  // Control Panel
+                  _buildInputPanel(context),
+                ],
+              ),
+            ),
+
+            // Floating Action Button
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                _addNewSubscription();
+              },
+              tooltip: 'Add new subscription',
+              child: const Icon(Icons.add),
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            // Bottom Navigation Bar
+            bottomNavigationBar: _ControlBottomAppBar(
+              fabLocation: FloatingActionButtonLocation.centerDocked,
+              shape: null,
+              onExport: exportSubscriptions,
+              onImport: importSubscriptions,
+            ),
+          );
+        },
       ),
     );
   }
@@ -791,15 +793,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
           ),
         ],
       ),
-      backgroundColor: Colors.white70,
-      shadowColor: Colors.black.withValues(
-        alpha: 0.7,
-      ), // Adding shadow with opacity
-      elevation: 4, // Make sure elevation is set to see the shadow
-      centerTitle: true,
-      toolbarHeight: 48, // Reduce height from default ~56 to 48
       leadingWidth: 40, // If you have a leading widget, make it narrower
-      titleSpacing: 0, // Reduce spacing around title
       leading: Builder(
         builder:
             (context) => IconButton(
@@ -838,7 +832,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
   Widget _buildLogDrawer(BuildContext context) {
     // Track which log entry is being hovered
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.70, // 70% of screen width
+      width: MediaQuery.of(context).size.width * 0.70, // 70% of screen width      
       child: Column(
         children: [
           AppBar(
@@ -850,16 +844,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
             actions: [
               IconButton(
                 icon: Icon(Icons.close),
-                onPressed: () => _scaffoldKey.currentState?.closeDrawer(),
-                /*
-                // For left drawer
-                _scaffoldKey.currentState?.openDrawer();
-                _scaffoldKey.currentState?.closeDrawer();
-
-                // For end drawer
-                _scaffoldKey.currentState?.openEndDrawer();
-                _scaffoldKey.currentState?.closeEndDrawer();
-                */
+                onPressed: () => _scaffoldKey.currentState?.closeDrawer(),                
                 //onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -956,10 +941,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                       ),
                       subtitle: Text(
                         _formatUrlWithFilename(_subscriptions[index]),
-                        style: TextStyle(
-                          fontSize: 12, // Smaller font size for subtitle
-                          color: Colors.grey[500],
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -977,9 +959,12 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                                         strokeWidth: 2.0,
                                       ),
                                     )
-                                    : const Icon(
+                                    : Icon(
                                       Icons.play_arrow,
-                                      color: Colors.green,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).extension<AppColors>()!.saveAction,
                                     ),
                             tooltip: "Process this subscription",
                             onPressed:
@@ -994,9 +979,12 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                           Builder(
                             builder:
                                 (buttonContext) => IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.close,
-                                    color: Colors.red,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).extension<AppColors>()!.deleteAction,
                                   ),
                                   tooltip: "Delete this subscription",
                                   onPressed:
@@ -1024,7 +1012,10 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
       ),
       child: ListTile(
         leading: IconButton(
-          icon: const Icon(Icons.folder_open, color: Colors.deepPurple),
+          icon: Icon(
+            Icons.folder_open,
+            color: Theme.of(context).extension<AppColors>()!.folderAction,
+          ),
           onPressed: _selectFolder,
           tooltip: "Select Folder",
         ),
@@ -1033,11 +1024,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
           enabled: false,
           decoration: InputDecoration(
             hintText: "Select Clash Config Folder ...",
-            border: InputBorder.none,
-            isDense: true,
-            contentPadding: EdgeInsets.only(bottom: 3.0),
           ),
-          style: TextStyle(color: Colors.grey[700]),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1049,14 +1036,23 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                   child: CircularProgressIndicator(strokeWidth: 2.0),
                 )
                 : IconButton(
-                  icon: const Icon(Icons.fast_forward, color: Colors.green),
+                  icon: Icon(
+                    Icons.fast_forward,
+                    color:
+                        Theme.of(context).extension<AppColors>()!.forwardAction,
+                  ),
                   onPressed: _processAllUrls,
                   tooltip: "Process all URLs",
                 ),
             _isBatchProcessing ? SizedBox(width: 16) : SizedBox(width: 5.0),
             IconButton(
-              icon: const Icon(Icons.delete_forever, color: Colors.red),
-              onPressed: () => {_showDeleteAllConfirmation(context)},
+              icon: Icon(
+                Icons.delete_forever,
+                color: Theme.of(context).extension<AppColors>()!.deleteAction,
+              ),
+              onPressed: () {
+                _showDeleteAllConfirmation(context);
+              },
               tooltip: "Delete all URLs",
             ),
           ],
@@ -1086,7 +1082,6 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                           controller: _textController,
                           decoration: InputDecoration(
                             hintText: 'Enter URL',
-                            border: InputBorder.none,
                             errorText:
                                 _newSubscriptionUrl.isNotEmpty && !_isValidUrl
                                     ? 'Only support https:// vmess:// vless:// trojan:// ss://'
@@ -1096,11 +1091,23 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.check, color: Colors.green),
+                        icon: Icon(
+                          Icons.check,
+                          color:
+                              Theme.of(
+                                context,
+                              ).extension<AppColors>()!.saveAction,
+                        ),
                         onPressed: _confirmNewSubscription,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
+                        icon: Icon(
+                          Icons.close,
+                          color:
+                              Theme.of(
+                                context,
+                              ).extension<AppColors>()!.deleteAction,
+                        ),
                         onPressed: _cancelNewSubscription,
                       ),
                     ],
@@ -1132,11 +1139,23 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.check, color: Colors.green),
+                        icon: Icon(
+                          Icons.check,
+                          color:
+                              Theme.of(
+                                context,
+                              ).extension<AppColors>()!.saveAction,
+                        ),
                         onPressed: _confirmEditSubscription,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
+                        icon: Icon(
+                          Icons.close,
+                          color:
+                              Theme.of(
+                                context,
+                              ).extension<AppColors>()!.deleteAction,
+                        ),
                         onPressed: _cancelEditSubscription,
                       ),
                     ],
@@ -1198,7 +1217,7 @@ class _ControlBottomAppBar extends StatelessWidget {
                 title: const Text('Import Subscriptions'),
                 subtitle: Text(
                   'Load subscription URLs from a file, where each line contains a single URL.',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               ListTile(
@@ -1206,7 +1225,7 @@ class _ControlBottomAppBar extends StatelessWidget {
                 title: const Text('Export Subscriptions'),
                 subtitle: Text(
                   'Save all added subscription URLs to a file, with each URL on a separate line.',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               ListTile(
@@ -1214,7 +1233,7 @@ class _ControlBottomAppBar extends StatelessWidget {
                 title: const Text('Process All Subscriptions'),
                 subtitle: Text(
                   'Retrieve and format all protocols from all added subscription URLs.',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               ListTile(
@@ -1222,7 +1241,15 @@ class _ControlBottomAppBar extends StatelessWidget {
                 title: const Text('Subscriptions Target Path'),
                 subtitle: Text(
                   'Process all subscription protocols in YAML format and save them in the specified folder.',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.notifications_outlined),
+                title: const Text('Logs of processing'),
+                subtitle: Text(
+                  'Logs record all subscription processing results, hover over each log to see the detail.',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
               ListTile(
@@ -1230,7 +1257,7 @@ class _ControlBottomAppBar extends StatelessWidget {
                 title: const Text('Supported Formats'),
                 subtitle: Text(
                   'Includes vmess, vless, trojan, and Shadowsocks (ss) protocols. Vmess provides secure, efficient data transmission; vless offers similar benefits with enhanced performance; trojan is optimized for stealth and reliability; and Shadowsocks is renowned for its simplicity and strong encryption.',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             ],
@@ -1240,24 +1267,66 @@ class _ControlBottomAppBar extends StatelessWidget {
     );
   }
 
+  Future<void> _showQuitConfimMenu(BuildContext buttonContext) async {
+    // Get the position of the button that was clicked
+    final RenderBox buttonBox = buttonContext.findRenderObject() as RenderBox;
+    final Offset position = buttonBox.localToGlobal(Offset.zero);
+    final Size buttonSize = buttonBox.size;
+
+    // Position the popup menu just below and right-aligned with the button
+    final result = await showMenu<bool>(
+      context: buttonContext,
+      position: RelativeRect.fromLTRB(
+        position.dx - 100, // Adjust this to position horizontally
+        position.dy + buttonSize.height, // Just below the button
+        position.dx + buttonSize.width,
+        position.dy,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      items: [
+        PopupMenuItem<bool>(
+          value: null,
+          enabled: false,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'Want to quit ?',
+            style: TextStyle(fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        PopupMenuItem<bool>(height: 40, value: false, child: Text('No')),
+        PopupMenuItem<bool>(height: 40, value: true, child: Text('Yes')),
+      ],
+    );
+
+    if (result == true) {
+      if (Platform.isMacOS) {
+        exit(0); // Clean exit with code 0
+      } else {
+        SystemNavigator.pop(); // For mobile platforms
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
       shape: shape,
-      color: Colors.white70,
       child: Row(
         children: <Widget>[
-          IconButton(
-            onPressed: () {
-              // Quit the app
-              if (Platform.isMacOS) {
-                exit(0); // Clean exit with code 0
-              } else {
-                SystemNavigator.pop(); // For mobile platforms
-              }
-            },
-            icon: const Icon(Icons.power_settings_new_outlined, color: Color.fromARGB(255, 136, 28, 21)),
-            tooltip: 'Quit',
+          Builder(
+            builder:
+                (buttonContext) => IconButton(
+                  onPressed: () {
+                    // Quit the app
+                    _showQuitConfimMenu(buttonContext);
+                  },
+                  icon: Icon(
+                    Icons.power_settings_new_outlined,
+                    color: Theme.of(context).extension<AppColors>()?.quitAction,
+                  ),
+                  tooltip: 'Quit',
+                ),
           ),
           SizedBox(width: 4),
           ElevatedButton.icon(
@@ -1265,8 +1334,7 @@ class _ControlBottomAppBar extends StatelessWidget {
             icon: const Icon(Icons.upload),
             label: const Text('Import'),
             style: ElevatedButton.styleFrom(
-              iconColor: Colors.green,
-              minimumSize: const Size(0, 50),
+              iconColor: Theme.of(context).extension<AppColors>()?.saveAction,
             ),
           ),
 
@@ -1277,8 +1345,7 @@ class _ControlBottomAppBar extends StatelessWidget {
             icon: const Icon(Icons.share),
             label: const Text('Export'),
             style: ElevatedButton.styleFrom(
-              iconColor: Colors.blue,
-              minimumSize: const Size(0, 50),
+              iconColor: Theme.of(context).extension<AppColors>()?.infoAction,
             ),
           ),
           SizedBox(width: 4),
@@ -1286,9 +1353,9 @@ class _ControlBottomAppBar extends StatelessWidget {
             onPressed: () {
               _showBottomSheet(context);
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.question_mark_outlined,
-              color: Colors.blueGrey,
+              color: Theme.of(context).extension<AppColors>()?.folderAction,
             ),
             tooltip: 'How to use',
           ),
@@ -1341,7 +1408,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
               // Header
               Row(
                 children: [
-                  Icon(Icons.settings, color: Theme.of(context).primaryColor),
+                  Icon(Icons.settings, color: Theme.of(context).extension<AppColors>()!.folderAction),
                   SizedBox(width: 12),
                   Text(
                     'Settings',
@@ -1379,7 +1446,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
 
               // DNS Info Card
               Card(
-                color: Colors.blue.shade50,
+                color: Theme.of(context).extension<AppColors>()?.cardInfoColor,
                 elevation: 0,
                 margin: EdgeInsets.only(bottom: 20),
                 shape: RoundedRectangleBorder(
@@ -1394,7 +1461,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                         children: [
                           Icon(
                             Icons.info_outline,
-                            color: Colors.blue.shade700,
+                            color: Theme.of(context).cardTheme.surfaceTintColor,
                             size: 20,
                           ),
                           SizedBox(width: 8),
@@ -1402,7 +1469,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                             'Why this matters:',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade700,
+                              color: Theme.of(context).cardTheme.surfaceTintColor,
                             ),
                           ),
                         ],
