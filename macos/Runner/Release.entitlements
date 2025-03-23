@@ -2,7 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- App sandbox must be disabled for unrestricted home directory access -->
 	<key>com.apple.security.app-sandbox</key>
+	<false/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<!-- Allow network access -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!-- Allow network in (accept incoming network connections) -->
+	<key>com.apple.security.network.server</key>
+	<true/>
+	<!-- Allow JIT (JavaScript engines/interpreters)/Web browser components -->
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.security.files.home-relative-path.read-write</key>
 	<true/>
 </dict>
 </plist>

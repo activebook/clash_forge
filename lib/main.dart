@@ -385,7 +385,7 @@ class MyAppState extends State<MyApp> {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             'Delete "${_formatUrlWithFilename(_subscriptions[index], onlyFilename: true)}"?',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(buttonContext).extension<AppColors>()!.folderAction),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -1307,7 +1307,7 @@ class _ControlBottomAppBar extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             'Want to quit ?',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(buttonContext).extension<AppColors>()!.folderAction),
             overflow: TextOverflow.ellipsis,
           ),
         ),
