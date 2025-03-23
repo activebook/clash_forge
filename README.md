@@ -1,6 +1,6 @@
 # Clash Forge
 
-**Clash Forge** is a powerful and user-friendly tool designed to streamline the management of proxy configurations for [Clash](https://github.com/Dreamacro/clash), a popular rule-based proxy client. Whether you have Clash subscriptions or individual proxy URLs, Clash Forge converts them into Clash-compatible YAML configuration files with ease. It automates tedious tasks, resolves DNS blocks, and provides clear feedback, making proxy setup a breeze.
+**Clash Forge** is a powerful and user-friendly tool designed to streamline the management of proxy configurations for [Clash], a popular rule-based proxy client. Whether you have Clash subscriptions or individual proxy URLs, Clash Forge converts them into Clash-compatible YAML configuration files with ease. It automates tedious tasks, resolves DNS blocks, and provides clear feedback, making proxy setup a breeze.
 
 ## Features
 
