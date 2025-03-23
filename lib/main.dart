@@ -138,7 +138,10 @@ class MyAppState extends State<MyApp> {
 
       // For standard URLs
       if (uri.pathSegments.isNotEmpty) {
-        final filename = uri.pathSegments.last;
+        String filename = uri.pathSegments.last;
+        if (filename.isEmpty) {
+          filename = uri.host;
+        }
         return onlyFilename ? filename : "${uri.host}: $filename";
       } else {
         // If no path segments
@@ -504,7 +507,9 @@ class MyAppState extends State<MyApp> {
 
       totalUrls++;
       futures.add(_processUrl(_subscriptions[i], i));
+      //await Future.delayed(const Duration(seconds: 2));
     }
+    
     // Update UI to show processing has started
     showNotification(
       'Processing $totalUrls subscriptions...',
@@ -741,20 +746,22 @@ class MyAppState extends State<MyApp> {
               },
             ),
             body: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(left:16, right:16, top:8, bottom:8),
               child: Column(
                 children: [
                   // Subscription List (takes most of the space)
-                  Expanded(child: _buildSubscriptionList()),
+                  Expanded(
+                    flex: 1, // You can increase this value to give it more priority
+                    child: _buildSubscriptionList()),
 
                   // Spacing
-                  SizedBox(height: 8),
+                  //SizedBox(height: 8),
 
                   // Batch Process Bar
                   _buildBatchProcessBar(context),
 
                   // Spacing
-                  SizedBox(height: 8),
+                  //SizedBox(height: 8),
 
                   // Control Panel
                   _buildInputPanel(context),
@@ -771,7 +778,7 @@ class MyAppState extends State<MyApp> {
               child: const Icon(Icons.add),
             ),
             floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
+                FloatingActionButtonLocation.miniCenterDocked,
             // Bottom Navigation Bar
             bottomNavigationBar: _ControlBottomAppBar(
               fabLocation: FloatingActionButtonLocation.centerDocked,
@@ -950,8 +957,9 @@ class MyAppState extends State<MyApp> {
                 itemBuilder: (context, index) {
                   final bool isProcessing = _processingItems[index] ?? false;
                   return Card(
-                    margin: const EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                     child: ListTile(
+                      dense: true,
                       onTap: () {
                         _editSubscription(index);
                       },
@@ -1026,7 +1034,7 @@ class MyAppState extends State<MyApp> {
 
   Widget _buildBatchProcessBar(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
       decoration: BoxDecoration(
         //color: Colors.grey[200],
         //borderRadius: BorderRadius.circular(8.0),
@@ -1066,7 +1074,7 @@ class MyAppState extends State<MyApp> {
                   onPressed: _processAllUrls,
                   tooltip: "Process all URLs",
                 ),
-            _isBatchProcessing ? SizedBox(width: 16) : SizedBox(width: 5.0),
+            _isBatchProcessing ? SizedBox(width: 12) : SizedBox(width: 0.0),
             IconButton(
               icon: Icon(
                 Icons.delete_forever,
@@ -1077,6 +1085,7 @@ class MyAppState extends State<MyApp> {
               },
               tooltip: "Delete all URLs",
             ),
+            SizedBox(width: 6.0),
           ],
         ),
       ),
@@ -1085,7 +1094,7 @@ class MyAppState extends State<MyApp> {
 
   Widget _buildInputPanel(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 0.0),
       decoration: BoxDecoration(
         //color: Colors.grey[200],
         //borderRadius: BorderRadius.circular(8.0),
