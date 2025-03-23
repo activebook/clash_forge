@@ -19,8 +19,8 @@
 2. **Supporting OS**: Right now macOS support only. (Using swift code for system network proxy)
 
 ## Screenshots
-| Main Theme | Settings |
+| Light Theme | Dark Theme |
 | ------------ | ------------ |
-| ![Screen 1](screenshots/screen1.png) | ![Screen 2](screenshots/screen2.png) |
-| How to use | Logs |
-| ![Screen 3](screenshots/screen3.png) | ![Screen 4](screenshots/screen4.png) |
+| ![Screen 1](screenshots/screen1.jpg) | ![Screen 2](screenshots/screen2.jpg) |
+| DNS Setting | Logs |
+| ![Screen 3](screenshots/screen3.jpg) | ![Screen 4](screenshots/screen4.jpg) |
