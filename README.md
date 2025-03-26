@@ -19,6 +19,7 @@
 2. **Supporting OS**: Right now macOS support only. (Using swift code for system network proxy)
 
 ## Screenshots
+
 | Light Theme | Dark Theme |
 | ------------ | ------------ |
 | ![Screen 1](screenshots/screen1.jpg) | ![Screen 2](screenshots/screen2.jpg) |
