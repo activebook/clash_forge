@@ -17,7 +17,6 @@ class AppInfo {
   AppInfo({required this.appName, required this.appVersion});
 }
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final packageInfo = await PackageInfo.fromPlatform();
@@ -26,7 +25,7 @@ void main() async {
     appName: packageInfo.appName,
     appVersion: packageInfo.version,
   );
-  
+
   runApp(MyApp(appInfo: appInfo));
 }
 
@@ -121,7 +120,7 @@ class MyAppState extends State<MyApp> {
   String _formatUrlWithFilename(String url, {onlyFilename = false}) {
     try {
       final uri = Uri.parse(url);
-
+      /*
       // For special protocol URLs (vless, vmess, ss, trojan)
       if (url.toLowerCase().startsWith('vless://') ||
           url.toLowerCase().startsWith('vmess://') ||
@@ -136,7 +135,7 @@ class MyAppState extends State<MyApp> {
         return onlyFilename ? uri.host : uri.host;
       }
 
-      // For standard URLs
+      // For standard URLs      
       if (uri.pathSegments.isNotEmpty) {
         String filename = uri.pathSegments.last;
         if (filename.isEmpty) {
@@ -147,6 +146,14 @@ class MyAppState extends State<MyApp> {
         // If no path segments
         return onlyFilename ? uri.host : uri.host;
       }
+      */
+
+      final converter = UrlConverter();
+      String filename = converter.extractFileNameFromUrlEx(
+        url,
+        defaultExtension: '',
+      );
+      return onlyFilename ? filename : "${uri.host}: $filename";
     } catch (e) {
       // Handle invalid URLs
       return url;
@@ -509,7 +516,7 @@ class MyAppState extends State<MyApp> {
       futures.add(_processUrl(_subscriptions[i], i));
       //await Future.delayed(const Duration(seconds: 2));
     }
-    
+
     // Update UI to show processing has started
     showNotification(
       'Processing $totalUrls subscriptions...',
@@ -746,13 +753,20 @@ class MyAppState extends State<MyApp> {
               },
             ),
             body: Padding(
-              padding: const EdgeInsets.only(left:16, right:16, top:8, bottom:8),
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 8,
+                bottom: 8,
+              ),
               child: Column(
                 children: [
                   // Subscription List (takes most of the space)
                   Expanded(
-                    flex: 1, // You can increase this value to give it more priority
-                    child: _buildSubscriptionList()),
+                    flex:
+                        1, // You can increase this value to give it more priority
+                    child: _buildSubscriptionList(),
+                  ),
 
                   // Spacing
                   //SizedBox(height: 8),
@@ -957,7 +971,10 @@ class MyAppState extends State<MyApp> {
                 itemBuilder: (context, index) {
                   final bool isProcessing = _processingItems[index] ?? false;
                   return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 4.0,
+                      horizontal: 8.0,
+                    ),
                     child: ListTile(
                       dense: true,
                       onTap: () {

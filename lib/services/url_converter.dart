@@ -42,7 +42,7 @@ class UrlConverter {
       _clearLogs();
 
       // Extract the filename from the URL
-      String fileName = _extractFileNameFromUrlEx(scriptionUrl);
+      String fileName = extractFileNameFromUrlEx(scriptionUrl);
 
       Uri uri = Uri.parse(scriptionUrl);
       String content = '';
@@ -221,77 +221,101 @@ class UrlConverter {
     }
   }
 
-  // ignore: unused_element
-  String _extractFileNameFromUrlOldVersion(String url) {
-    try {
-      Uri uri = Uri.parse(url);
-      String path = uri.path;
-
-      // Get the last segment of the path
-      List<String> segments = path.split('/');
-      String lastSegment = segments.lastWhere(
-        (segment) => segment.isNotEmpty,
-        orElse: () => _generateRandomString(8),
-      );
-
-      // Extract filename and handle query parameters
-      String fileName = lastSegment;
-      if (fileName.contains('?')) {
-        fileName = fileName.split('?').first;
-      }
-
-      // If no extension, add .yaml for Clash configs
-      if (!fileName.contains('.')) {
-        fileName = '$fileName.yaml';
-      } else {
-        // Remove .suffix
-        fileName = fileName.split('.').first;
-        fileName = '$fileName.yaml';
-      }
-
-      // Sanitize filename (remove invalid characters)
-      fileName = fileName.replaceAll(RegExp(r'[\\/*?:"<>|]'), '_');
-
-      return fileName;
-    } catch (e) {
-      // Return a default name if there's an error
-      return '${_generateRandomString(8)}.yaml';
-    }
-  }
-
-  String _extractFileNameFromUrlEx(
+  String extractFileNameFromUrlEx(
     String url, {
     String defaultExtension = '.yaml',
   }) {
     try {
-      // Directly use the file name in the url
-      final fileName = _getFileNameFromUrl(url, defaultExtension: defaultExtension);
-      if (fileName != null) {
-        return fileName;
+      final uri = Uri.parse(url);
+      final path = uri.path;
+      final segments = path.split('/').where((s) => s.isNotEmpty).toList();
+
+      // Rule 0: Check for key query parameters first (priority for URLs like example 4)
+      if (uri.queryParameters.isNotEmpty) {
+        final paramKeys = ['key', 'id', 'name', 'token'];
+        for (final key in paramKeys) {
+          if (uri.queryParameters.containsKey(key)) {
+            final value = uri.queryParameters[key]!;
+            if (value.isNotEmpty) {
+              return _sanitizeFileName(value) + defaultExtension;
+            }
+          }
+        }
       }
 
-      // For these protocol URLs, the fragment identifier is typically the name
-      if (url.contains('#')) {
-        final fragment = url.split('#').last;
-        // Sanitize the fragment to create a valid filename
-        return fragment.replaceAll(RegExp(r'[\\/*?:"<>|]'), '_') +
-            defaultExtension;
+      // Rule 1: Check for filenames in the URL
+      if (segments.isNotEmpty) {
+        final lastSegment = segments.last;
+
+        // If it has a file extension (like sub.txt), extract the name but apply defaultExtension
+        final lastDotIndex = lastSegment.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < lastSegment.length - 1) {
+          // Extract just the filename without the extension
+          final filenameWithoutExtension = lastSegment.substring(
+            0,
+            lastDotIndex,
+          );
+          return _sanitizeFileName(filenameWithoutExtension) + defaultExtension;
+        }
+
+        // If it doesn't have an extension but looks like a resource name
+        final systemPaths = ['refs', 'heads', 'main', 'master'];
+        if (!systemPaths.contains(lastSegment) && !lastSegment.endsWith('/')) {
+          // Handle GitHub URLs with meaningful owner and resource pattern
+          if ((uri.host.contains('github') ||
+                  uri.host.contains('githubusercontent')) &&
+              segments.length > 1) {
+            final repoOwner = segments[0];
+
+            // For URLs with protocols pattern (Example 3)
+            if (segments.contains('protocols') ||
+                segments.contains('channels')) {
+              return _sanitizeFileName('${lastSegment}_$repoOwner') +
+                  defaultExtension;
+            }
+
+            // General GitHub resource (Example 2) - not limited to NiREvil
+            return _sanitizeFileName('${repoOwner}_$lastSegment') +
+                defaultExtension;
+          }
+
+          // Default case: just use the resource name if it seems meaningful
+          if (lastSegment.length > 2) {
+            return _sanitizeFileName(lastSegment) + defaultExtension;
+          }
+        }
       }
 
-      // Fallback to host extraction if no fragment
-      final uriParts = url.split('@');
-      if (uriParts.length > 1) {
-        final hostPart = uriParts[1].split('?').first.split('/').first;
-        final host = hostPart.split(':').first;
-        return host + defaultExtension;
+      // Rule 2: Check for fragment identifiers
+      if (uri.fragment.isNotEmpty) {
+        return _sanitizeFileName(uri.fragment) + defaultExtension;
       }
 
-      final rdn = _generateRandomString(8);
-      return '$rdn$defaultExtension';
+      // Rule 3: Handle URLs with @ symbols
+      if (url.contains('@')) {
+        final uriParts = url.split('@');
+        if (uriParts.length > 1) {
+          final hostPart = uriParts[1].split('?').first.split('/').first;
+          final host = hostPart.split(':').first;
+          return _sanitizeFileName(host) + defaultExtension;
+        }
+      }
+
+      // Rule 4: Fallback to domain
+      if (uri.host.isNotEmpty) {
+        final host = uri.host.split('.').first;
+        return _sanitizeFileName(host) + defaultExtension;
+      }
+
+      // Final fallback
+      return _generateRandomString(8) + defaultExtension;
     } catch (e) {
-      // When using a function call within string interpolation in Dart, you need to wrap the function call in curly braces:
-      return '{$_generateRandomString(8)}$defaultExtension';
+      return '${_generateRandomString(8)}$defaultExtension';
     }
+  }
+
+  String _sanitizeFileName(String name) {
+    return name.replaceAll(RegExp(r'[\\/*?:"<>|]'), '_');
   }
 
   // Check if content is line-by-line text format
@@ -1208,7 +1232,10 @@ class UrlConverter {
         final hostname = server['server'];
         if (!isIpAddressFast(hostname)) {
           // If not IP address
-          final ipAddresses = await getDnsIpAddresses(hostname, firstChoice: _dnsProvider);
+          final ipAddresses = await getDnsIpAddresses(
+            hostname,
+            firstChoice: _dnsProvider,
+          );
           if (ipAddresses.isNotEmpty) {
             server['server'] = ipAddresses.first;
           }
