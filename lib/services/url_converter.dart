@@ -243,55 +243,46 @@ class UrlConverter {
         }
       }
 
-      // Rule 1: Check for filenames in the URL
+      // Rule 1: Special handling for GitHub/GitHubusercontent URLs
+      if ((uri.host.contains('github') ||
+              uri.host.contains('githubusercontent')) &&
+          segments.length > 1) {
+        final repoOwner = segments[0];
+        final lastSegment = segments.last;
+        final lastDotIndex = lastSegment.lastIndexOf('.');
+        String filenameWithoutExtension = lastSegment;
+        if (lastDotIndex > 0) {
+          filenameWithoutExtension = lastSegment.substring(0, lastDotIndex);
+        }
+        return _sanitizeFileName('${repoOwner}_$filenameWithoutExtension') +
+            defaultExtension;
+      }
+
+      // Rule 2: Check for filenames in the URL
       if (segments.isNotEmpty) {
         final lastSegment = segments.last;
-
-        // If it has a file extension (like sub.txt), extract the name but apply defaultExtension
         final lastDotIndex = lastSegment.lastIndexOf('.');
         if (lastDotIndex > 0 && lastDotIndex < lastSegment.length - 1) {
-          // Extract just the filename without the extension
           final filenameWithoutExtension = lastSegment.substring(
             0,
             lastDotIndex,
           );
           return _sanitizeFileName(filenameWithoutExtension) + defaultExtension;
         }
-
-        // If it doesn't have an extension but looks like a resource name
         final systemPaths = ['refs', 'heads', 'main', 'master'];
         if (!systemPaths.contains(lastSegment) && !lastSegment.endsWith('/')) {
-          // Handle GitHub URLs with meaningful owner and resource pattern
-          if ((uri.host.contains('github') ||
-                  uri.host.contains('githubusercontent')) &&
-              segments.length > 1) {
-            final repoOwner = segments[0];
-
-            // For URLs with protocols pattern (Example 3)
-            if (segments.contains('protocols') ||
-                segments.contains('channels')) {
-              return _sanitizeFileName('${lastSegment}_$repoOwner') +
-                  defaultExtension;
-            }
-
-            // General GitHub resource (Example 2) - not limited to NiREvil
-            return _sanitizeFileName('${repoOwner}_$lastSegment') +
-                defaultExtension;
-          }
-
-          // Default case: just use the resource name if it seems meaningful
           if (lastSegment.length > 2) {
             return _sanitizeFileName(lastSegment) + defaultExtension;
           }
         }
       }
 
-      // Rule 2: Check for fragment identifiers
+      // Rule 3: Check for fragment identifiers
       if (uri.fragment.isNotEmpty) {
         return _sanitizeFileName(uri.fragment) + defaultExtension;
       }
 
-      // Rule 3: Handle URLs with @ symbols
+      // Rule 4: Handle URLs with @ symbols
       if (url.contains('@')) {
         final uriParts = url.split('@');
         if (uriParts.length > 1) {
@@ -301,7 +292,7 @@ class UrlConverter {
         }
       }
 
-      // Rule 4: Fallback to domain
+      // Rule 5: Fallback to domain
       if (uri.host.isNotEmpty) {
         final host = uri.host.split('.').first;
         return _sanitizeFileName(host) + defaultExtension;
@@ -892,7 +883,9 @@ class UrlConverter {
             'headers': {'host': host},
           };
         } else {
-          serverInfo['h2-opts'] = {'path': path, 'host': host};
+          if (path != null && path.isNotEmpty) {
+            serverInfo['h2-opts'] = {'path': path, 'host': host};
+          }
         }
       } else if (network == 'grpc') {
         final serviceName = _getFirstNonEmptyValue(params, [
@@ -1049,7 +1042,9 @@ class UrlConverter {
             'headers': {'host': host},
           };
         } else {
-          serverInfo['h2-opts'] = {'path': path, 'host': host};
+          if (path != null && path.isNotEmpty) {
+            serverInfo['h2-opts'] = {'path': path, 'host': host};
+          }
         }
       } else if (network == 'grpc') {
         final serviceName = _getFirstNonEmptyValue(params, [
@@ -1066,7 +1061,15 @@ class UrlConverter {
        * Other Part (including: ip-version, alpn)
        */
       serverInfo['ip-version'] = params['ip-version'] ?? '';
-      serverInfo['flow'] = params['flow'] ?? '';
+      if (params['flow'] != null && params['flow'].toString().isNotEmpty) {
+        final flow = params['flow'].toString();
+        //Only Vless has flow
+        //xtls: It stands for eXtra Transport Layer Security — Xray's custom TLS implementation that allows better performance and flexibility.
+        //rprx: Stands for ReProxy, indicating the use of proxy-side TLS handling.
+        if (flow.startsWith("xtls-rprx-")) {
+          serverInfo['flow'] = flow;
+        }
+      }
       // Handle ALPN from URI parameters
       if (params.containsKey('alpn')) {
         // If alpn comes as comma-separated string
@@ -1184,7 +1187,9 @@ class UrlConverter {
             'headers': {'host': host},
           };
         } else {
-          serverInfo['h2-opts'] = {'path': path, 'host': host};
+          if (path != null && path.isNotEmpty) {
+            serverInfo['h2-opts'] = {'path': path, 'host': host};
+          }
         }
       } else if (network == 'grpc') {
         final serviceName = _getFirstNonEmptyValue(params, [
