@@ -688,19 +688,25 @@ class UrlConverter {
       // Normalize method
       method = method.toLowerCase();
 
-      // --- 2. Validate Key Length (SS-2022 Only) ---
+      // --- 2. Validate Cipher Method (RESTORED) ---
+      // This will now reject 'chacha20-poly1305' because it is not in your list
+      if (!ProxyUrl.isValidCipher(method)) {
+        return {
+          'type': 'ss',
+          'error': 'Unsupported or Legacy cipher detected: $method',
+        };
+      }
+
+      // --- 3. Validate Key Length (SS-2022 Only) ---
       int? expectedKeyLength = ProxyUrl.getKeyLengthForCipher(method);
 
       if (method.startsWith('2022-blake3') && expectedKeyLength != null) {
-        // Handle Multi-User keys (ServerKey:UserKey)
         List<String> keysToCheck =
             password.contains(':') ? password.split(':') : [password];
 
         for (String keyStr in keysToCheck) {
           try {
-            // SS-2022 keys are Base64. Decode to check actual byte size.
             List<int> keyBytes = base64.decode(keyStr);
-
             if (keyBytes.length != expectedKeyLength) {
               return {
                 'type': 'ss',
@@ -716,9 +722,8 @@ class UrlConverter {
           }
         }
       }
-      // Legacy ciphers (aes-256-gcm, etc.) are intentionally NOT checked.
 
-      // --- 3. Handle Plugin (The Fix for ": true") ---
+      // --- 4. Handle Plugin (Fix for ": true") ---
       String plugin = '';
       Map<String, dynamic> pluginOpts = {};
 
@@ -729,22 +734,37 @@ class UrlConverter {
           final pluginParts = pluginInfo.split(';');
           plugin = pluginParts[0];
 
-          // Loop through options (start from index 1)
           for (var opt in pluginParts.sublist(1)) {
             opt = opt.trim();
-
-            // FIX: Skip empty strings caused by trailing semicolons (e.g., "plugin;opts;;")
-            if (opt.isEmpty) continue;
+            if (opt.isEmpty) continue; // Skip empty options
 
             if (opt.contains('=')) {
               final keyValue = opt.split('=');
               if (keyValue.length == 2) {
-                // Try to detect numbers/booleans, otherwise keep as string
+                // For mihoyo
+                // pluginOpts[keyValue[0]] = keyValue[1];
+
+                String key = keyValue[0].toLowerCase();
                 String val = keyValue[1];
-                pluginOpts[keyValue[0]] = val;
+
+                // --- TYPE CONVERSION FIX ---
+                // Clash requires specific types for these keys:
+                if (key == 'tls' || key == 'skip-cert-verify') {
+                  pluginOpts[key] = val == 'true' || val == '1';
+                } else if (key == 'mux') {
+                  // URL uses mux=4 (int), but Clash Meta expects mux: boolean.
+                  // Logic: If it's not "0" and not "false", it's True.
+                  pluginOpts[key] =
+                      (val != '0' && val != 'false' && val.isNotEmpty);
+                } else if (key == 'port') {
+                  // Some plugins might use port as Int
+                  pluginOpts[key] = int.tryParse(val) ?? val;
+                } else {
+                  // Default to String
+                  pluginOpts[key] = val;
+                }
               }
             } else {
-              // Flags (e.g. "tls" -> tls: true)
               pluginOpts[opt] = true;
             }
           }
@@ -753,7 +773,7 @@ class UrlConverter {
         }
       }
 
-      // --- 4. Return Final Map ---
+      // --- 5. Return Final Map ---
       Map<String, dynamic> serverInfo = {
         'type': 'ss',
         'name': remark.isNotEmpty ? remark : uri.host,
@@ -762,7 +782,7 @@ class UrlConverter {
         'password': password,
         'cipher': method,
         'udp': true,
-        'tls': false, // Default
+        'tls': false,
       };
 
       if (plugin.isNotEmpty) {
