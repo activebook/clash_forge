@@ -439,15 +439,17 @@ ProxyUrl? parseProxyUrl(String url) {
     final serverPart = connectionPart.substring(atIndex + 1);
 
     final colonIndex = serverPart.lastIndexOf(':');
-    if (colonIndex == -1)
+    if (colonIndex == -1) {
       throw ArgumentError('Invalid URL: No : in URL: [$url]');
+    }
 
     final address = serverPart.substring(0, colonIndex);
     String portPart = serverPart.substring(colonIndex + 1);
     portPart = portPart.replaceAll(RegExp(r'[^0-9]'), '');
     final port = int.tryParse(portPart);
-    if (port == null)
+    if (port == null) {
       throw ArgumentError('Invalid URL: No port in URL: [$url]');
+    }
 
     // Extract parameters
     Map<String, String> params = {};
