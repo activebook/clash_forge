@@ -1,0 +1,68 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "clash_forge (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": []
+        },
+        {
+            "name": "clash_forge (profile)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "clash_forge (release)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "clash_forge (macOS)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "macos",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "clash_forge (iOS Simulator)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "ios",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "clash_forge (Android)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "android",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "clash_forge (Chrome)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "chrome",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "clash_forge (Linux)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "linux",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "clash_forge (Windows)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "windows",
+            "program": "lib/main.dart"
+        }
+    ]
+}
