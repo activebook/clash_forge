@@ -18,7 +18,7 @@ echo "Version: $VERSION"
 
 # Define paths
 APP_PATH="build/macos/Build/Products/Release/Clash Forge.app"
-ZIP_NAME="clash-forge-macos-v$VERSION.zip"
+ZIP_NAME="clash-forge-macos-v$VERSION.7z"
 
 # Check if app exists
 if [ ! -d "$APP_PATH" ]; then
@@ -26,9 +26,11 @@ if [ ! -d "$APP_PATH" ]; then
     exit 1
 fi
 
-# Zip the app (handle space in name)
-echo "Creating zip archive: $ZIP_NAME"
-zip -r "$ZIP_NAME" "build/macos/Build/Products/Release/Clash Forge.app"
+# Archive the app (handle space in name)
+echo "Creating 7z archive: $ZIP_NAME"
+cd "build/macos/Build/Products/Release/"
+7z a "../../../../$ZIP_NAME" "Clash Forge.app"
+cd ../../../../
 
 # Create GitHub release
 echo "Creating GitHub release..."
