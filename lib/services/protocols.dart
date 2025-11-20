@@ -44,18 +44,30 @@ class ProxyUrl {
 
   bool get isLikelyVless {
     // UUID format with dashes + VLESS-specific parameters
-    bool encryption = params.containsKey('encryption') && params['encryption'] == 'none';
-    bool security = params.containsKey('security') &&
-        (params['security'] == 'reality' || params['security'] == 'tls' || params['security'] == 'none');
+    bool encryption =
+        params.containsKey('encryption') && params['encryption'] == 'none';
+    bool security =
+        params.containsKey('security') &&
+        (params['security'] == 'reality' ||
+            params['security'] == 'tls' ||
+            params['security'] == 'none');
     // only in vless, type is a network factor
-    bool type = params.containsKey('type') && (params['type'] == 'ws' || params['type'] == 'grpc' || params['type'] == 'h2');
-    bool feature = !isBase64 && isUuid(id) && (encryption || security || type || params.containsKey('pbk'));
+    bool type =
+        params.containsKey('type') &&
+        (params['type'] == 'ws' ||
+            params['type'] == 'grpc' ||
+            params['type'] == 'h2');
+    bool feature =
+        !isBase64 &&
+        isUuid(id) &&
+        (encryption || security || type || params.containsKey('pbk'));
     return feature;
   }
 
   bool get isLikelyVmess {
     // Check for VMESS-specific parameters or structure
-    bool feature = isBase64 &&
+    bool feature =
+        isBase64 &&
         (isUuid(id) || params.containsKey("id")) &&
         (params.containsKey('aid') ||
             params.containsKey('net') ||
@@ -79,7 +91,8 @@ class ProxyUrl {
     if (!isBase64 && params.containsKey('sni')) {
       return true;
     }
-    bool feature = !isBase64 &&
+    bool feature =
+        !isBase64 &&
         params.containsKey('security') &&
         params['security'] == 'tls' &&
         !params.containsKey('encryption'); // No encryption param unlike VLESS
@@ -94,10 +107,13 @@ class ProxyUrl {
     // SIP002 (modern): ss://[base64(method:password)]@[server]:[port]#[remark]
     // Only the method:password part is base64-encoded
     // Legacy: ss://[base64(entire-configuration)]
-    bool feature = !isUuid(id) &&
-        (params.containsKey('method') || params.containsKey('cipher') ||
+    bool feature =
+        !isUuid(id) &&
+        (params.containsKey('method') ||
+            params.containsKey('cipher') ||
             id.contains(':') || // might be method:password not in base64
-            params.isEmpty) && (protocol == "ss"); // SS often has minimal params
+            params.isEmpty) &&
+        (protocol == "ss"); // SS often has minimal params
     return feature;
   }
 
@@ -296,6 +312,7 @@ class ProxyUrl {
     }
   }
 }
+
 /// vmess URLs use "@" to separate user information from server details and ":" to separate host from port
 /// vless follows a format like: vless://userID@host:port
 /// trojan follows: trojan://password@host:port
@@ -349,7 +366,7 @@ ProxyUrl? parseProxyUrl(String url) {
     }
 
     if (protocol == 'ss') {
-      // decode 
+      // decode
       // for legacy ss format (ss://base64[method:pass@host:port]#remarks)
       urlWithoutRemark = urlWithoutRemark.replaceFirst("$protocol://", '');
       if (ProxyUrl.checkBase64(urlWithoutRemark)) {
@@ -388,13 +405,15 @@ ProxyUrl? parseProxyUrl(String url) {
     final serverPart = connectionPart.substring(atIndex + 1);
 
     final colonIndex = serverPart.lastIndexOf(':');
-    if (colonIndex == -1) throw ArgumentError('Invalid URL: No : in URL: [$url]');
+    if (colonIndex == -1)
+      throw ArgumentError('Invalid URL: No : in URL: [$url]');
 
     final address = serverPart.substring(0, colonIndex);
     String portPart = serverPart.substring(colonIndex + 1);
     portPart = portPart.replaceAll(RegExp(r'[^0-9]'), '');
     final port = int.tryParse(portPart);
-    if (port == null) throw ArgumentError('Invalid URL: No port in URL: [$url]');
+    if (port == null)
+      throw ArgumentError('Invalid URL: No port in URL: [$url]');
 
     // Extract parameters
     Map<String, String> params = {};

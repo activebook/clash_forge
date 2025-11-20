@@ -9,7 +9,7 @@ void main() async {
   String body = '';
   try {
     body = await http_client.request('https://www.google.com');
-    if (!body.isEmpty) {
+    if (body.isNotEmpty) {
       print("Body length: ${body.length}");
     } else {
       print("No connection!");

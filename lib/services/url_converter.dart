@@ -887,6 +887,26 @@ class UrlConverter {
             serverInfo['h2-opts'] = {'path': path, 'host': host};
           }
         }
+      } else if (network == 'http') {
+        final httpPath = _getFirstNonEmptyValue(params, [
+          'path',
+          'pathname',
+          'path-name',
+        ], defaultValue: '/');
+        final httpHost = _getFirstNonEmptyValue(params, [
+          'host',
+          'hostname',
+        ], defaultValue: '');
+        final httpMethod = _getFirstNonEmptyValue(params, [
+          'method',
+        ], defaultValue: 'GET');
+        serverInfo['http-opts'] = {
+          'method': httpMethod,
+          'path': [httpPath],
+          'headers': {
+            'Host': [httpHost],
+          },
+        };
       } else if (network == 'grpc') {
         final serviceName = _getFirstNonEmptyValue(params, [
           'serviceName',
@@ -1046,6 +1066,46 @@ class UrlConverter {
             serverInfo['h2-opts'] = {'path': path, 'host': host};
           }
         }
+      } else if (network == 'http') {
+        final httpPath = _getFirstNonEmptyValue(params, [
+          'path',
+          'pathname',
+          'path-name',
+        ], defaultValue: '/');
+        final httpHost = _getFirstNonEmptyValue(params, [
+          'host',
+          'hostname',
+        ], defaultValue: '');
+        final httpMethod = _getFirstNonEmptyValue(params, [
+          'method',
+        ], defaultValue: 'GET');
+        serverInfo['http-opts'] = {
+          'method': httpMethod,
+          'path': [httpPath],
+          'headers': {
+            'Host': [httpHost],
+          },
+        };
+      } else if (network == 'http') {
+        final httpPath = _getFirstNonEmptyValue(params, [
+          'path',
+          'pathname',
+          'path-name',
+        ], defaultValue: '/');
+        final httpHost = _getFirstNonEmptyValue(params, [
+          'host',
+          'hostname',
+        ], defaultValue: '');
+        final httpMethod = _getFirstNonEmptyValue(params, [
+          'method',
+        ], defaultValue: 'GET');
+        serverInfo['http-opts'] = {
+          'method': httpMethod,
+          'path': [httpPath],
+          'headers': {
+            'Host': [httpHost],
+          },
+        };
       } else if (network == 'grpc') {
         final serviceName = _getFirstNonEmptyValue(params, [
           'serviceName',

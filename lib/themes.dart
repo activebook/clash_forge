@@ -66,7 +66,7 @@ class AppColors extends ThemeExtension<AppColors> {
       forwardAction: forwardAction ?? this.forwardAction,
       folderAction: folderAction ?? this.folderAction,
       quitAction: quitAction ?? this.quitAction,
-      cardInfoColor: cardInfoAction ?? this.cardInfoColor,
+      cardInfoColor: cardInfoAction ?? cardInfoColor,
     );
   }
 
@@ -212,7 +212,6 @@ ThemeData macOSLightTheme() {
       primary: primaryBlue,
       secondary: Color(0xFF34C759), // macOS green
       surface: surfaceColor,
-      background: backgroundColor,
       error: Color(0xFFFF3B30), // macOS red
     ),
 
@@ -323,12 +322,12 @@ ThemeData macOSLightTheme() {
 
     // Switches, checkboxes, etc.
     switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) return Colors.white;
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return Colors.white;
         return const Color(0xFFD8D8D8);
       }),
-      trackColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) return primaryBlue;
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return primaryBlue;
         return const Color(0xFFE9E9EA);
       }),
     ),
