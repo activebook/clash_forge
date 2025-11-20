@@ -52,3 +52,8 @@ app.*.map.json
 
 # Env and release
 env
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
