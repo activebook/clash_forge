@@ -264,10 +264,9 @@ class ProxyUrl {
       'camellia-192-cfb',
       'camellia-256-cfb',
 
-      // ChaCha family
+      // ChaCha family - removed chacha20-poly1305 as Clash doesn't support it
       'chacha20',
       'chacha20-ietf',
-      'chacha20-poly1305',
       'chacha20-ietf-poly1305',
       'xchacha20-ietf-poly1305',
 
@@ -282,6 +281,41 @@ class ProxyUrl {
     ];
     // Then, add this validation before returning serverInfo:
     return (validCiphers.contains(cipher));
+  }
+
+  static int? getKeyLengthForCipher(String cipher) {
+    switch (cipher) {
+      case 'aes-128-gcm':
+      case 'aes-128-cfb':
+      case 'aes-128-ctr':
+      case 'camellia-128-cfb':
+      case '2022-blake3-aes-128-gcm':
+        return 16;
+      case 'aes-256-gcm':
+      case 'aes-256-cfb':
+      case 'aes-256-ctr':
+      case 'camellia-256-cfb':
+      case 'chacha20':
+      case 'chacha20-ietf':
+      case 'chacha20-ietf-poly1305':
+      case 'xchacha20-ietf-poly1305':
+      case '2022-blake3-aes-256-gcm':
+      case '2022-blake3-chacha20-poly1305':
+        return 32;
+      case 'aes-192-gcm':
+      case 'aes-192-cfb':
+      case 'aes-192-ctr':
+      case 'camellia-192-cfb':
+        return 24;
+      case 'rc4-md5':
+      case 'bf-cfb':
+      case 'salsa20':
+      case 'auto':
+      case 'none':
+        return null; // Variable or no key
+      default:
+        return null;
+    }
   }
 
   static bool isValidPublicKey(String? key) {

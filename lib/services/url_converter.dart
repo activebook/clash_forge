@@ -681,6 +681,16 @@ class UrlConverter {
           };
         }
 
+        // Check key length for the cipher
+        int? expectedKeyLength = ProxyUrl.getKeyLengthForCipher(method);
+        if (expectedKeyLength != null && password.length != expectedKeyLength) {
+          return {
+            'type': 'ss',
+            'error':
+                'Invalid key length for cipher $method: expected $expectedKeyLength, got ${password.length}',
+          };
+        }
+
         // Handle plugin (SIP003) if present in query parameters
         String plugin = '';
         Map<String, dynamic> pluginOpts = {};
@@ -1066,26 +1076,6 @@ class UrlConverter {
             serverInfo['h2-opts'] = {'path': path, 'host': host};
           }
         }
-      } else if (network == 'http') {
-        final httpPath = _getFirstNonEmptyValue(params, [
-          'path',
-          'pathname',
-          'path-name',
-        ], defaultValue: '/');
-        final httpHost = _getFirstNonEmptyValue(params, [
-          'host',
-          'hostname',
-        ], defaultValue: '');
-        final httpMethod = _getFirstNonEmptyValue(params, [
-          'method',
-        ], defaultValue: 'GET');
-        serverInfo['http-opts'] = {
-          'method': httpMethod,
-          'path': [httpPath],
-          'headers': {
-            'Host': [httpHost],
-          },
-        };
       } else if (network == 'http') {
         final httpPath = _getFirstNonEmptyValue(params, [
           'path',
