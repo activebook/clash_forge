@@ -114,7 +114,8 @@ class MyAppState extends State<MyApp> {
           trimmedValue.startsWith('vless://') ||
           trimmedValue.startsWith('trojan://') ||
           trimmedValue.startsWith('ss://') ||
-          trimmedValue.startsWith('hysteria2://');
+          trimmedValue.startsWith('hysteria2://') ||
+          trimmedValue.startsWith('hy2://');
     });
   }
 
@@ -1133,7 +1134,7 @@ class MyAppState extends State<MyApp> {
                             hintText: 'Enter URL',
                             errorText:
                                 _newSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2://'
+                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2:// hy2://'
                                     : null,
                           ),
                           onChanged: _validateUrl,
@@ -1181,7 +1182,7 @@ class MyAppState extends State<MyApp> {
                             border: InputBorder.none,
                             errorText:
                                 _editSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2://'
+                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2:// hy2://'
                                     : null,
                           ),
                           onChanged: _validateUrl,

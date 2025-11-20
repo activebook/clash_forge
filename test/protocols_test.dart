@@ -55,7 +55,8 @@ void main() {
     'ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTpvWEdwMStpaGxmS2c4MjZIQDE3Mi4yMzIuMTcxLjE5MjoxODY2#SS-%E7%BE%8E%E5%9B%BD-NF%E8%A7%A3%E9%94%81%E8%87%AA%E5%88%B6%E5%89%A7-ChatGPT-TikTok-YouTube-172.232.171.192%3A1866',
     'ss://cmM0LW1kNTplZmFuY2N5dW4@cn01.efan8867801.xyz:8773/?plugin=obfs-local%3Bobfs%3Dhttp%3Bobfs-host%3D202503170996717-MVQjjXvt4R.download.microsoft.com#%F0%9F%87%BA%F0%9F%87%B8%20%E7%BE%8E%E5%9B%BD2%7C%40ripaojiedian',
     'ss://df0680ca-e43c-498d-ed86-8e196eedd012@157.180.22.144:8880?mode=gun&security=none&encryption=none&type=grpc#',
-    'ss://c72db571-2c94-4bfa-e546-c6eca9e43b91@151.101.66.219:80?type=ws&host=foffmelo.com&path=%2Folem%2Fws%3Fed%3D1024#@Hope_Net-join-us-on-Telegram'
+    'ss://c72db571-2c94-4bfa-e546-c6eca9e43b91@151.101.66.219:80?type=ws&host=foffmelo.com&path=%2Folem%2Fws%3Fed%3D1024#@Hope_Net-join-us-on-Telegram',
+    'hy2://2c833c5d-cbcc-4afb-89ba-d17dc39db6f0@75.127.13.83:47974?insecure=1&sni=www.bing.com#Test_HY2',
   ];
   /*
   for (final url in testUrls) {
@@ -69,5 +70,6 @@ void main() {
   logger.e("Error message");
   logger.wtf("WTF message");
 
-  detectAndCorrectUrl(testUrls[testUrls.length - 1]);
+  // Test the hy2 URL
+  detectAndCorrectUrl(testUrls.last);
 }

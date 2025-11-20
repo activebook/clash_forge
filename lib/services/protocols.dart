@@ -108,7 +108,7 @@ class ProxyUrl {
     // Hysteria2 has a simple structure: password@server:port
     // MUST check protocol explicitly since params can overlap with trojan
     bool feature =
-        protocol == "hysteria2" &&
+        (protocol == "hysteria2" || protocol == "hy2") &&
         !isBase64 &&
         (params.containsKey('insecure') ||
             params.containsKey('sni') ||

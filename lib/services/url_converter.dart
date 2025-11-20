@@ -63,6 +63,7 @@ class UrlConverter {
         case 'vless':
         case 'trojan':
         case 'hysteria2': // hysteria v2
+        case 'hy2': // short alias for hysteria2
           // Don't need to fetch the content
           content = scriptionUrl;
         default:
@@ -1332,8 +1333,9 @@ class UrlConverter {
   Map<String, dynamic> _processHysteria2Url(String url) {
     try {
       final uri = Uri.parse(url);
-      if (uri.scheme.toLowerCase() != 'hysteria2') {
-        throw FormatException('URL scheme is not hysteria2');
+      if (uri.scheme.toLowerCase() != 'hysteria2' &&
+          uri.scheme.toLowerCase() != 'hy2') {
+        throw FormatException('URL scheme is not hysteria2 or hy2');
       }
       if (uri.userInfo.isEmpty) {
         throw FormatException('Missing password in hysteria2 URL');
