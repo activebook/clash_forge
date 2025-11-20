@@ -613,53 +613,61 @@ class UrlConverter {
   */
 
   /// Process a Shadowsocks URL.(new version)
-  Map<String, dynamic> _processSsUrl(String url) {
+  static Map<String, dynamic> _processSsUrl(String url) {
     try {
-      // Handle base64 encoded URL
-      if (url.startsWith('ss://')) {
-        String ssUrl = url;
-        String remark = '';
+      if (!url.startsWith('ss://')) {
+        throw FormatException('Not a Shadowsocks URL');
+      }
 
-        // Extract remark/name if present
-        if (ssUrl.contains('#')) {
-          final parts = ssUrl.split('#');
-          ssUrl = parts[0];
+      String ssUrl = url;
+      String remark = '';
+
+      // Handle fragment (#remark)
+      if (ssUrl.contains('#')) {
+        final parts = ssUrl.split('#');
+        ssUrl = parts[0];
+        try {
           remark = Uri.decodeComponent(parts[1]);
+        } catch (e) {
+          remark = parts[1];
         }
+      }
 
-        Uri uri;
-        String method = '';
-        String password = '';
+      Uri uri;
+      String method = '';
+      String password = '';
 
-        // Handle the different formats
-        if (!ssUrl.contains('@')) {
-          // Format: ss://BASE64(method:password@server:port)
-          final base64Part = ssUrl.substring(5);
+      // --- 1. Parse UserInfo (3 formats) ---
+      if (!ssUrl.contains('@')) {
+        // Format: ss://BASE64(...)
+        final base64Part = ssUrl.substring(5);
+        try {
           final decoded = utf8.decode(
             base64.decode(
               base64Part.padRight((base64Part.length + 3) & ~3, '='),
             ),
           );
           uri = Uri.parse('ss://$decoded');
-
-          // Extract method and password from URI
           final userInfoParts = uri.userInfo.split(':');
           if (userInfoParts.length >= 2) {
             method = userInfoParts[0];
             password = userInfoParts.sublist(1).join(':');
           }
+        } catch (e) {
+          return {'type': 'ss', 'error': 'Invalid Base64 in SS URL'};
+        }
+      } else {
+        uri = Uri.parse(ssUrl);
+        final userInfoParts = uri.userInfo.split(':');
+        if (userInfoParts.length >= 2) {
+          // Format: ss://method:pass@server:port
+          method = userInfoParts[0];
+          password = userInfoParts.sublist(1).join(':');
         } else {
-          // Format: ss://method:password@server:port
-          uri = Uri.parse(ssUrl);
-          final userInfoParts = uri.userInfo.split(':');
-          if (userInfoParts.length >= 2) {
-            method = userInfoParts[0];
-            password = userInfoParts.sublist(1).join(':');
-          } else {
-            // Format: ss://BASE64(method:password)@server:port
-            final userInfo = uri.userInfo;
-            if (ProxyUrl.checkBase64(userInfo)) {
-              // Handle possible base64 encoding
+          // Format: ss://BASE64(method:pass)@server:port
+          final userInfo = uri.userInfo;
+          if (ProxyUrl.checkBase64(userInfo)) {
+            try {
               final decoded = utf8.decode(
                 base64.decode(
                   userInfo.padRight((userInfo.length + 3) & ~3, '='),
@@ -670,76 +678,101 @@ class UrlConverter {
                 method = parts[0];
                 password = parts.sublist(1).join(':');
               }
+            } catch (e) {
+              // Ignore decode errors, treat as raw
             }
           }
         }
-        // Check if the cipher is valid
-        if (!ProxyUrl.isValidCipher(method)) {
-          return {
-            'type': 'ss',
-            'error': 'Invalid SS cipher method: $method URL:[$url]',
-          };
-        }
-
-        // Check key length for the cipher
-        int? expectedKeyLength = ProxyUrl.getKeyLengthForCipher(method);
-        if (expectedKeyLength != null && password.length != expectedKeyLength) {
-          return {
-            'type': 'ss',
-            'error':
-                'Invalid key length for cipher $method: expected $expectedKeyLength, got ${password.length}',
-          };
-        }
-
-        // Handle plugin (SIP003) if present in query parameters
-        String plugin = '';
-        Map<String, dynamic> pluginOpts = {};
-        if (uri.queryParameters.containsKey('plugin')) {
-          final pluginInfo = uri.queryParameters['plugin']!;
-          if (pluginInfo.contains(';')) {
-            final pluginParts = pluginInfo.split(';');
-            plugin = pluginParts[0];
-
-            // Process each option after the plugin name
-            for (var opt in pluginParts.sublist(1)) {
-              opt = opt.trim();
-              if (opt.contains('=')) {
-                // Handle key=value options
-                final keyValue = opt.split('=');
-                if (keyValue.length == 2) {
-                  pluginOpts[keyValue[0]] = keyValue[1];
-                }
-              } else {
-                // Handle flag options (without value)
-                pluginOpts[opt] = true;
-              }
-            }
-          } else {
-            plugin = pluginInfo;
-          }
-        }
-
-        // Initialize serverInfo
-        Map<String, dynamic> serverInfo = {
-          'type': 'ss',
-          'name': remark.isNotEmpty ? remark : uri.host,
-          'server': uri.host,
-          'port': uri.port,
-          'password': password,
-          'cipher': method,
-          'tls': false,
-          'udp': true,
-        };
-        if (plugin.isNotEmpty) {
-          serverInfo['plugin'] = plugin;
-          serverInfo['plugin-opts'] = pluginOpts;
-        }
-        return serverInfo;
-      } else {
-        throw FormatException('Not a Shadowsocks URL');
       }
+
+      // Normalize method
+      method = method.toLowerCase();
+
+      // --- 2. Validate Key Length (SS-2022 Only) ---
+      int? expectedKeyLength = ProxyUrl.getKeyLengthForCipher(method);
+
+      if (method.startsWith('2022-blake3') && expectedKeyLength != null) {
+        // Handle Multi-User keys (ServerKey:UserKey)
+        List<String> keysToCheck =
+            password.contains(':') ? password.split(':') : [password];
+
+        for (String keyStr in keysToCheck) {
+          try {
+            // SS-2022 keys are Base64. Decode to check actual byte size.
+            List<int> keyBytes = base64.decode(keyStr);
+
+            if (keyBytes.length != expectedKeyLength) {
+              return {
+                'type': 'ss',
+                'error':
+                    'Key length mismatch for $method. Expected $expectedKeyLength bytes, but got ${keyBytes.length}.',
+              };
+            }
+          } catch (e) {
+            return {
+              'type': 'ss',
+              'error': 'Invalid Base64 key in SS-2022 config.',
+            };
+          }
+        }
+      }
+      // Legacy ciphers (aes-256-gcm, etc.) are intentionally NOT checked.
+
+      // --- 3. Handle Plugin (The Fix for ": true") ---
+      String plugin = '';
+      Map<String, dynamic> pluginOpts = {};
+
+      if (uri.queryParameters.containsKey('plugin')) {
+        String pluginInfo = Uri.decodeComponent(uri.queryParameters['plugin']!);
+
+        if (pluginInfo.contains(';')) {
+          final pluginParts = pluginInfo.split(';');
+          plugin = pluginParts[0];
+
+          // Loop through options (start from index 1)
+          for (var opt in pluginParts.sublist(1)) {
+            opt = opt.trim();
+
+            // FIX: Skip empty strings caused by trailing semicolons (e.g., "plugin;opts;;")
+            if (opt.isEmpty) continue;
+
+            if (opt.contains('=')) {
+              final keyValue = opt.split('=');
+              if (keyValue.length == 2) {
+                // Try to detect numbers/booleans, otherwise keep as string
+                String val = keyValue[1];
+                pluginOpts[keyValue[0]] = val;
+              }
+            } else {
+              // Flags (e.g. "tls" -> tls: true)
+              pluginOpts[opt] = true;
+            }
+          }
+        } else {
+          plugin = pluginInfo;
+        }
+      }
+
+      // --- 4. Return Final Map ---
+      Map<String, dynamic> serverInfo = {
+        'type': 'ss',
+        'name': remark.isNotEmpty ? remark : uri.host,
+        'server': uri.host,
+        'port': uri.port,
+        'password': password,
+        'cipher': method,
+        'udp': true,
+        'tls': false, // Default
+      };
+
+      if (plugin.isNotEmpty) {
+        serverInfo['plugin'] = plugin;
+        serverInfo['plugin-opts'] = pluginOpts;
+      }
+
+      return serverInfo;
     } catch (e) {
-      rethrow;
+      return {'type': 'ss', 'error': 'Parse error: $e'};
     }
   }
 

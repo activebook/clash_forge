@@ -284,13 +284,15 @@ class ProxyUrl {
   }
 
   static int? getKeyLengthForCipher(String cipher) {
-    switch (cipher) {
+    switch (cipher.toLowerCase()) {
+      // Good practice to handle case-insensitivity
       case 'aes-128-gcm':
       case 'aes-128-cfb':
       case 'aes-128-ctr':
       case 'camellia-128-cfb':
       case '2022-blake3-aes-128-gcm':
         return 16;
+
       case 'aes-256-gcm':
       case 'aes-256-cfb':
       case 'aes-256-ctr':
@@ -302,17 +304,22 @@ class ProxyUrl {
       case '2022-blake3-aes-256-gcm':
       case '2022-blake3-chacha20-poly1305':
         return 32;
+
       case 'aes-192-gcm':
       case 'aes-192-cfb':
       case 'aes-192-ctr':
       case 'camellia-192-cfb':
         return 24;
+
       case 'rc4-md5':
       case 'bf-cfb':
       case 'salsa20':
       case 'auto':
       case 'none':
-        return null; // Variable or no key
+      case 'table':
+      case 'rc4':
+        return null; // Variable length or legacy stream ciphers
+
       default:
         return null;
     }
