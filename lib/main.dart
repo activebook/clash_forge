@@ -113,7 +113,8 @@ class MyAppState extends State<MyApp> {
           trimmedValue.startsWith('vmess://') ||
           trimmedValue.startsWith('vless://') ||
           trimmedValue.startsWith('trojan://') ||
-          trimmedValue.startsWith('ss://');
+          trimmedValue.startsWith('ss://') ||
+          trimmedValue.startsWith('hysteria2://');
     });
   }
 
@@ -1132,7 +1133,7 @@ class MyAppState extends State<MyApp> {
                             hintText: 'Enter URL',
                             errorText:
                                 _newSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https:// vmess:// vless:// trojan:// ss://'
+                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2://'
                                     : null,
                           ),
                           onChanged: _validateUrl,
@@ -1180,7 +1181,7 @@ class MyAppState extends State<MyApp> {
                             border: InputBorder.none,
                             errorText:
                                 _editSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https:// vmess:// vless:// trojan:// ss://'
+                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2://'
                                     : null,
                           ),
                           onChanged: _validateUrl,
@@ -1304,7 +1305,7 @@ class _ControlBottomAppBar extends StatelessWidget {
                 leading: const Icon(Icons.format_align_center),
                 title: const Text('Supported Formats'),
                 subtitle: Text(
-                  'Includes vmess, vless, trojan, and Shadowsocks (ss) protocols. Vmess provides secure, efficient data transmission; vless offers similar benefits with enhanced performance; trojan is optimized for stealth and reliability; and Shadowsocks is renowned for its simplicity and strong encryption.',
+                  'Includes vmess, vless, trojan, Shadowsocks (ss), and Hysteria2 protocols. Vmess provides secure, efficient data transmission; vless offers similar benefits with enhanced performance; trojan is optimized for stealth and reliability; Shadowsocks is renowned for its simplicity and strong encryption; and Hysteria2 delivers excellent obfuscation with top performance.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),

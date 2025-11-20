@@ -7,8 +7,8 @@
 - **Convert Subscriptions**: Transform multiple Clash subscriptions into individual YAML config files.
 - **Direct Config Placement**: Generate config files straight into your Clash config folder for immediate use.
 - **DNS Resolution**: Automatically resolve proxy server DNS to bypass blocks, ensuring accessibility.
-- **Protocol Support**: Handles all modern protocols, including VMess, VLESS, Shadowsocks (SS), and Trojan.
-- **Individual URLs**: Supports single or multiple proxy URLs (e.g., `vmess://`, `vless://`, `trojan://`, `ss://`) alongside subscriptions(`https://`).
+- **Protocol Support**: Handles all modern protocols, including VMess, VLESS, Shadowsocks (SS), Trojan, and Hysteria2.
+- **Individual URLs**: Supports single or multiple proxy URLs (e.g., `vmess://`, `vless://`, `trojan://`, `ss://`, `hysteria2://`) alongside subscriptions(`https://`).
 - **System Network Proxy Support**: Enables the use of system-level proxies to improve connectivity.
 - **Clear Logs**: Provides detailed logs of the conversion process for transparency and troubleshooting.
 - **Import/Export**: Save and share your subscription lists with import and export functionality.
