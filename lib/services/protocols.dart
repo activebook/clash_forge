@@ -99,6 +99,22 @@ class ProxyUrl {
     return feature;
   }
 
+  bool get isLikelyHysteria2 {
+    // Hysteria2 has a simple structure: password@server:port
+    // It typically has parameters like insecure, sni, obfs
+    // The password/id is NOT a UUID (unlike VLESS)
+    bool feature =
+        !isBase64 &&
+        !isUuid(id) &&
+        protocol == "hysteria2" &&
+        (params.containsKey('insecure') ||
+            params.containsKey('sni') ||
+            params.containsKey('obfs') ||
+            params.containsKey('mport') ||
+            params.isEmpty); // Hysteria2 can have minimal params
+    return feature;
+  }
+
   bool get isLikelyShadowsocks {
     // Real Shadowsocks has method:password in base64
     // This is complex to check perfectly but we can look for non-UUID format
@@ -122,6 +138,7 @@ class ProxyUrl {
     if (isLikelyVmess) return 'vmess';
     if (isLikelyTrojan) return 'trojan';
     if (isLikelyShadowsocks) return 'ss';
+    if (isLikelyHysteria2) return 'hysteria2';
     return protocol; // Default to original if uncertain
   }
 

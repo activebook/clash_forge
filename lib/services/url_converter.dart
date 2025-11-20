@@ -62,6 +62,7 @@ class UrlConverter {
         case 'vmess':
         case 'vless':
         case 'trojan':
+        case 'hysteria2': // hysteria v2
           // Don't need to fetch the content
           content = scriptionUrl;
         default:
@@ -381,6 +382,8 @@ class UrlConverter {
           serverConfig = _processVlessUrl(url);
         } else if (protocol == "trojan") {
           serverConfig = _processTrojanUrl(url);
+        } else if (protocol == "hysteria2") {
+          serverConfig = _processHysteria2Url(url);
         } else {
           _addLog('Not a supported protocol($protocol): $line', LogLevel.error);
           continue;
@@ -1322,6 +1325,154 @@ class UrlConverter {
       return serverInfo;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  // Process Hysteria v2 URL: hysteria2://password@server:port?parameters#name
+  Map<String, dynamic> _processHysteria2Url(String url) {
+    try {
+      final uri = Uri.parse(url);
+      if (uri.scheme.toLowerCase() != 'hysteria2') {
+        throw FormatException('URL scheme is not hysteria2');
+      }
+      if (uri.userInfo.isEmpty) {
+        throw FormatException('Missing password in hysteria2 URL');
+      }
+
+      final params = uri.queryParameters;
+
+      // Initialize serverInfo with default values
+      Map<String, dynamic> serverInfo = {
+        'type': 'hysteria2',
+        'name':
+            uri.fragment.isNotEmpty
+                ? Uri.decodeComponent(uri.fragment)
+                : uri.host,
+        'server': uri.host,
+        'port': uri.port,
+        'password': Uri.decodeComponent(uri.userInfo),
+      };
+
+      /**
+     * Security Part (including: sni, skip-cert-verify, fingerprint)
+     */
+
+      // SNI (Server Name Indication)
+      final serverName = _getFirstNonEmptyValue(params, [
+        'sni',
+        'servername',
+        'peer',
+      ], defaultValue: null);
+      if (serverName != null) {
+        serverInfo['sni'] = serverName;
+      }
+
+      // Skip certificate verification
+      final insecure = _getFirstNonEmptyValue(params, [
+        'insecure',
+        'skip-cert-verify',
+        'allowInsecure',
+      ], defaultValue: '0');
+      serverInfo['skip-cert-verify'] = _parseBooleanValue(insecure);
+
+      // Client fingerprint
+      final fingerPrint = _getFirstNonEmptyValue(params, [
+        'fp',
+        'fingerprint',
+        'client-fingerprint',
+      ], defaultValue: null);
+      if (fingerPrint != null) {
+        serverInfo['client-fingerprint'] = fingerPrint;
+      }
+
+      /**
+     * Obfuscation Part
+     */
+      final obfs = _getFirstNonEmptyValue(params, [
+        'obfs',
+        'obfsParam',
+      ], defaultValue: null);
+      if (obfs != null && obfs.isNotEmpty) {
+        serverInfo['obfs'] = obfs;
+
+        final obfsPassword = _getFirstNonEmptyValue(params, [
+          'obfs-password',
+          'obfsPassword',
+        ], defaultValue: null);
+        if (obfsPassword != null) {
+          serverInfo['obfs-password'] = obfsPassword;
+        }
+      }
+
+      /**
+     * Network Part
+     */
+
+      // Multi-port support (mport parameter like "30000-60000")
+      final mport = _getFirstNonEmptyValue(params, [
+        'mport',
+        'mports',
+      ], defaultValue: null);
+      if (mport != null && mport.isNotEmpty) {
+        serverInfo['ports'] = mport;
+      }
+
+      // UDP support (Hysteria2 uses UDP by default)
+      serverInfo['udp'] = true;
+
+      /**
+     * Additional Hysteria2 specific parameters
+     */
+
+      // Upload/Download bandwidth
+      final up = _getFirstNonEmptyValue(params, [
+        'up',
+        'upmbps',
+      ], defaultValue: null);
+      if (up != null) {
+        serverInfo['up'] = up;
+      }
+
+      final down = _getFirstNonEmptyValue(params, [
+        'down',
+        'downmbps',
+      ], defaultValue: null);
+      if (down != null) {
+        serverInfo['down'] = down;
+      }
+
+      // ALPN
+      if (params.containsKey('alpn')) {
+        final alpnString = params['alpn'] ?? '';
+        if (alpnString.isNotEmpty) {
+          final alpnList = alpnString.split(',').map((s) => s.trim()).toList();
+          serverInfo['alpn'] = alpnList;
+        }
+      }
+
+      // CA certificate
+      final ca = _getFirstNonEmptyValue(params, [
+        'ca',
+        'ca-str',
+      ], defaultValue: null);
+      if (ca != null) {
+        serverInfo['ca'] = ca;
+      }
+
+      // CA certificate path
+      final caStr = _getFirstNonEmptyValue(params, [
+        'ca-path',
+      ], defaultValue: null);
+      if (caStr != null) {
+        serverInfo['ca-str'] = caStr;
+      }
+
+      return serverInfo;
+    } catch (e) {
+      return {
+        'type': 'hysteria2',
+        'error': 'Failed to parse Hysteria2 URL: $e',
+      };
     }
   }
 
