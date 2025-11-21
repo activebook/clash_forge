@@ -224,7 +224,7 @@ class MyAppState extends State<MyApp> {
   void _confirmNewSubscription() {
     if (_newSubscriptionUrl.isNotEmpty && _isValidUrl) {
       setState(() {
-        _subscriptions.add(_newSubscriptionUrl);
+        _subscriptions.add(_newSubscriptionUrl.trim());
         _newSubscriptionUrl = '';
         _isAddingNew = false;
         _textController.clear();
@@ -268,7 +268,7 @@ class MyAppState extends State<MyApp> {
   void _confirmEditSubscription() {
     if (_editSubscriptionUrl.isNotEmpty && _isValidUrl) {
       setState(() {
-        _subscriptions[_editingIndex] = _editSubscriptionUrl;
+        _subscriptions[_editingIndex] = _editSubscriptionUrl.trim();
         _editSubscriptionUrl = '';
         _editingIndex = -1;
         _textController.clear();

@@ -9,11 +9,18 @@ class TrojanProtocol implements Protocol {
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
-      if (parsed.protocol == 'hysteria2' || parsed.protocol == 'hy2') return false;
-      
+      if (parsed.protocol == 'hysteria2' || parsed.protocol == 'hy2') {
+        return false;
+      }
+
       if (!parsed.isBase64 &&
           (parsed.params.containsKey('allowInsecure') &&
-              ['0', '1', 'true', 'false'].contains(parsed.params['allowInsecure']?.toLowerCase()))) {
+              [
+                '0',
+                '1',
+                'true',
+                'false',
+              ].contains(parsed.params['allowInsecure']?.toLowerCase()))) {
         return true;
       }
       if (!parsed.isBase64 && parsed.params.containsKey('sni')) {
@@ -34,6 +41,14 @@ class TrojanProtocol implements Protocol {
     try {
       final proxy = parsed ?? ProxyUrl.parse(url);
       if (proxy == null) throw FormatException('Failed to parse URL');
+
+      // Validate password exists - Trojan protocol requires authentication
+      if (proxy.id.isEmpty) {
+        return {
+          'type': 'trojan',
+          'error': 'Trojan protocol requires a password',
+        };
+      }
 
       Map<String, dynamic> serverInfo = {
         'type': 'trojan',
@@ -56,7 +71,7 @@ class TrojanProtocol implements Protocol {
           'sid',
           'short-id',
         ], defaultValue: '');
-        
+
         if (!ProxyUrl.isValidPublicKey(publicKey)) {
           return {
             'type': 'trojan',
@@ -101,7 +116,7 @@ class TrojanProtocol implements Protocol {
         'type',
         'net',
       ], defaultValue: 'tcp');
-      
+
       if (network == 'ws' || network == 'h2') {
         final path = ProtocolUtils.getFirstNonEmptyValue(params, [
           'path',
@@ -130,12 +145,12 @@ class TrojanProtocol implements Protocol {
         ], defaultValue: '');
         serverInfo['grpc-opts'] = {'grpc-service-name': serviceName};
       }
-      
+
       serverInfo['network'] = network ?? 'tcp';
       serverInfo['udp'] = ProtocolUtils.parseBooleanValue(params['udp']);
       serverInfo['ip-version'] = params['ip-version'] ?? '';
       serverInfo['flow'] = params['flow'] ?? '';
-      
+
       if (params.containsKey('alpn')) {
         final alpnString = params['alpn'] ?? '';
         if (alpnString.isNotEmpty) {
@@ -146,10 +161,7 @@ class TrojanProtocol implements Protocol {
 
       return serverInfo;
     } catch (e) {
-      return {
-        'type': 'trojan',
-        'error': 'Error parsing Trojan URL: $e',
-      };
+      return {'type': 'trojan', 'error': 'Error parsing Trojan URL: $e'};
     }
   }
 }

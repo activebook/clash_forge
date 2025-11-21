@@ -99,12 +99,12 @@ class ProxyUrl {
         urlContent = fixBase64Padding(urlContent);
         final decoded = base64.decode(urlContent);
         final decodedUrl = utf8.decode(decoded);
-        
+
         // Try to parse as JSON (VMess style)
         try {
           final jsonUrl = jsonDecode(decodedUrl);
           if (jsonUrl is Map<String, dynamic>) {
-             Map<String, String> params = {};
+            Map<String, String> params = {};
             jsonUrl.forEach((key, value) {
               params[key] = value.toString();
             });
@@ -128,31 +128,41 @@ class ProxyUrl {
       String? remark;
       final remarkIndex = url.indexOf('#');
       if (remarkIndex != -1) {
-        remark = url.substring(remarkIndex + 1);
+        final encodedRemark = url.substring(remarkIndex + 1);
+        // Decode URL-encoded characters (emojis, special chars, spaces, etc.)
+        try {
+          remark = Uri.decodeComponent(encodedRemark);
+        } catch (_) {
+          // Fallback if decoding fails (e.g., invalid encoding)
+          remark = encodedRemark;
+        }
         urlWithoutRemark = url.substring(0, remarkIndex);
       }
 
       // Special handling for SS legacy format
       if (protocol == 'ss') {
-         String content = urlWithoutRemark.substring(protocolSeparator + 3);
-         // Check if it's the legacy format: ss://base64(method:pass@host:port)
-         if (!content.contains('@') && checkBase64(content)) {
-             // It's likely the legacy format or SIP002 without userinfo separator (which is rare but possible if full base64)
-             // But wait, the original logic had specific handling.
-             // Let's try to decode it.
-             try {
-               final decoded = utf8.decode(base64.decode(fixBase64Padding(content)));
-               if (decoded.contains('@') && decoded.contains(':')) {
-                 // It was indeed base64 encoded config
-                 urlWithoutRemark = "$protocol://$decoded";
-               }
-             } catch (_) {}
-         }
+        String content = urlWithoutRemark.substring(protocolSeparator + 3);
+        // Check if it's the legacy format: ss://base64(method:pass@host:port)
+        if (!content.contains('@') && checkBase64(content)) {
+          // It's likely the legacy format or SIP002 without userinfo separator (which is rare but possible if full base64)
+          // But wait, the original logic had specific handling.
+          // Let's try to decode it.
+          try {
+            final decoded = utf8.decode(
+              base64.decode(fixBase64Padding(content)),
+            );
+            if (decoded.contains('@') && decoded.contains(':')) {
+              // It was indeed base64 encoded config
+              urlWithoutRemark = "$protocol://$decoded";
+            }
+          } catch (_) {}
+        }
       }
 
       final urlParts = urlWithoutRemark.substring(protocolSeparator + 3);
       final paramsIndex = urlParts.indexOf('?');
-      final connectionPart = paramsIndex != -1 ? urlParts.substring(0, paramsIndex) : urlParts;
+      final connectionPart =
+          paramsIndex != -1 ? urlParts.substring(0, paramsIndex) : urlParts;
 
       final atIndex = connectionPart.indexOf('@');
       if (atIndex == -1) {
@@ -191,14 +201,14 @@ class ProxyUrl {
 
       // SS specific: decode ID if it is base64 and contains method:password
       if (protocol == 'ss' && checkBase64(id)) {
-         try {
-            final decodedId = utf8.decode(base64.decode(fixBase64Padding(id)));
-            final colonIndex = decodedId.lastIndexOf(':');
-            if (colonIndex != -1) {
-              params['method'] = decodedId.substring(0, colonIndex);
-              params['password'] = decodedId.substring(colonIndex + 1);
-            }
-         } catch (_) {}
+        try {
+          final decodedId = utf8.decode(base64.decode(fixBase64Padding(id)));
+          final colonIndex = decodedId.lastIndexOf(':');
+          if (colonIndex != -1) {
+            params['method'] = decodedId.substring(0, colonIndex);
+            params['password'] = decodedId.substring(colonIndex + 1);
+          }
+        } catch (_) {}
       }
 
       return ProxyUrl(
@@ -218,14 +228,30 @@ class ProxyUrl {
 
   static bool isValidCipher(String cipher) {
     const List<String> validCiphers = [
-      'aes-128-gcm', 'aes-192-gcm', 'aes-256-gcm',
-      '2022-blake3-aes-128-gcm', '2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305',
-      'aes-128-cfb', 'aes-192-cfb', 'aes-256-cfb',
-      'aes-128-ctr', 'aes-192-ctr', 'aes-256-ctr',
-      'camellia-128-cfb', 'camellia-192-cfb', 'camellia-256-cfb',
-      'chacha20', 'chacha20-ietf', 'chacha20-ietf-poly1305', 'xchacha20-ietf-poly1305',
-      'rc4-md5', 'bf-cfb', 'salsa20',
-      'auto', 'none',
+      'aes-128-gcm',
+      'aes-192-gcm',
+      'aes-256-gcm',
+      '2022-blake3-aes-128-gcm',
+      '2022-blake3-aes-256-gcm',
+      '2022-blake3-chacha20-poly1305',
+      'aes-128-cfb',
+      'aes-192-cfb',
+      'aes-256-cfb',
+      'aes-128-ctr',
+      'aes-192-ctr',
+      'aes-256-ctr',
+      'camellia-128-cfb',
+      'camellia-192-cfb',
+      'camellia-256-cfb',
+      'chacha20',
+      'chacha20-ietf',
+      'chacha20-ietf-poly1305',
+      'xchacha20-ietf-poly1305',
+      'rc4-md5',
+      'bf-cfb',
+      'salsa20',
+      'auto',
+      'none',
     ];
     return validCiphers.contains(cipher);
   }
