@@ -182,41 +182,6 @@ class UrlConverter {
     );
   }
 
-  String? _getFileNameFromUrl(String url, {String defaultExtension = '.yaml'}) {
-    try {
-      final uri = Uri.parse(url);
-      final path = uri.path;
-
-      // If path is empty or ends with a slash, it's not a file
-      if (path.isEmpty || path.endsWith('/')) {
-        return null;
-      }
-
-      // Get the last segment of the path
-      final segments = path.split('/').where((s) => s.isNotEmpty).toList();
-      if (segments.isEmpty) {
-        return null;
-      }
-
-      final lastSegment = segments.last;
-
-      // Check if the last segment has a dot and something after it (extension)
-      final lastDotIndex = lastSegment.lastIndexOf('.');
-      if (lastDotIndex > 0 && lastDotIndex < lastSegment.length - 1) {
-        // Remove .suffix
-        String fileName = lastSegment.split('.').first;
-        fileName = '$fileName$defaultExtension';
-        fileName = fileName.replaceAll(RegExp(r'[\\/*?:"<>|]'), '_');
-        return fileName;
-      }
-
-      return null;
-    } catch (e) {
-      // Handle invalid URLs
-      return null;
-    }
-  }
-
   String extractFileNameFromUrlEx(
     String url, {
     String defaultExtension = '.yaml',
