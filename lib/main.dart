@@ -252,7 +252,7 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  void _editSubscription(index) {
+  void _editSubscription(int index) {
     setState(() {
       _isAddingNew = false;
       _editingIndex = index;
@@ -312,27 +312,6 @@ class MyAppState extends State<MyApp> {
     setState(() {
       _targetFolderPath = prefs.getString('targetFolder') ?? '';
     });
-  }
-
-  Future<void> _showInfo(String title, String desc) async {
-    return showDialog(
-      context: context,
-      builder:
-          (BuildContext context) => AlertDialog(
-            title: Text(title),
-            content: Text(desc),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'Cancel'),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-    );
   }
 
   // Show confirmation dialog before deleting
@@ -791,7 +770,7 @@ class MyAppState extends State<MyApp> {
                 _addNewSubscription();
               },
               tooltip: 'Add new subscription',
-              child: const Icon(Icons.add),
+              child: const Icon(Icons.add, size: 28),
             ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.miniCenterDocked,
@@ -821,17 +800,32 @@ class MyAppState extends State<MyApp> {
           Text(_appInfo.appName, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(width: 8), // Space between title and version
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.grey.shade600,
-              borderRadius: BorderRadius.circular(4),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                  Theme.of(context).colorScheme.primary,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Text(
               "v${_appInfo.appVersion}",
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade200,
-                fontWeight: FontWeight.w500,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -860,12 +854,21 @@ class MyAppState extends State<MyApp> {
         // Settings button
         Builder(
           builder:
-              (context) => IconButton(
-                icon: Icon(Icons.settings),
-                tooltip: 'Settings',
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
+              (context) => Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: 'Settings',
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                ),
               ),
         ),
       ],
@@ -1052,59 +1055,60 @@ class MyAppState extends State<MyApp> {
   }
 
   Widget _buildBatchProcessBar(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
-      decoration: BoxDecoration(
-        //color: Colors.grey[200],
-        //borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: ListTile(
-        leading: IconButton(
-          icon: Icon(
-            Icons.folder_open,
-            color: Theme.of(context).extension<AppColors>()!.folderAction,
-          ),
-          onPressed: _selectFolder,
-          tooltip: "Select Folder",
-        ),
-        title: TextField(
-          controller: TextEditingController(text: _targetFolderPath),
-          enabled: false,
-          decoration: InputDecoration(
-            hintText: "Select Clash Config Folder ...",
-          ),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+        child: Row(
           children: [
+            IconButton(
+              icon: Icon(
+                Icons.folder_open_outlined,
+                color: Theme.of(context).extension<AppColors>()!.folderAction,
+                size: 24,
+              ),
+              onPressed: _selectFolder,
+              tooltip: "Select Folder",
+            ),
+            Expanded(
+              child: TextField(
+                controller: TextEditingController(text: _targetFolderPath),
+                enabled: false,
+                decoration: const InputDecoration(
+                  hintText: "Select Clash Config Folder ...",
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            const SizedBox(width: 8),
             _isBatchProcessing
                 ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2.0),
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
                 )
                 : IconButton(
                   icon: Icon(
                     Icons.fast_forward,
                     color:
                         Theme.of(context).extension<AppColors>()!.forwardAction,
+                    size: 24,
                   ),
                   onPressed: _processAllUrls,
                   tooltip: "Process all URLs",
                 ),
-            _isBatchProcessing ? SizedBox(width: 12) : SizedBox(width: 0.0),
             IconButton(
               icon: Icon(
-                Icons.delete_forever,
+                Icons.delete_forever_outlined,
                 color: Theme.of(context).extension<AppColors>()!.deleteAction,
+                size: 24,
               ),
               onPressed: () {
                 _showDeleteAllConfirmation(context);
               },
               tooltip: "Delete all URLs",
             ),
-            SizedBox(width: 6.0),
           ],
         ),
       ),
@@ -1123,42 +1127,58 @@ class MyAppState extends State<MyApp> {
           // URL Input or Add Button
           (_isAddingNew && _editingIndex == -1)
               ? Card(
+                elevation: 3,
+                shadowColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.2),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
+                      Icon(
+                        Icons.link,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
                           controller: _textController,
                           decoration: InputDecoration(
-                            hintText: 'Enter URL',
+                            hintText: 'Enter subscription URL',
                             errorText:
                                 _newSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2:// hy2://'
+                                    ? 'Only support https://, vmess://, vless://, trojan://, ss://, hysteria2://, hy2://'
                                     : null,
                           ),
                           onChanged: _validateUrl,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       IconButton(
                         icon: Icon(
-                          Icons.check,
+                          Icons.check_circle,
                           color:
                               Theme.of(
                                 context,
                               ).extension<AppColors>()!.saveAction,
                         ),
                         onPressed: _confirmNewSubscription,
+                        tooltip: 'Confirm',
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.close,
+                          Icons.cancel,
                           color:
                               Theme.of(
                                 context,
                               ).extension<AppColors>()!.deleteAction,
                         ),
                         onPressed: _cancelNewSubscription,
+                        tooltip: 'Cancel',
                       ),
                     ],
                   ),
@@ -1170,43 +1190,59 @@ class MyAppState extends State<MyApp> {
               : const SizedBox.shrink(),
           (!_isAddingNew && _editingIndex != -1)
               ? Card(
+                elevation: 3,
+                shadowColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.2),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     children: [
+                      Icon(
+                        Icons.edit,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
                           controller: _textController,
                           decoration: InputDecoration(
-                            hintText: 'Enter URL',
+                            hintText: 'Enter subscription URL',
                             border: InputBorder.none,
                             errorText:
                                 _editSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https:// vmess:// vless:// trojan:// ss:// hysteria2:// hy2://'
+                                    ? 'Only support https://, vmess://, vless://, trojan://, ss://, hysteria2://, hy2://'
                                     : null,
                           ),
                           onChanged: _validateUrl,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       IconButton(
                         icon: Icon(
-                          Icons.check,
+                          Icons.check_circle,
                           color:
                               Theme.of(
                                 context,
                               ).extension<AppColors>()!.saveAction,
                         ),
                         onPressed: _confirmEditSubscription,
+                        tooltip: 'Confirm',
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.close,
+                          Icons.cancel,
                           color:
                               Theme.of(
                                 context,
                               ).extension<AppColors>()!.deleteAction,
                         ),
                         onPressed: _cancelEditSubscription,
+                        tooltip: 'Cancel',
                       ),
                     ],
                   ),
@@ -1378,14 +1414,15 @@ class _ControlBottomAppBar extends StatelessWidget {
                   icon: Icon(
                     Icons.power_settings_new_outlined,
                     color: Theme.of(context).extension<AppColors>()?.quitAction,
+                    size: 24,
                   ),
                   tooltip: 'Quit',
                 ),
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 8),
           ElevatedButton.icon(
             onPressed: onImport,
-            icon: const Icon(Icons.upload),
+            icon: const Icon(Icons.upload_outlined, size: 20),
             label: const Text('Import'),
             style: ElevatedButton.styleFrom(
               iconColor: Theme.of(context).extension<AppColors>()?.saveAction,
@@ -1396,20 +1433,21 @@ class _ControlBottomAppBar extends StatelessWidget {
 
           ElevatedButton.icon(
             onPressed: onExport,
-            icon: const Icon(Icons.share),
+            icon: const Icon(Icons.share_outlined, size: 20),
             label: const Text('Export'),
             style: ElevatedButton.styleFrom(
               iconColor: Theme.of(context).extension<AppColors>()?.infoAction,
             ),
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 8),
           IconButton(
             onPressed: () {
               _showBottomSheet(context);
             },
             icon: Icon(
-              Icons.question_mark_outlined,
+              Icons.help_outline,
               color: Theme.of(context).extension<AppColors>()?.folderAction,
+              size: 24,
             ),
             tooltip: 'How to use',
           ),
@@ -1475,29 +1513,61 @@ class SettingsDrawerState extends State<SettingsDrawer> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
-              Row(
-                children: [
-                  Icon(
-                    Icons.settings,
-                    color:
-                        Theme.of(context).extension<AppColors>()!.folderAction,
+              // Header with gradient background
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
+                      Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.05),
+                    ],
                   ),
-                  SizedBox(width: 12),
-                  Text(
-                    'Settings',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
                   ),
-                  Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                    tooltip: 'Close',
-                  ),
-                ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.settings,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Settings',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                      tooltip: 'Close',
+                    ),
+                  ],
+                ),
               ),
-              Divider(),
-              SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // DNS Setting with explanation
               ListTile(
@@ -1520,7 +1590,9 @@ class SettingsDrawerState extends State<SettingsDrawer> {
 
               // DNS Info Card
               Card(
-                color: Theme.of(context).extension<AppColors>()?.cardInfoColor,
+                color:
+                    Theme.of(context).extension<AppColors>()?.cardInfoColor ??
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 elevation: 0,
                 margin: EdgeInsets.only(bottom: 20),
                 shape: RoundedRectangleBorder(
