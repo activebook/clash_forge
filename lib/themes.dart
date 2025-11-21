@@ -129,24 +129,21 @@ ThemeData macOSLightThemeFollow() {
 
 ThemeData macOSDarkThemeFollow() {
   return ThemeData.dark().copyWith(
-    scaffoldBackgroundColor: Color(0xFF1A222D),
+    scaffoldBackgroundColor: const Color(0xFF1A222D),
 
     appBarTheme: AppBarTheme(
-      // Remove color as it's deprecated
       elevation: 4.0,
-      iconTheme: IconThemeData(color: Colors.white),
-      actionsIconTheme: IconThemeData(color: Colors.white),
-      titleTextStyle: TextStyle(color: Colors.white, fontSize: 18.0),
-      backgroundColor: Color(0xFF3D4545), // Use your dark color here
-      shadowColor: Colors.black.withValues(
-        alpha: 0.7,
-      ), // Correct opacity method
+      iconTheme: const IconThemeData(color: Colors.white),
+      actionsIconTheme: const IconThemeData(color: Colors.white),
+      titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18.0),
+      backgroundColor: const Color(0xFF3D4545),
+      shadowColor: Colors.black.withOpacity(0.7),
       centerTitle: true,
-      toolbarHeight: 48, // Reduce height from default ~56 to 48
-      titleSpacing: 0, // Reduce spacing around title
+      toolbarHeight: 48,
+      titleSpacing: 0,
     ),
 
-    bottomAppBarTheme: BottomAppBarTheme(
+    bottomAppBarTheme: const BottomAppBarThemeData(
       color: Color(0xFF1A222D),
       elevation: 8.0,
       height: 60.0,
@@ -155,45 +152,43 @@ ThemeData macOSDarkThemeFollow() {
       shadowColor: Colors.black54,
     ),
 
-    drawerTheme: DrawerThemeData(backgroundColor: Color(0xFF1A222D)),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color(0xFF1A222D),
+    ),
 
-    cardTheme: CardTheme(
-      color: Color.fromARGB(255, 70, 78, 90),
+    cardTheme: CardThemeData(
+      color: const Color.fromARGB(255, 70, 78, 90),
       elevation: 2.0,
-      margin: EdgeInsets.all(8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      margin: const EdgeInsets.all(8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
     ),
 
     colorScheme: ThemeData.dark().colorScheme.copyWith(
-      secondary: Color(0xFF34C759), // macOS green
+      secondary: const Color(0xFF34C759),
     ),
 
-    // Input fields
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationTheme(
       filled: true,
       isDense: true,
       contentPadding: EdgeInsets.only(bottom: 3.0),
-      fillColor: Colors.transparent, // This makes the background transparent
-      hintStyle: TextStyle(color: Colors.white60), // Add hint text styling
+      fillColor: Colors.transparent,
+      hintStyle: TextStyle(color: Colors.white60),
     ),
 
-    // Add text field styling
-    // Text theme with defaults preserved
     textTheme: ThemeData.dark().textTheme.copyWith(
-      // title
-      bodyLarge: TextStyle(color: Colors.white70),
-      // subtitle
-      bodySmall: TextStyle(fontSize: 12, color: Colors.white60),
-      // titleSmall is not specified, so it inherits from the default
+      bodyLarge: const TextStyle(color: Colors.white70),
+      bodySmall: const TextStyle(fontSize: 12, color: Colors.white60),
     ),
 
-    // Customized Extensions
-    extensions: <ThemeExtension<dynamic>>[AppColors.dark],
+    extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
   );
 }
 
 /// macOS light mode theme
 /// total redesigned
+/*
 ThemeData macOSLightTheme() {
   // macOS light mode color palette
   const primaryBlue = Color(0xFF007AFF);
@@ -314,11 +309,11 @@ ThemeData macOSLightTheme() {
     ),
 
     // Dialogs and popovers
-    dialogTheme: DialogTheme(
-      backgroundColor: surfaceColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 0,
-    ),
+    // dialogTheme: DialogTheme(
+    //   backgroundColor: surfaceColor,
+    //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    //   elevation: 0,
+    // ),
 
     // Switches, checkboxes, etc.
     switchTheme: SwitchThemeData(
@@ -336,6 +331,7 @@ ThemeData macOSLightTheme() {
     extensions: <ThemeExtension<dynamic>>[AppColors.light],
   );
 }
+*/
 
 ThemeData macOSDarkTheme() {
   // macOS color palette

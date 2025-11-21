@@ -1,4 +1,5 @@
-import 'package:clash_forge/services/protocols.dart';
+import 'package:clash_forge/services/protocols/protocol_manager.dart';
+import 'package:clash_forge/services/protocols/proxy_url.dart';
 import 'package:logger/logger.dart';
 
 // Configure logger for command-line use
@@ -16,26 +17,31 @@ var logger = Logger(
 // Usage example
 void detectAndCorrectUrl(String url) {
   try {
-    final parsedUrl = parseProxyUrl(url)!;
-
-    final correctUrl = parsedUrl.toCorrectUrl();
-    if (correctUrl.isNotEmpty) {
-      print('Detected incorrect protocol. Corrected URL: $correctUrl');
+    print('Testing URL: $url');
+    // Try to parse with ProtocolManager
+    final config = ProtocolManager.parse(url);
+    
+    if (config.containsKey('error')) {
+      print('Failed to parse or unsupported protocol: ${config['error']}');
     } else {
-      print('URL appears to use the correct protocol: ${parsedUrl.protocol}');
+      print('Successfully parsed protocol: ${config['type']}');
+      print('Name: ${config['name']}');
+      print('Server: ${config['server']}:${config['port']}');
+      print('Config: $config');
     }
-
-    // Print detection results
-    print('Protocol detection results:');
-    print('- Is VLESS? ${parsedUrl.isLikelyVless}');
-    print('- Is VMESS? ${parsedUrl.isLikelyVmess}');
-    print('- Is Trojan? ${parsedUrl.isLikelyTrojan}');
-    print('- Is Shadowsocks? ${parsedUrl.isLikelyShadowsocks}');
-
-    print("Revised url: ${parsedUrl.toRevisedUrl()}");
-    print(parsedUrl.toString());
+    
+    // Also check basic ProxyUrl parsing
+    try {
+      final parsed = ProxyUrl.parse(url);
+      if (parsed != null) {
+        print('ProxyUrl parsed: ${parsed.protocol}://${parsed.id}@${parsed.address}:${parsed.port}');
+      }
+    } catch (e) {
+      print('ProxyUrl basic parsing failed: $e');
+    }
+    print('---');
   } catch (e) {
-    print('Failed to parse URL: $e');
+    print('Exception during detection: $e');
   }
 }
 
@@ -43,7 +49,7 @@ void main() {
   // Test URLs
   final testUrls = [
     'ss://beb8afcb-4c95-46ea-8b05-d890ba1d3215@85.208.139.222:1633?security=reality&encryption=none&pbk=ANlgAsYC8HmKfJnc5SFvru822urkxG1PzW1Zw4Vbm0Q&host=jokerrvpnTelegram#[]t.me/ConfigsHub',
-    'vmess://eyJhZGQiOiJzaS4xODA4LnNpdGUiLCJhaWQiOiIwIiwiaG9zdCI6Im9iZGlpLmNmZCIsImlkIjoiMDU2NDFjZjUtNThkMi00YmE0LWE5ZjEtYjNjZGEwYjFmYjFkIiwibmV0Ijoid3MiLCJwYXRoIjoiL2xpbmt3cyIsInBvcnQiOiIzMDAwMiIsInBzIjoiW/Cfj4FddC5tZS9Db25maWdzSHViIiwic2N5IjoiYXV0byIsInNuaSI6Im9iZGlpLmNmZCIsInRscyI6InRscyIsInR5cGUiOiIiLCJ2IjoiMiJ9`',
+    'vmess://eyJhZGQiOiJzaS4xODA4LnNpdGUiLCJhaWQiOiIwIiwiaG9zdCI6Im9iZGlpLmNmZCIsImlkIjoiMDU2NDFjZjUtNThkMi00YmE0LWE5ZjEtYjNjZGEwYjFmYjFkIiwibmV0Ijoid3MiLCJwYXRoIjoiL2xpbmt3cyIsInBvcnQiOiIzMDAwMiIsInBzIjoiW/Cfj4FddC5tZS9Db25maWdzSHViIiwic2N5IjoiYXV0byIsInNuaSI6Im9iZGlpLmNmZCIsInRscyI6InRscyIsInR5cGUiOiIiLCJ2IjoiMiJ9',
     'ss://eyJhZGQiOiJodHRwczovL2dpdGh1Yi5jb20vQUxJSUxBUFJPL3YycmF5TkctQ29uZmlnIiwiYWlkIjoiMCIsImFscG4iOiIiLCJmcCI6IiIsImhvc3QiOiIiLCJpZCI6IkZyZWUiLCJuZXQiOiJ0Y3AiLCJwYXRoIjoiIiwicG9ydCI6IjQzMyIsInBzIjoi8J+SgPCfmI4gUHJvamVjdCBCeSBBTElJTEFQUk8iLCJzY3kiOiJjaGFjaGEyMC1wb2x5MTMwNSIsInNuaSI6IiIsInRscyI6IiIsInR5cGUiOiJub25lIiwidiI6IjIifQ==',
     'ss://YWVzLTI1Ni1jZmI6YW1hem9uc2tyMDU@52.195.185.114:443#2%7C%F0%9F%87%BA%F0%9F%87%B83%20%7C%20%206.0MB%2Fs',
     'vless://df0680ca-e43c-498d-ed86-8e196eedd012@138.199.175.222:8880?security=&encryption=none&type=grpc#[]t.me/ConfigsHub',
@@ -58,18 +64,14 @@ void main() {
     'ss://c72db571-2c94-4bfa-e546-c6eca9e43b91@151.101.66.219:80?type=ws&host=foffmelo.com&path=%2Folem%2Fws%3Fed%3D1024#@Hope_Net-join-us-on-Telegram',
     'hy2://2c833c5d-cbcc-4afb-89ba-d17dc39db6f0@75.127.13.83:47974?insecure=1&sni=www.bing.com#Test_HY2',
   ];
-  /*
+
   for (final url in testUrls) {
     detectAndCorrectUrl(url);
   }
-  */
 
   logger.d("Debug message");
   logger.i("Info message");
   logger.w("Warning message");
   logger.e("Error message");
-  logger.wtf("WTF message");
-
-  // Test the hy2 URL
-  detectAndCorrectUrl(testUrls.last);
+  // logger.wtf("WTF message"); // Deprecated
 }
