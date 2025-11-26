@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 Future<List<String>> getDnsIpAddresses(
   String hostname, {
-  String firstChoice = 'cloudflare',
+  String firstChoice = 'dnspub',
 }) async {
   // Define the providers map
   Map<String, String> providers = {
@@ -20,6 +20,19 @@ Future<List<String>> getDnsIpAddresses(
     'nextdns': 'https://dns.nextdns.io/dns-query?name=$hostname&type=A',
   };
 
+  // China-friendly providers that work in China and return global IPs (uncensored)
+  final chinaFriendlyProviders = ['dohpub', 'dnspub', 'tencent', 'cnnic'];
+
+  // Global providers (may not work in China or be slow)
+  final globalProviders = [
+    'cloudflare',
+    'google',
+    'quad9',
+    'adguard',
+    'nextdns',
+    'alibaba',
+  ];
+
   try {
     // Try the preferred provider first
     firstChoice = firstChoice.trim().toLowerCase();
@@ -27,27 +40,51 @@ Future<List<String>> getDnsIpAddresses(
       try {
         return await _queryDnsProvider(providers[firstChoice]!);
       } catch (_) {
-        // If preferred provider fails, try random fallbacks
-        //print('preferred provider fails, try random fallbacks: $hostname');
+        // If preferred provider fails, try fallbacks
+        //print('preferred provider fails, try fallbacks: $hostname');
       }
     }
 
-    // Randomly select a few fallbacks if the first choice fails
-    final availableProviders =
-        providers.keys.where((p) => p != firstChoice).toList();
-    // Shuffle the list to randomize selection
-    availableProviders.shuffle();
-    // Take only 2 providers for fallback
-    final fallbackProviders = availableProviders.take(2).toList();
+    // Build fallback list: prioritize China-friendly providers first
+    final fallbackProviders = <String>[];
 
+    // Add China-friendly providers (excluding the first choice)
+    for (var provider in chinaFriendlyProviders) {
+      if (provider != firstChoice && !fallbackProviders.contains(provider)) {
+        fallbackProviders.add(provider);
+      }
+    }
+
+    // Add global providers (excluding the first choice)
+    for (var provider in globalProviders) {
+      if (provider != firstChoice && !fallbackProviders.contains(provider)) {
+        fallbackProviders.add(provider);
+      }
+    }
+
+    // Try fallbacks: first 2 China-friendly in parallel, then remaining if needed
     if (fallbackProviders.isNotEmpty) {
-      final fallbackFutures =
-          fallbackProviders
+      // Try first 2 China-friendly providers in parallel
+      final initialFallbacks = fallbackProviders.take(2).toList();
+      final initialFutures =
+          initialFallbacks
               .map((p) => _queryDnsProvider(providers[p]!))
               .toList();
 
-      // Try fallbacks in parallel
-      return await Future.any(fallbackFutures);
+      try {
+        return await Future.any(initialFutures);
+      } catch (_) {
+        // If first 2 fail, try remaining providers
+        if (fallbackProviders.length > 2) {
+          final remainingFallbacks = fallbackProviders.skip(2).take(2).toList();
+          final remainingFutures =
+              remainingFallbacks
+                  .map((p) => _queryDnsProvider(providers[p]!))
+                  .toList();
+
+          return await Future.any(remainingFutures);
+        }
+      }
     }
 
     // Last resort: use system DNS
@@ -55,7 +92,7 @@ Future<List<String>> getDnsIpAddresses(
       hostname,
     ).then((addrs) => addrs.map((addr) => addr.address).toList());
   } catch (e) {
-    //print('All dns looksup failed!: $hostname  -- $e');
+    //print('All dns lookup failed!: $hostname  -- $e');
     return <String>[];
   }
 }

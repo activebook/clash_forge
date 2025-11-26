@@ -169,7 +169,7 @@ class MyAppState extends State<MyApp> {
       _themeMode =
           prefs.getBool('darkMode') ?? false ? ThemeMode.dark : ThemeMode.light;
       _needResolveDNS = prefs.getBool('needResolveDNS') ?? false;
-      _dnsProvider = prefs.getString('dnsProvider') ?? 'Google';
+      _dnsProvider = prefs.getString('dnsProvider') ?? 'DNSPub';
     });
   }
 
@@ -1488,12 +1488,16 @@ class SettingsDrawerState extends State<SettingsDrawer> {
 
   // List of DNS providers
   final List<String> _dnsProviders = [
-    'Google',
-    'Cloudflare',
-    'Alibaba',
-    'CNNIC',
-    'DNSPod',
-    'NextDNS',
+    'DNSPub', // China-friendly, returns global IPs
+    'DOHPub', // China-friendly, returns global IPs
+    'Tencent', // China-friendly, returns global IPs
+    'CNNIC', // China-friendly, returns global IPs
+    'Cloudflare', // Global provider
+    'Google', // Global provider
+    'Alibaba', // May censor results
+    'Quad9', // Global provider
+    'AdGuard', // Global provider
+    'NextDNS', // Global provider
   ];
 
   @override
