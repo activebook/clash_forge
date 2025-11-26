@@ -20,7 +20,7 @@ void detectAndCorrectUrl(String url) {
     print('Testing URL: $url');
     // Try to parse with ProtocolManager
     final config = ProtocolManager.parse(url);
-    
+
     if (config.containsKey('error')) {
       print('Failed to parse or unsupported protocol: ${config['error']}');
     } else {
@@ -29,12 +29,14 @@ void detectAndCorrectUrl(String url) {
       print('Server: ${config['server']}:${config['port']}');
       print('Config: $config');
     }
-    
+
     // Also check basic ProxyUrl parsing
     try {
       final parsed = ProxyUrl.parse(url);
       if (parsed != null) {
-        print('ProxyUrl parsed: ${parsed.protocol}://${parsed.id}@${parsed.address}:${parsed.port}');
+        print(
+          'ProxyUrl parsed: ${parsed.protocol}://${parsed.id}@${parsed.address}:${parsed.port}',
+        );
       }
     } catch (e) {
       print('ProxyUrl basic parsing failed: $e');
@@ -63,6 +65,8 @@ void main() {
     'ss://df0680ca-e43c-498d-ed86-8e196eedd012@157.180.22.144:8880?mode=gun&security=none&encryption=none&type=grpc#',
     'ss://c72db571-2c94-4bfa-e546-c6eca9e43b91@151.101.66.219:80?type=ws&host=foffmelo.com&path=%2Folem%2Fws%3Fed%3D1024#@Hope_Net-join-us-on-Telegram',
     'hy2://2c833c5d-cbcc-4afb-89ba-d17dc39db6f0@75.127.13.83:47974?insecure=1&sni=www.bing.com#Test_HY2',
+    'ssr://MTUwLjEwNy40Ni4yMTo4MDgzOm9yaWdpbjphZXMtMjU2LWNmYjp0bHMxLjJfdGlja2V0X2F1dGg6YVVaeGJucFRjMk5PLz9yZW1hcmtzPThKK0hyZkNmaDdBZzVweTY1Wnk2NW82bzZJMlFPbVJoWm1WcExtUmxJT21tbWVhNHJ5QXhOQT09',
+    'ssr://c3NjYS5pcnVuZG5zLm5ldDo0NDM6YXV0aF9hZXMxMjhfbWQ1OmFlcy0xMjgtY2ZiOmh0dHBfcG9zdDpKQ1JVZFhKaU1GWlFUaVFrLz9yZW1hcmtzPThKK0hxUENmaDZZZzVweTY1Wnk2NW82bzZJMlFPbVJoWm1WcExtUmxJT1dLb09hTHYrV2tweUF3TVE9PQ==',
   ];
 
   for (final url in testUrls) {

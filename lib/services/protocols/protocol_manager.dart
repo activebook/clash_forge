@@ -6,12 +6,15 @@ import 'shadowsocks.dart';
 import 'trojan.dart';
 import 'hysteria2.dart';
 
+import 'shadowsocksr.dart';
+
 class ProtocolManager {
   static final List<Protocol> _protocols = [
     Hysteria2Protocol(), // Check specific ones first
     VlessProtocol(),
     VmessProtocol(),
     TrojanProtocol(),
+    ShadowsocksRProtocol(),
     ShadowsocksProtocol(),
   ];
 

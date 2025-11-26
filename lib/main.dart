@@ -114,6 +114,7 @@ class MyAppState extends State<MyApp> {
           trimmedValue.startsWith('vless://') ||
           trimmedValue.startsWith('trojan://') ||
           trimmedValue.startsWith('ss://') ||
+          trimmedValue.startsWith('ssr://') ||
           trimmedValue.startsWith('hysteria2://') ||
           trimmedValue.startsWith('hy2://');
     });

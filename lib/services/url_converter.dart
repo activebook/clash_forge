@@ -53,6 +53,7 @@ class UrlConverter {
           content = await http_client.request(scriptionUrl);
           break;
         case 'ss':
+        case 'ssr':
         case 'vmess':
         case 'vless':
         case 'trojan':
