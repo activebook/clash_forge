@@ -107,6 +107,14 @@ class ShadowsocksRProtocol implements Protocol {
       obfsParam = _decodeBase64(params['obfsparam']!);
     }
 
+    // Right now ClashX Meta doesn't support chacha20-ietf-poly1305 and rc4
+    if (method == 'chacha20-ietf-poly1305') {
+      method = 'chacha20-ietf';
+    } else if (method == 'rc4') {
+      method = 'rc4-md5';
+      //return {'type': 'ssr', 'error': 'Unsupported cipher for SSR: $method'};
+    }
+
     return {
       'name': name,
       'type': 'ssr',
