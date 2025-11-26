@@ -1624,7 +1624,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'When enabled, server domains will be automatically resolved to IP addresses. This improves reliability when DNS is blocked but may increase subscription processing time.',
+                        'When enabled, server domains will be automatically resolved to IP addresses. This improves reliability when DNS is blocked but IP addresses are available. \n\nPS. This may increase subscription processing time.\n\nYou should always use DNSPub, Tencent or CNNIC as your primary DNS choice.',
                         style: TextStyle(fontSize: 13),
                       ),
                     ],
