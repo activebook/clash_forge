@@ -4,14 +4,28 @@
 
 ## Features
 
+### Core Functionality
 - **Convert Subscriptions**: Transform multiple Clash subscriptions into individual YAML config files.
 - **Direct Config Placement**: Generate config files straight into your Clash config folder for immediate use.
-- **DNS Resolution**: Automatically resolve proxy server DNS to bypass blocks, ensuring accessibility.
-- **Protocol Support**: Handles all modern protocols, including VMess, VLESS, Shadowsocks (SS), Trojan, and Hysteria2.
-- **Individual URLs**: Supports single or multiple proxy URLs (e.g., `vmess://`, `vless://`, `trojan://`, `ss://`, `hysteria2://`, `hy2://`) alongside subscriptions(`https://`).
-- **System Network Proxy Support**: Enables the use of system-level proxies to improve connectivity.
-- **Clear Logs**: Provides detailed logs of the conversion process for transparency and troubleshooting.
 - **Import/Export**: Save and share your subscription lists with import and export functionality.
+- **Clear Logs**: Provides detailed logs of the conversion process for transparency and troubleshooting.
+
+### Protocol Support
+- **Comprehensive Protocol Coverage**: Supports all modern proxy protocols:
+  - VMess, VLESS, Shadowsocks (SS), ShadowsocksR (SSR), Trojan, **Hysteria2**
+  - **WireGuard** configurations (ClashX Meta compatible)
+- **Multiple Input Formats**: Accepts subscription URLs (`https://`), individual proxy URLs (`vmess://`, `vless://`, `ss://`, `ssr://`, `trojan://`, `hysteria2://`, `hy2://`), and local configuration files.
+
+### Smart DNS Resolution
+- **Automatic DNS Resolution**: Bypass DNS blocks by automatically resolving proxy server domains to IP addresses.
+- **China-Friendly DNS Providers**: Prioritizes reliable DNS-over-HTTPS providers that work well in restrictive networks.
+
+### Enhanced User Experience
+- **Drag-and-Drop Support**: Simply drag local configuration files into the app to import them instantly.
+- **Missing File Alerts**: Visual warnings for local file subscriptions that no longer exist, helping you keep your list clean.
+- **Dark Mode Support**: Seamlessly adapts to your system's appearance preferences.
+- **System Network Proxy Support**: Enables the use of system-level proxies to improve connectivity.
+- **Real-time Validation**: Instant feedback on URL and file path validity as you type.
 
 ## Installation
 
