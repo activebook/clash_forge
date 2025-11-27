@@ -10,6 +10,7 @@ import 'protocols/proxy_url.dart';
 import 'dns.dart';
 import 'http_client.dart' as http_client;
 import 'loginfo.dart';
+import 'file_utils.dart';
 
 class UrlConverter {
   // List to store logs
@@ -46,9 +47,7 @@ class UrlConverter {
       String fileName = extractFileNameFromUrlEx(scriptionUrl);
 
       // Check if this is a local file path
-      bool isLocalFile =
-          scriptionUrl.trim().startsWith('/') ||
-          (scriptionUrl.trim().length >= 3 && scriptionUrl.trim()[1] == ':');
+      bool isLocalFile = FileUtils.isLocalFilePath(scriptionUrl);
 
       String content = '';
 
@@ -58,7 +57,12 @@ class UrlConverter {
           final file = File(scriptionUrl.trim());
           if (await file.exists()) {
             content = await file.readAsString();
-            fileName = path.basename(scriptionUrl.trim());
+
+            // Generate filename: parentDir_basename.yaml
+            final filePath = scriptionUrl.trim();
+            final parentDir = path.basename(path.dirname(filePath));
+            final baseName = path.basenameWithoutExtension(filePath);
+            fileName = '${parentDir}_$baseName.yaml';
           } else {
             throw Exception('File not found: $scriptionUrl');
           }

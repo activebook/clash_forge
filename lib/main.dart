@@ -5,8 +5,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:path/path.dart' as path;
 import 'services/url_converter.dart';
 import 'services/loginfo.dart';
+import 'services/file_utils.dart';
 import 'themes.dart';
 
 // Model class to hold app info
@@ -133,19 +135,7 @@ class MyAppState extends State<MyApp> {
           lowerValue.startsWith('hy2://');
 
       // Check for local file paths - validate that file actually exists
-      bool isLocalFile = false;
-      if (trimmedValue.startsWith('/') || // Unix/Mac absolute path
-          (trimmedValue.length >= 3 &&
-              trimmedValue[1] == ':' &&
-              (trimmedValue[2] == '\\' || trimmedValue[2] == '/'))) {
-        // Check if file actually exists
-        try {
-          final file = File(trimmedValue);
-          isLocalFile = file.existsSync();
-        } catch (_) {
-          isLocalFile = false;
-        }
-      }
+      bool isLocalFile = FileUtils.isValidLocalFile(trimmedValue);
 
       _isValidUrl = isProtocolUrl || isLocalFile;
     });
@@ -153,6 +143,17 @@ class MyAppState extends State<MyApp> {
 
   String _formatUrlWithFilename(String url, {onlyFilename = false}) {
     try {
+      // Check if this is a local file path
+      if (FileUtils.isLocalFilePath(url)) {
+        // For local files: show "local: parentDir_filename" (without .yaml extension)
+        final filePath = url.trim();
+        final parentDir = path.basename(path.dirname(filePath));
+        final baseName = path.basenameWithoutExtension(filePath);
+        final displayName = '${parentDir}_$baseName';
+        return onlyFilename ? displayName : 'local: $displayName';
+      }
+
+      // For URLs
       final uri = Uri.parse(url);
       /*
       // For special protocol URLs (vless, vmess, ss, trojan)
