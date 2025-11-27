@@ -36,7 +36,7 @@ enum NotificationStatus { success, error, warning, info }
 
 // Constant messages
 const String kSupportedUrlMessage =
-    'Only support https://, vmess://, vless://, trojan://, ss://, ssr://, hysteria2://, hy2:// and local file';
+    'Only support https, vmess, vless, trojan, ss, ssr, hysteria2, hy2 and local file';
 
 const String kDnsResolveInfoMessage =
     'When enabled, server domains will be automatically resolved to IP addresses. '
