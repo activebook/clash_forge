@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 Future<List<String>> getDnsIpAddresses(
   String hostname, {
-  String firstChoice = 'dnspub',
+  String firstChoice = 'dohpub',
 }) async {
   // Define the providers map
   Map<String, String> providers = {

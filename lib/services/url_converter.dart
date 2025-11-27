@@ -425,7 +425,22 @@ class UrlConverter {
             firstChoice: _dnsProvider,
           );
           if (ipAddresses.isNotEmpty) {
-            server['server'] = ipAddresses.first;
+            final resolvedIp = ipAddresses.first;
+            // Check if the resolved result is actually an IP address
+            if (isIpAddressFast(resolvedIp)) {
+              server['server'] = resolvedIp;
+              _addLog('DNS resolved: $hostname -> $resolvedIp', LogLevel.info);
+            } else {
+              _addLog(
+                'DNS resolution returned non-IP result for $hostname: $resolvedIp. Keeping original hostname.',
+                LogLevel.warning,
+              );
+            }
+          } else {
+            _addLog(
+              'DNS resolution failed for $hostname. Keeping original hostname.',
+              LogLevel.warning,
+            );
           }
         }
       }
