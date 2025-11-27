@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:path/path.dart' as path;
+import 'package:desktop_drop/desktop_drop.dart';
 import 'services/url_converter.dart';
 import 'services/loginfo.dart';
 import 'services/file_utils.dart';
@@ -766,34 +767,56 @@ class MyAppState extends State<MyApp> {
                 _toggleDnsProvider(selectedDnsProvider);
               },
             ),
-            body: Padding(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 8,
-                bottom: 8,
-              ),
-              child: Column(
-                children: [
-                  // Subscription List (takes most of the space)
-                  Expanded(
-                    flex:
-                        1, // You can increase this value to give it more priority
-                    child: _buildSubscriptionList(),
-                  ),
+            body: DropTarget(
+              onDragDone: (detail) {
+                if (detail.files.isNotEmpty) {
+                  final filePath = detail.files.first.path;
+                  // If not adding or editing, switch to adding mode
+                  if (!_isAddingNew && _editingIndex == -1) {
+                    setState(() {
+                      _isAddingNew = true;
+                      _editingIndex = -1;
+                    });
+                  }
+                  _textController.text = filePath;
+                  _validateUrl(filePath);
+                }
+              },
+              onDragEntered: (detail) {
+                // Optional: add visual feedback
+              },
+              onDragExited: (detail) {
+                // Optional: remove visual feedback
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 8,
+                  bottom: 8,
+                ),
+                child: Column(
+                  children: [
+                    // Subscription List (takes most of the space)
+                    Expanded(
+                      flex:
+                          1, // You can increase this value to give it more priority
+                      child: _buildSubscriptionList(),
+                    ),
 
-                  // Spacing
-                  //SizedBox(height: 8),
+                    // Spacing
+                    //SizedBox(height: 8),
 
-                  // Batch Process Bar
-                  _buildBatchProcessBar(context),
+                    // Batch Process Bar
+                    _buildBatchProcessBar(context),
 
-                  // Spacing
-                  //SizedBox(height: 8),
+                    // Spacing
+                    //SizedBox(height: 8),
 
-                  // Control Panel
-                  _buildInputPanel(context),
-                ],
+                    // Control Panel
+                    _buildInputPanel(context),
+                  ],
+                ),
               ),
             ),
 
@@ -1181,7 +1204,8 @@ class MyAppState extends State<MyApp> {
                         child: TextField(
                           controller: _textController,
                           decoration: InputDecoration(
-                            hintText: 'Enter subscription URL',
+                            hintText:
+                                'Enter subscription URL or drag file here',
                             errorText:
                                 _newSubscriptionUrl.isNotEmpty && !_isValidUrl
                                     ? kSupportedUrlMessage
@@ -1244,7 +1268,8 @@ class MyAppState extends State<MyApp> {
                         child: TextField(
                           controller: _textController,
                           decoration: InputDecoration(
-                            hintText: 'Enter subscription URL',
+                            hintText:
+                                'Enter subscription URL or drag file here',
                             border: InputBorder.none,
                             errorText:
                                 _editSubscriptionUrl.isNotEmpty && !_isValidUrl
