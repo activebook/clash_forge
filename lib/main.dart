@@ -31,6 +31,16 @@ void main() async {
 
 enum NotificationStatus { success, error, warning, info }
 
+// Constant messages
+const String kSupportedUrlMessage =
+    'Only support https://, vmess://, vless://, trojan://, ss://, ssr://, hysteria2://, hy2:// and local file';
+
+const String kDnsResolveInfoMessage =
+    'When enabled, server domains will be automatically resolved to IP addresses. '
+    'This improves reliability when DNS is blocked but IP addresses are available. '
+    '\n\nPS. This may increase processing time.'
+    '\n\nYou should always use DNSPub, Tencent or CNNIC as your primary DNS choice.';
+
 class MyApp extends StatefulWidget {
   final AppInfo appInfo;
   const MyApp({super.key, required this.appInfo});
@@ -107,16 +117,37 @@ class MyAppState extends State<MyApp> {
     setState(() {
       _newSubscriptionUrl = value;
       _editSubscriptionUrl = value;
-      String trimmedValue = value.trim().toLowerCase();
-      _isValidUrl =
-          trimmedValue.startsWith('https://') ||
-          trimmedValue.startsWith('vmess://') ||
-          trimmedValue.startsWith('vless://') ||
-          trimmedValue.startsWith('trojan://') ||
-          trimmedValue.startsWith('ss://') ||
-          trimmedValue.startsWith('ssr://') ||
-          trimmedValue.startsWith('hysteria2://') ||
-          trimmedValue.startsWith('hy2://');
+      String trimmedValue = value.trim();
+      String lowerValue = trimmedValue.toLowerCase();
+
+      // Check for protocol URLs
+      bool isProtocolUrl =
+          lowerValue.startsWith('https://') ||
+          lowerValue.startsWith('http://') ||
+          lowerValue.startsWith('vmess://') ||
+          lowerValue.startsWith('vless://') ||
+          lowerValue.startsWith('trojan://') ||
+          lowerValue.startsWith('ss://') ||
+          lowerValue.startsWith('ssr://') ||
+          lowerValue.startsWith('hysteria2://') ||
+          lowerValue.startsWith('hy2://');
+
+      // Check for local file paths - validate that file actually exists
+      bool isLocalFile = false;
+      if (trimmedValue.startsWith('/') || // Unix/Mac absolute path
+          (trimmedValue.length >= 3 &&
+              trimmedValue[1] == ':' &&
+              (trimmedValue[2] == '\\' || trimmedValue[2] == '/'))) {
+        // Check if file actually exists
+        try {
+          final file = File(trimmedValue);
+          isLocalFile = file.existsSync();
+        } catch (_) {
+          isLocalFile = false;
+        }
+      }
+
+      _isValidUrl = isProtocolUrl || isLocalFile;
     });
   }
 
@@ -1152,7 +1183,7 @@ class MyAppState extends State<MyApp> {
                             hintText: 'Enter subscription URL',
                             errorText:
                                 _newSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https://, vmess://, vless://, trojan://, ss://, hysteria2://, hy2://'
+                                    ? kSupportedUrlMessage
                                     : null,
                           ),
                           onChanged: _validateUrl,
@@ -1216,7 +1247,7 @@ class MyAppState extends State<MyApp> {
                             border: InputBorder.none,
                             errorText:
                                 _editSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? 'Only support https://, vmess://, vless://, trojan://, ss://, hysteria2://, hy2://'
+                                    ? kSupportedUrlMessage
                                     : null,
                           ),
                           onChanged: _validateUrl,
@@ -1511,7 +1542,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: 300, // Slim width
+      width: 380, // Wider for better readability
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
@@ -1519,9 +1550,12 @@ class SettingsDrawerState extends State<SettingsDrawer> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with gradient background
+                // Header with gradient background (thinner)
                 Container(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 8.0,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -1536,44 +1570,46 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                       ],
                     ),
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
                     ),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: Theme.of(
                             context,
                           ).colorScheme.primary.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
                           Icons.settings,
                           color: Theme.of(context).colorScheme.primary,
-                          size: 24,
+                          size: 18,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       const Text(
                         'Settings',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(Icons.close, size: 20),
                         onPressed: () => Navigator.pop(context),
                         tooltip: 'Close',
+                        padding: EdgeInsets.all(4),
+                        constraints: BoxConstraints(),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
                 // DNS Setting with explanation
                 ListTile(
@@ -1632,7 +1668,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'When enabled, server domains will be automatically resolved to IP addresses. This improves reliability when DNS is blocked but IP addresses are available. \n\nPS. This may increase processing time.\n\nYou should always use DNSPub, Tencent or CNNIC as your primary DNS choice.',
+                          kDnsResolveInfoMessage,
                           style: TextStyle(fontSize: 13),
                         ),
                       ],

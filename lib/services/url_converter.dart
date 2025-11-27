@@ -45,24 +45,46 @@ class UrlConverter {
       // Extract the filename from the URL
       String fileName = extractFileNameFromUrlEx(scriptionUrl);
 
-      Uri uri = Uri.parse(scriptionUrl);
+      // Check if this is a local file path
+      bool isLocalFile =
+          scriptionUrl.trim().startsWith('/') ||
+          (scriptionUrl.trim().length >= 3 && scriptionUrl.trim()[1] == ':');
+
       String content = '';
-      switch (uri.scheme) {
-        case 'http':
-        case 'https':
-          content = await http_client.request(scriptionUrl);
-          break;
-        case 'ss':
-        case 'ssr':
-        case 'vmess':
-        case 'vless':
-        case 'trojan':
-        case 'hysteria2': // hysteria v2
-        case 'hy2': // short alias for hysteria2
-          // Don't need to fetch the content
-          content = scriptionUrl;
-        default:
-          throw Exception('Unsupported URL scheme: ${uri.scheme}');
+
+      if (isLocalFile) {
+        // Handle local file path
+        try {
+          final file = File(scriptionUrl.trim());
+          if (await file.exists()) {
+            content = await file.readAsString();
+            fileName = path.basename(scriptionUrl.trim());
+          } else {
+            throw Exception('File not found: $scriptionUrl');
+          }
+        } catch (e) {
+          throw Exception('Error reading local file: $e');
+        }
+      } else {
+        // Handle URLs
+        Uri uri = Uri.parse(scriptionUrl);
+        switch (uri.scheme) {
+          case 'http':
+          case 'https':
+            content = await http_client.request(scriptionUrl);
+            break;
+          case 'ss':
+          case 'ssr':
+          case 'vmess':
+          case 'vless':
+          case 'trojan':
+          case 'hysteria2': // hysteria v2
+          case 'hy2': // short alias for hysteria2
+            // Don't need to fetch the content
+            content = scriptionUrl;
+          default:
+            throw Exception('Unsupported URL scheme: ${uri.scheme}');
+        }
       }
 
       _addLog('Start processing... [$scriptionUrl]', LogLevel.start);
