@@ -11,6 +11,7 @@ import 'dns.dart';
 import 'http_client.dart' as http_client;
 import 'loginfo.dart';
 import 'file_utils.dart';
+import 'protocols/wireguard.dart';
 
 class UrlConverter {
   // List to store logs
@@ -94,7 +95,14 @@ class UrlConverter {
       _addLog('Start processing... [$scriptionUrl]', LogLevel.start);
       Map<String, dynamic> processedContent;
       // 2. Determine the format by examining the content
-      if (ProxyUrl.checkBase64(content)) {
+      if (WireGuardParser.isWireGuardConfig(content)) {
+        // Handle WireGuard config
+        final wgConfig = WireGuardParser.parse(content);
+        if (wgConfig.containsKey('error')) {
+          throw Exception(wgConfig['error']);
+        }
+        processedContent = await _formatToClashConfig([wgConfig]);
+      } else if (ProxyUrl.checkBase64(content)) {
         // Decode first
         processedContent = await _processBase64Content(content);
       } else if (_isLineByLineText(content)) {
