@@ -643,15 +643,15 @@ class MyAppState extends State<MyApp> {
     Widget icon;
     switch (status) {
       case NotificationStatus.success:
-        icon = Icon(Icons.check_circle, color: Colors.green);
+        icon = Icon(Icons.check_circle, color: Color(0xFF66BB6A)); // Soft Green
         break;
       case NotificationStatus.error:
-        icon = Icon(Icons.error, color: Colors.red);
+        icon = Icon(Icons.error, color: Color(0xFFEF5350)); // Soft Red
         break;
       case NotificationStatus.warning:
-        icon = Icon(Icons.warning, color: Colors.orange);
+        icon = Icon(Icons.warning, color: Color(0xFFFFA726)); // Soft Orange
       case NotificationStatus.info:
-        icon = Icon(Icons.info, color: Colors.blue);
+        icon = Icon(Icons.info, color: Color(0xFF29B6F6)); // Soft Blue
         break;
     }
     _scaffoldMessengerKey.currentState?.showSnackBar(
@@ -700,24 +700,46 @@ class MyAppState extends State<MyApp> {
   Icon _getLogLevelIcon(LogLevel level) {
     switch (level) {
       case LogLevel.error:
-        return const Icon(Icons.error_outline, color: Colors.red);
+        return const Icon(
+          Icons.error_outline,
+          color: Color(0xFFEF5350),
+        ); // Soft Red
       case LogLevel.warning:
-        return const Icon(Icons.warning_amber, color: Colors.orange);
+        return const Icon(
+          Icons.warning_amber,
+          color: Color(0xFFFFA726),
+        ); // Soft Orange
       case LogLevel.info:
-        return const Icon(Icons.info_outline, color: Colors.blue);
+        return const Icon(
+          Icons.info_outline,
+          color: Color(0xFF29B6F6),
+        ); // Soft Blue
       case LogLevel.debug:
-        return const Icon(Icons.bug_report, color: Colors.blueGrey);
+        return const Icon(
+          Icons.bug_report,
+          color: Color(0xFF78909C),
+        ); // Soft Blue Grey
       case LogLevel.success:
-        return const Icon(Icons.check_circle, color: Colors.green);
+        return const Icon(
+          Icons.check_circle,
+          color: Color(0xFF66BB6A),
+        ); // Soft Green
       case LogLevel.start:
         return const Icon(
           Icons.play_circle_outline,
-          color: Colors.indigoAccent,
+          color: Color(0xFF5C6BC0), // Soft Indigo
         );
       case LogLevel.file:
-        return const Icon(Icons.file_copy_outlined, color: Colors.purple);
+        return const Icon(
+          Icons.file_copy_outlined,
+          color: Color(0xFF7E57C2),
+        ); // Soft Purple
       default: // LogLevel.normal
-        return const Icon(Icons.circle, size: 12, color: Colors.lime);
+        return const Icon(
+          Icons.circle,
+          size: 12,
+          color: Color(0xFF9CCC65),
+        ); // Soft Lime
     }
   }
 
@@ -1006,7 +1028,7 @@ class MyAppState extends State<MyApp> {
                 icon: const Icon(Icons.clear_all),
                 label: const Text('Clear'),
                 style: ElevatedButton.styleFrom(
-                  iconColor: Colors.red,
+                  iconColor: Color(0xFFEF5350), // Soft Red
                   minimumSize: const Size(0, 50),
                 ),
               ),
@@ -1802,7 +1824,10 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                   ),
                   leading: Icon(
                     _isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                    color: _isDarkMode ? Colors.blueGrey : Colors.amber,
+                    color:
+                        _isDarkMode
+                            ? Color(0xFF78909C)
+                            : Color(0xFFFFB74D), // Soft Blue Grey : Soft Amber
                   ),
                 ),
               ],
