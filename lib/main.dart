@@ -1046,11 +1046,42 @@ class MyAppState extends State<MyApp> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: Text(
-                        _formatUrlWithFilename(_subscriptions[index]),
-                        style: Theme.of(context).textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+
+                      subtitle: Row(
+                        children: [
+                          if (FileUtils.isLocalFilePath(
+                                _subscriptions[index],
+                              ) &&
+                              !FileUtils.fileExists(_subscriptions[index]))
+                            Padding(
+                              padding: const EdgeInsets.only(right: 4.0),
+                              child: Icon(
+                                Icons.warning_amber_rounded,
+                                size: 14,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              _formatUrlWithFilename(_subscriptions[index]),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color:
+                                    (FileUtils.isLocalFilePath(
+                                              _subscriptions[index],
+                                            ) &&
+                                            !FileUtils.fileExists(
+                                              _subscriptions[index],
+                                            ))
+                                        ? Theme.of(context).colorScheme.error
+                                        : null,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
