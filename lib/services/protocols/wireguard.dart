@@ -86,6 +86,8 @@ class WireGuardParser {
       'remote-dns-resolve':
           true, // CRITICAL: Enable remote DNS resolution through tunnel
       'dns': [
+        'https://doh.pub/dns-query', // DoH Pub
+        'https://dns.pub/dns-query', // DNS Pub
         'https://1.12.12.12/dns-query', // Tencent DoH
         'https://120.53.53.53/dns-query', // CNNIC DoH
         ...configDns,
