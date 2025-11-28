@@ -36,6 +36,6 @@
 
 | Light Theme | Dark Theme |
 | ------------ | ------------ |
-| ![Screen 1](screenshots/screen1.jpg) | ![Screen 2](screenshots/screen2.jpg) |
+| ![Screen 1](screenshots/screen1.png) | ![Screen 2](screenshots/screen2.png) |
 | DNS Setting | Logs |
-| ![Screen 3](screenshots/screen3.jpg) | ![Screen 4](screenshots/screen4.jpg) |
+| ![Screen 3](screenshots/screen3.png) | ![Screen 4](screenshots/screen4.png) |
