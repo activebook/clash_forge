@@ -17,7 +17,8 @@ class VmessProtocol implements Protocol {
           (parsed.params.containsKey('aid') ||
               parsed.params.containsKey('net') ||
               parsed.params.containsKey('type') ||
-              (parsed.params.containsKey('tls') && parsed.params.containsKey('network')));
+              (parsed.params.containsKey('tls') &&
+                  parsed.params.containsKey('network')));
       return feature || parsed.protocol == 'vmess';
     }
     return url.toLowerCase().startsWith('vmess://');
@@ -26,9 +27,9 @@ class VmessProtocol implements Protocol {
   @override
   Map<String, dynamic> parse(String url, {ProxyUrl? parsed}) {
     if (!url.toLowerCase().startsWith('vmess://')) {
-       // If it doesn't start with vmess://, but canHandle said yes, it might be a disguised URL.
-       // But typically we expect the prefix.
-       // However, if we rely on ProxyUrl to have parsed it, we might use that.
+      // If it doesn't start with vmess://, but canHandle said yes, it might be a disguised URL.
+      // But typically we expect the prefix.
+      // However, if we rely on ProxyUrl to have parsed it, we might use that.
     }
 
     // VMess format: vmess://BASE64(JSON)
@@ -36,19 +37,19 @@ class VmessProtocol implements Protocol {
       // Remove the "vmess://" prefix
       // If parsed is provided and it is base64, we can use it directly?
       // Actually, the ProxyUrl parsing logic for base64 JSON already extracts params.
-      
+
       Map<String, dynamic> params;
-      
+
       if (parsed != null && parsed.isBase64 && parsed.protocol == 'vmess') {
-         // Reconstruct params from parsed data if it was parsed as JSON
-         // But ProxyUrl stores params as Map<String, String>.
-         // We might need the original JSON if we want types, but strings are usually fine.
-         // However, ProxyUrl.parse logic for base64 JSON puts everything in params.
-         params = Map<String, dynamic>.from(parsed.params);
-         // Add other fields that might be outside params in ProxyUrl
-         params['id'] = parsed.id;
-         params['add'] = parsed.address;
-         params['port'] = parsed.port;
+        // Reconstruct params from parsed data if it was parsed as JSON
+        // But ProxyUrl stores params as Map<String, String>.
+        // We might need the original JSON if we want types, but strings are usually fine.
+        // However, ProxyUrl.parse logic for base64 JSON puts everything in params.
+        params = Map<String, dynamic>.from(parsed.params);
+        // Add other fields that might be outside params in ProxyUrl
+        params['id'] = parsed.id;
+        params['add'] = parsed.address;
+        params['port'] = parsed.port;
       } else {
         String content = url;
         final protocolSeparator = url.indexOf('://');
@@ -61,11 +62,12 @@ class VmessProtocol implements Protocol {
         params = jsonDecode(decodedContent);
       }
 
-      String cipher = ProtocolUtils.getFirstNonEmptyValue(params, [
-        'security',
-        'scy',
-      ], defaultValue: 'auto')!;
-      
+      String cipher =
+          ProtocolUtils.getFirstNonEmptyValue(params, [
+            'security',
+            'scy',
+          ], defaultValue: 'auto')!;
+
       if (!ProxyUrl.isValidCipher(cipher)) {
         return {
           'type': 'vmess',
@@ -93,7 +95,7 @@ class VmessProtocol implements Protocol {
           'sid',
           'short-id',
         ], defaultValue: '');
-        
+
         if (!ProxyUrl.isValidPublicKey(publicKey)) {
           return {
             'type': 'vmess',
@@ -148,7 +150,7 @@ class VmessProtocol implements Protocol {
         'network',
         'net',
       ], defaultValue: 'tcp');
-      
+
       if (network == 'ws' || network == 'h2') {
         final path = ProtocolUtils.getFirstNonEmptyValue(params, [
           'path',
@@ -159,7 +161,7 @@ class VmessProtocol implements Protocol {
           'host',
           'hostname',
         ], defaultValue: '');
-        
+
         if (network == 'ws') {
           serverInfo['ws-opts'] = {
             'path': path,
@@ -198,18 +200,18 @@ class VmessProtocol implements Protocol {
         ], defaultValue: '');
         serverInfo['grpc-opts'] = {'grpc-service-name': serviceName};
       } else if (network == 'tcp') {
-         final headerType = ProtocolUtils.getFirstNonEmptyValue(params, [
+        final headerType = ProtocolUtils.getFirstNonEmptyValue(params, [
           'type',
           'headerType',
         ], defaultValue: 'none');
         serverInfo['tcp-opts'] = {'type': headerType};
       }
-      
+
       serverInfo['network'] = network ?? 'tcp';
       serverInfo['udp'] = ProtocolUtils.parseBooleanValue(params['udp']);
       serverInfo['ip-version'] = params['ip-version'] ?? '';
       serverInfo['flow'] = params['flow'] ?? '';
-      
+
       if (params.containsKey('alpn')) {
         final alpnString = params['alpn']?.toString() ?? '';
         if (alpnString.isNotEmpty) {
@@ -217,13 +219,34 @@ class VmessProtocol implements Protocol {
           serverInfo['alpn'] = alpnList;
         }
       }
-      
+
+      final packetEncoding = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'packetEncoding',
+        'packet-encoding',
+      ]);
+      if (packetEncoding != null) {
+        serverInfo['packet-encoding'] = packetEncoding;
+      }
+
+      serverInfo['global-padding'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['global-padding']),
+      );
+
+      serverInfo['authenticated-length'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['authenticated-length']),
+      );
+
+      serverInfo['tfo'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['tfo', 'fast-open']),
+      );
+
+      serverInfo['mptcp'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['mptcp']),
+      );
+
       return serverInfo;
     } catch (e) {
-      return {
-        'type': 'vmess',
-        'error': 'Error parsing VMess URL: $e',
-      };
+      return {'type': 'vmess', 'error': 'Error parsing VMess URL: $e'};
     }
   }
 }

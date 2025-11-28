@@ -159,6 +159,14 @@ class TrojanProtocol implements Protocol {
         }
       }
 
+      serverInfo['tfo'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['tfo', 'fast-open']),
+      );
+
+      serverInfo['mptcp'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['mptcp']),
+      );
+
       return serverInfo;
     } catch (e) {
       return {'type': 'trojan', 'error': 'Error parsing Trojan URL: $e'};

@@ -9,9 +9,10 @@ class VlessProtocol implements Protocol {
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
-       // UUID format with dashes + VLESS-specific parameters
+      // UUID format with dashes + VLESS-specific parameters
       bool encryption =
-          parsed.params.containsKey('encryption') && parsed.params['encryption'] == 'none';
+          parsed.params.containsKey('encryption') &&
+          parsed.params['encryption'] == 'none';
       bool security =
           parsed.params.containsKey('security') &&
           (parsed.params['security'] == 'reality' ||
@@ -60,7 +61,7 @@ class VlessProtocol implements Protocol {
           'sid',
           'short-id',
         ], defaultValue: '');
-        
+
         if (!ProxyUrl.isValidPublicKey(publicKey)) {
           return {
             'type': 'vless',
@@ -116,7 +117,7 @@ class VlessProtocol implements Protocol {
         'type',
         'net',
       ], defaultValue: 'tcp');
-      
+
       if (network == 'ws' || network == 'h2') {
         final path = ProtocolUtils.getFirstNonEmptyValue(params, [
           'path',
@@ -165,18 +166,18 @@ class VlessProtocol implements Protocol {
         ], defaultValue: '');
         serverInfo['grpc-opts'] = {'grpc-service-name': serviceName};
       }
-      
+
       serverInfo['network'] = network ?? 'tcp';
       serverInfo['udp'] = ProtocolUtils.parseBooleanValue(params['udp']);
       serverInfo['ip-version'] = params['ip-version'] ?? '';
-      
+
       if (params['flow'] != null && params['flow']!.isNotEmpty) {
         final flow = params['flow']!;
         if (flow.startsWith("xtls-rprx-")) {
           serverInfo['flow'] = flow;
         }
       }
-      
+
       if (params.containsKey('alpn')) {
         final alpnString = params['alpn'] ?? '';
         if (alpnString.isNotEmpty) {
@@ -185,12 +186,25 @@ class VlessProtocol implements Protocol {
         }
       }
 
+      final packetEncoding = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'packetEncoding',
+        'packet-encoding',
+      ]);
+      if (packetEncoding != null) {
+        serverInfo['packet-encoding'] = packetEncoding;
+      }
+
+      serverInfo['tfo'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['tfo', 'fast-open']),
+      );
+
+      serverInfo['mptcp'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['mptcp']),
+      );
+
       return serverInfo;
     } catch (e) {
-      return {
-        'type': 'vless',
-        'error': 'Error parsing VLESS URL: $e',
-      };
+      return {'type': 'vless', 'error': 'Error parsing VLESS URL: $e'};
     }
   }
 }

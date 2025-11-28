@@ -14,9 +14,13 @@ class WireGuardParser {
 
     String privateKey = '';
     String ip = '';
+    String ipv6 = '';
     String server = '';
     int port = 0;
     String publicKey = '';
+    String preSharedKey = '';
+    List<int> reserved = [];
+    int mtu = 0;
     String name = 'WireGuard';
 
     String currentSection = '';
@@ -44,7 +48,15 @@ class WireGuardParser {
         if (key == 'privatekey') {
           privateKey = value;
         } else if (key == 'address') {
-          ip = value;
+          // Handle both IPv4 and IPv6
+          final addresses = value.split(',').map((e) => e.trim()).toList();
+          for (var addr in addresses) {
+            if (addr.contains(':')) {
+              ipv6 = addr; // Simple check for IPv6
+            } else {
+              ip = addr;
+            }
+          }
         } else if (key == 'dns') {
           configDns =
               value
@@ -52,8 +64,9 @@ class WireGuardParser {
                   .map((e) => e.trim())
                   .where((e) => e.isNotEmpty)
                   .toList();
+        } else if (key == 'mtu') {
+          mtu = int.tryParse(value) ?? 0;
         }
-        // Ignore MTU
       } else if (currentSection == 'peer') {
         if (key == 'endpoint') {
           final endpointParts = value.split(':');
@@ -63,6 +76,14 @@ class WireGuardParser {
           }
         } else if (key == 'publickey') {
           publicKey = value;
+        } else if (key == 'presharedkey') {
+          preSharedKey = value;
+        } else if (key == 'reserved') {
+          // Reserved bytes are typically comma-separated integers
+          try {
+            reserved =
+                value.split(',').map((e) => int.parse(e.trim())).toList();
+          } catch (_) {}
         }
         // Ignore AllowedIPs
       }
@@ -81,8 +102,12 @@ class WireGuardParser {
       'server': server,
       'port': port,
       'ip': ip,
+      if (ipv6.isNotEmpty) 'ipv6': ipv6,
       'private-key': privateKey,
       'public-key': publicKey,
+      if (preSharedKey.isNotEmpty) 'pre-shared-key': preSharedKey,
+      if (reserved.isNotEmpty) 'reserved': reserved,
+      if (mtu > 0) 'mtu': mtu,
       'remote-dns-resolve':
           true, // CRITICAL: Enable remote DNS resolution through tunnel
       'dns': [

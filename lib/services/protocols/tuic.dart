@@ -67,6 +67,25 @@ class TuicProtocol implements Protocol {
         ], defaultValue: 'false'),
       );
 
+      serverInfo['disable-sni'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['disable-sni']),
+      );
+
+      serverInfo['reduce-rtt'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['reduce-rtt']),
+      );
+
+      serverInfo['fast-open'] = ProtocolUtils.parseBooleanValue(
+        ProtocolUtils.getFirstNonEmptyValue(params, ['fast-open']),
+      );
+
+      final udpRelayMode = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'udp-relay-mode',
+      ]);
+      if (udpRelayMode != null) {
+        serverInfo['udp-relay-mode'] = udpRelayMode;
+      }
+
       // If skip-cert-verify is false, we can omit it or set it to false.
       // The example shows it present when true.
       if (serverInfo['skip-cert-verify'] == false) {
