@@ -522,6 +522,9 @@ class MyAppState extends State<MyApp> {
       return true;
     }
 
+    // Refresh validation status
+    _validateSubscriptionUrl(url);
+
     // Set the item to processing mode
     setState(() {
       _processingItems[index] = true;
