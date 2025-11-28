@@ -6,7 +6,12 @@
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": []
+            "args": [],
+            "env": {
+                "http_proxy": "",
+                "https_proxy": "",
+                "all_proxy": ""
+            }
         },
         {
             "name": "clash_forge (profile)",
@@ -27,7 +32,12 @@
             "request": "launch",
             "type": "dart",
             "deviceId": "macos",
-            "program": "lib/main.dart"
+            "program": "lib/main.dart",
+            "env": {
+                "http_proxy": "",
+                "https_proxy": "",
+                "all_proxy": ""
+            }
         },
         {
             "name": "clash_forge (iOS Simulator)",

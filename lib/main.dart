@@ -1031,7 +1031,8 @@ class MyAppState extends State<MyApp> {
                 icon: const Icon(Icons.clear_all),
                 label: const Text('Clear'),
                 style: ElevatedButton.styleFrom(
-                  iconColor: Color(0xFFEF5350), // Soft Red
+                  iconColor:
+                      Theme.of(context).extension<AppColors>()!.clearAction,
                   minimumSize: const Size(0, 50),
                 ),
               ),
@@ -1536,23 +1537,23 @@ class _ControlBottomAppBar extends StatelessWidget {
                 ),
           ),
           const SizedBox(width: 8),
-          ElevatedButton.icon(
-            onPressed: onImport,
-            icon: const Icon(Icons.upload_outlined, size: 20),
-            label: const Text('Import'),
-            style: ElevatedButton.styleFrom(
-              iconColor: Theme.of(context).extension<AppColors>()?.saveAction,
+          Tooltip(
+            message: 'Import Subscriptions',
+            child: ElevatedButton.icon(
+              onPressed: onImport,
+              icon: const Icon(Icons.upload_outlined, size: 20),
+              label: const Text('Import'),
             ),
           ),
 
           if (centerLocations.contains(fabLocation)) const Spacer(),
 
-          ElevatedButton.icon(
-            onPressed: onExport,
-            icon: const Icon(Icons.share_outlined, size: 20),
-            label: const Text('Export'),
-            style: ElevatedButton.styleFrom(
-              iconColor: Theme.of(context).extension<AppColors>()?.infoAction,
+          Tooltip(
+            message: 'Export Subscriptions',
+            child: ElevatedButton.icon(
+              onPressed: onExport,
+              icon: const Icon(Icons.share_outlined, size: 20),
+              label: const Text('Export'),
             ),
           ),
           const SizedBox(width: 8),

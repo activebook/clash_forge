@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 // Define your custom theme extension
-// Define your custom theme extension
 class AppColors extends ThemeExtension<AppColors> {
   final Color deleteAction;
   final Color saveAction;
@@ -10,6 +9,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color forwardAction;
   final Color folderAction;
   final Color quitAction;
+  final Color clearAction;
   final Color cardInfoColor;
 
   const AppColors({
@@ -20,6 +20,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.forwardAction,
     required this.folderAction,
     required this.quitAction,
+    required this.clearAction,
     required this.cardInfoColor,
   });
 
@@ -32,6 +33,7 @@ class AppColors extends ThemeExtension<AppColors> {
     forwardAction: Color(0xFF66BB6A),
     folderAction: Color(0xFF7E57C2), // Soft Deep Purple
     quitAction: Color(0xFFD32F2F),
+    clearAction: Color(0xFFE3F2FD),
     cardInfoColor: Color(0xFFE3F2FD), // Very light blue
   );
 
@@ -44,6 +46,7 @@ class AppColors extends ThemeExtension<AppColors> {
     forwardAction: Color(0xFF81C784),
     folderAction: Color(0xFF9575CD),
     quitAction: Color(0xFFEF5350),
+    clearAction: Color(0xFF263238),
     cardInfoColor: Color(0xFF263238), // Dark Blue Grey
   );
 
@@ -56,6 +59,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? forwardAction,
     Color? folderAction,
     Color? quitAction,
+    Color? clearAction,
     Color? cardInfoColor,
   }) {
     return AppColors(
@@ -66,6 +70,7 @@ class AppColors extends ThemeExtension<AppColors> {
       forwardAction: forwardAction ?? this.forwardAction,
       folderAction: folderAction ?? this.folderAction,
       quitAction: quitAction ?? this.quitAction,
+      clearAction: clearAction ?? this.clearAction,
       cardInfoColor: cardInfoColor ?? this.cardInfoColor,
     );
   }
@@ -83,6 +88,7 @@ class AppColors extends ThemeExtension<AppColors> {
       forwardAction: Color.lerp(forwardAction, other.forwardAction, t)!,
       folderAction: Color.lerp(folderAction, other.folderAction, t)!,
       quitAction: Color.lerp(quitAction, other.quitAction, t)!,
+      clearAction: Color.lerp(clearAction, other.clearAction, t)!,
       cardInfoColor: Color.lerp(cardInfoColor, other.cardInfoColor, t)!,
     );
   }
