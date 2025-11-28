@@ -12,9 +12,9 @@
 
 ### Protocol Support
 - **Comprehensive Protocol Coverage**: Supports all modern proxy protocols:
-  - VMess, VLESS, Shadowsocks (SS), ShadowsocksR (SSR), Trojan, **Hysteria2**
+  - VMess, VLESS, Shadowsocks (SS), ShadowsocksR (SSR), Trojan, **Hysteria2**, **TUIC**, **AnyTLS**
   - **WireGuard** configurations (ClashX Meta compatible)
-- **Multiple Input Formats**: Accepts subscription URLs (`https://`), individual proxy URLs (`vmess://`, `vless://`, `ss://`, `ssr://`, `trojan://`, `hysteria2://`, `hy2://`), and local configuration files.
+- **Multiple Input Formats**: Accepts subscription URLs (`https://`), individual proxy URLs (`vmess://`, `vless://`, `ss://`, `ssr://`, `trojan://`, `hysteria2://`, `hy2://`, `tuic://`, `anytls://`), and local configuration files.
 
 ### Smart DNS Resolution
 - **Automatic DNS Resolution**: Bypass DNS blocks by automatically resolving proxy server domains to IP addresses.

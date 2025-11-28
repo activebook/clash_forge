@@ -7,10 +7,14 @@ import 'trojan.dart';
 import 'hysteria2.dart';
 
 import 'shadowsocksr.dart';
+import 'tuic.dart';
+import 'anytls.dart';
 
 class ProtocolManager {
   static final List<Protocol> _protocols = [
     Hysteria2Protocol(), // Check specific ones first
+    TuicProtocol(),
+    AnyTlsProtocol(),
     VlessProtocol(),
     VmessProtocol(),
     TrojanProtocol(),

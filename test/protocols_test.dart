@@ -67,6 +67,10 @@ void main() {
     'hy2://2c833c5d-cbcc-4afb-89ba-d17dc39db6f0@75.127.13.83:47974?insecure=1&sni=www.bing.com#Test_HY2',
     'ssr://MTUwLjEwNy40Ni4yMTo4MDgzOm9yaWdpbjphZXMtMjU2LWNmYjp0bHMxLjJfdGlja2V0X2F1dGg6YVVaeGJucFRjMk5PLz9yZW1hcmtzPThKK0hyZkNmaDdBZzVweTY1Wnk2NW82bzZJMlFPbVJoWm1WcExtUmxJT21tbWVhNHJ5QXhOQT09',
     'ssr://c3NjYS5pcnVuZG5zLm5ldDo0NDM6YXV0aF9hZXMxMjhfbWQ1OmFlcy0xMjgtY2ZiOmh0dHBfcG9zdDpKQ1JVZFhKaU1GWlFUaVFrLz9yZW1hcmtzPThKK0hxUENmaDZZZzVweTY1Wnk2NW82bzZJMlFPbVJoWm1WcExtUmxJT1dLb09hTHYrV2tweUF3TVE9PQ==',
+    'tuic://de5d89a9-3f16-448e-8c40-9145852c8736:de5d89a9-3f16-448e-8c40-9145852c8736@hktuic01.yydzx.xyz:12907?alpn=h3&congestion_control=bbr&sni=hktuic01.yydzx.xyz&udp=true&version=5#%F0%9F%87%AD%F0%9F%87%B0%20%E6%9C%BA%E5%9C%BA%E6%8E%A8%E8%8D%90%3Adafei.de%20%E9%A6%99%E6%B8%AF%2015',
+    'tuic://91bf574a-4a2f-42eb-bfa9-5824317f541c:91bf574a-4a2f-42eb-bfa9-5824317f541c@node.waifly.com:28132?congestion_control=cubic&delay=1340&allow_insecure=1&sni=example.com&version=5#%F0%9F%87%AB%F0%9F%87%B7%20%E6%9C%BA%E5%9C%BA%E6%8E%A8%E8%8D%90%3Adafei.de%20%E6%B3%95%E5%9B%BD%2011',
+    'anytls://c1854182-5014-4cd5-b024-022302480ba1@ociuszz5.9966663.xyz:63427?security=tls&type=tcp&alpn=h2&allowInsecure=1&sni=ociuszz5.9966663.xyz&fp=chrome&insecure=1&udp=1#%F0%9F%87%BA%F0%9F%87%B8%20%E6%9C%BA%E5%9C%BA%E6%8E%A8%E8%8D%90%3Adafei.de%20%E7%BE%8E%E5%9B%BD%2039',
+    'anytls://238d00bd-79f9-4780-82c3-5fd8d3546947@auoci.9966663.xyz:34546?security=tls&type=tcp&alpn=h2&allowInsecure=1&sni=auoci.9966663.xyz&fp=chrome&insecure=1&udp=1#%F0%9F%87%A6%F0%9F%87%BA%20%E6%9C%BA%E5%9C%BA%E6%8E%A8%E8%8D%90%3Adafei.de%20%E6%BE%B3%E5%A4%A7%E5%88%A9%E4%BA%9A%2001',
   ];
 
   for (final url in testUrls) {

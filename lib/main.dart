@@ -36,7 +36,8 @@ enum NotificationStatus { success, error, warning, info }
 
 // Constant messages
 const String kSupportedUrlMessage =
-    'Only support https, vmess, vless, trojan, ss, ssr, hysteria2, hy2 and local file';
+    'Supported: https, vmess, vless, trojan, ss, ssr, hysteria2, tuic, anytls, local file.'
+    '\nHttps url can be a subscription url. You can also drag the local config file to import it.';
 
 const String kDnsResolveInfoMessage =
     'When enabled, server domains will be automatically resolved to IP addresses. '
@@ -133,7 +134,9 @@ class MyAppState extends State<MyApp> {
           lowerValue.startsWith('ss://') ||
           lowerValue.startsWith('ssr://') ||
           lowerValue.startsWith('hysteria2://') ||
-          lowerValue.startsWith('hy2://');
+          lowerValue.startsWith('hy2://') ||
+          lowerValue.startsWith('tuic://') ||
+          lowerValue.startsWith('anytls://');
 
       // Check for local file paths - validate that file actually exists
       bool isLocalFile = FileUtils.isValidLocalFile(trimmedValue);
@@ -1263,6 +1266,7 @@ class MyAppState extends State<MyApp> {
                                 _newSubscriptionUrl.isNotEmpty && !_isValidUrl
                                     ? kSupportedUrlMessage
                                     : null,
+                            errorMaxLines: 3,
                           ),
                           onChanged: _validateUrl,
                         ),
@@ -1328,6 +1332,7 @@ class MyAppState extends State<MyApp> {
                                 _editSubscriptionUrl.isNotEmpty && !_isValidUrl
                                     ? kSupportedUrlMessage
                                     : null,
+                            errorMaxLines: 3,
                           ),
                           onChanged: _validateUrl,
                         ),
@@ -1453,7 +1458,7 @@ class _ControlBottomAppBar extends StatelessWidget {
                 leading: const Icon(Icons.format_align_center),
                 title: const Text('Supported Formats'),
                 subtitle: Text(
-                  'Includes vmess, vless, trojan, Shadowsocks (ss), and Hysteria2 protocols. Vmess provides secure, efficient data transmission; vless offers similar benefits with enhanced performance; trojan is optimized for stealth and reliability; Shadowsocks is renowned for its simplicity and strong encryption; and Hysteria2 delivers excellent obfuscation with top performance.',
+                  'Includes VMess, VLess, Trojan, Shadowsocks(R), Hysteria2, TUIC, and AnyTLS protocols. VMess provides secure, efficient data transmission; VLess offers similar benefits with enhanced performance; Trojan is optimized for stealth and reliability; Shadowsocks is renowned for its simplicity and strong encryption; Hysteria2 delivers excellent obfuscation with top performance; TUIC uses QUIC for low latency; and AnyTLS offers versatile TLS wrapping.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),

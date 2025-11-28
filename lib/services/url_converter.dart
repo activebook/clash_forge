@@ -85,6 +85,8 @@ class UrlConverter {
           case 'trojan':
           case 'hysteria2': // hysteria v2
           case 'hy2': // short alias for hysteria2
+          case 'tuic':
+          case 'anytls':
             // Don't need to fetch the content
             content = scriptionUrl;
           default:
