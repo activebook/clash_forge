@@ -16,7 +16,9 @@ class ShadowsocksProtocol implements Protocol {
           !ProxyUrl.isUuid(parsed.id) &&
           (parsed.params.containsKey('method') ||
               parsed.params.containsKey('cipher') ||
-              parsed.id.contains(':') || // might be method:password not in base64
+              parsed.id.contains(
+                ':',
+              ) || // might be method:password not in base64
               parsed.params.isEmpty) &&
           (parsed.protocol == "ss");
       return feature;
@@ -31,10 +33,12 @@ class ShadowsocksProtocol implements Protocol {
         // If parsed is available and protocol is ss, maybe we can reconstruct or use parsed data?
         // But SS parsing logic is quite specific about base64 parts.
         // Let's rely on the raw URL for SS as it has unique encoding rules.
-        if (parsed != null && parsed.protocol == 'ss' && parsed.rawUrl != null) {
-           url = parsed.rawUrl!;
+        if (parsed != null &&
+            parsed.protocol == 'ss' &&
+            parsed.rawUrl != null) {
+          url = parsed.rawUrl!;
         } else {
-           throw FormatException('Not a Shadowsocks URL');
+          throw FormatException('Not a Shadowsocks URL');
         }
       }
 
@@ -61,9 +65,7 @@ class ShadowsocksProtocol implements Protocol {
         final base64Part = ssUrl.substring(5);
         try {
           final decoded = utf8.decode(
-            base64.decode(
-              ProxyUrl.fixBase64Padding(base64Part),
-            ),
+            base64.decode(ProxyUrl.fixBase64Padding(base64Part)),
           );
           // If decoded string contains another ss://, it's recursive? No.
           // It should be method:password@server:port
@@ -89,9 +91,7 @@ class ShadowsocksProtocol implements Protocol {
           if (ProxyUrl.checkBase64(userInfo)) {
             try {
               final decoded = utf8.decode(
-                base64.decode(
-                  ProxyUrl.fixBase64Padding(userInfo),
-                ),
+                base64.decode(ProxyUrl.fixBase64Padding(userInfo)),
               );
               final parts = decoded.split(':');
               if (parts.length >= 2) {
@@ -153,11 +153,18 @@ class ShadowsocksProtocol implements Protocol {
             opt = opt.trim();
             if (opt.isEmpty) continue;
 
-            if (opt.contains('=')) {
-              final keyValue = opt.split('=');
-              if (keyValue.length == 2) {
-                String key = keyValue[0].toLowerCase();
-                String val = keyValue[1];
+            if (opt.contains('=') || opt.contains(':')) {
+              final separator = opt.contains('=') ? '=' : ':';
+              final keyValue = opt.split(separator);
+              if (keyValue.length >= 2) {
+                String key = keyValue[0].trim().toLowerCase();
+                String val = keyValue.sublist(1).join(separator).trim();
+
+                // Handle v2ray-plugin specific mappings
+                if (plugin == 'v2ray-plugin') {
+                  if (key == 'obfs') key = 'mode';
+                  if (key == 'obfs-host') key = 'host';
+                }
 
                 if (key == 'tls' || key == 'skip-cert-verify') {
                   pluginOpts[key] = val == 'true' || val == '1';
@@ -171,6 +178,14 @@ class ShadowsocksProtocol implements Protocol {
                 }
               }
             } else {
+              // Heuristic for malformed v2ray-plugin options where separator is missing
+              if (plugin == 'v2ray-plugin' && opt.startsWith('obfs-host')) {
+                String val = opt.substring('obfs-host'.length).trim();
+                if (val.isNotEmpty) {
+                  pluginOpts['host'] = val;
+                  continue;
+                }
+              }
               pluginOpts[opt] = true;
             }
           }
