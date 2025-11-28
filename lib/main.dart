@@ -11,6 +11,7 @@ import 'services/url_converter.dart';
 import 'services/loginfo.dart';
 import 'services/file_utils.dart';
 import 'themes.dart';
+import 'package:http/http.dart' as http;
 
 // Model class to hold app info
 class AppInfo {
@@ -85,6 +86,10 @@ class MyAppState extends State<MyApp> {
 
   bool _isValidUrl = false; // Track URL validity
 
+  // Map to store validation status of URLs
+  // Key: URL, Value: true (valid), false (invalid), null (checking/unknown)
+  final Map<String, bool?> _urlValidationStatus = {};
+
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController =
       ScrollController(); // Add this line
@@ -143,6 +148,56 @@ class MyAppState extends State<MyApp> {
 
       _isValidUrl = isProtocolUrl || isLocalFile;
     });
+  }
+
+  // Async validation for remote URLs and local files
+  Future<void> _validateSubscriptionUrl(String url) async {
+    if (url.isEmpty) return;
+
+    // Check if it's a local file
+    if (FileUtils.isLocalFilePath(url)) {
+      // For local files, check existence synchronously
+      setState(() {
+        _urlValidationStatus[url] = FileUtils.fileExists(url);
+      });
+      return;
+    }
+
+    // Set status to null (loading) for remote URLs
+    setState(() {
+      _urlValidationStatus[url] = null;
+    });
+
+    try {
+      final uri = Uri.parse(url);
+      // Only validate http/https URLs
+      if (!uri.isScheme('http') && !uri.isScheme('https')) {
+        // For other protocols, we assume they are valid or we can't easily check
+        setState(() {
+          _urlValidationStatus[url] = true;
+        });
+        return;
+      }
+
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+
+      if (mounted) {
+        setState(() {
+          // We consider 200 OK as valid.
+          // Some servers might return 403/401 but still be valid subscription links with auth,
+          // but usually a simple GET check is a good enough proxy for "reachable".
+          // If strict validation is needed, we might need to adjust this.
+          _urlValidationStatus[url] =
+              response.statusCode >= 200 && response.statusCode < 400;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _urlValidationStatus[url] = false;
+        });
+      }
+    }
   }
 
   String _formatUrlWithFilename(String url, {onlyFilename = false}) {
@@ -239,6 +294,10 @@ class MyAppState extends State<MyApp> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _subscriptions = prefs.getStringList('subscriptions') ?? [];
+      // Validate all loaded subscriptions
+      for (var url in _subscriptions) {
+        _validateSubscriptionUrl(url);
+      }
     });
   }
 
@@ -262,6 +321,9 @@ class MyAppState extends State<MyApp> {
     if (_newSubscriptionUrl.isNotEmpty && _isValidUrl) {
       setState(() {
         _subscriptions.add(_newSubscriptionUrl.trim());
+        _validateSubscriptionUrl(
+          _newSubscriptionUrl.trim(),
+        ); // Validate new subscription
         _newSubscriptionUrl = '';
         _isAddingNew = false;
         _textController.clear();
@@ -306,6 +368,9 @@ class MyAppState extends State<MyApp> {
     if (_editSubscriptionUrl.isNotEmpty && _isValidUrl) {
       setState(() {
         _subscriptions[_editingIndex] = _editSubscriptionUrl.trim();
+        _validateSubscriptionUrl(
+          _editSubscriptionUrl.trim(),
+        ); // Validate edited subscription
         _editSubscriptionUrl = '';
         _editingIndex = -1;
         _textController.clear();
@@ -591,6 +656,9 @@ class MyAppState extends State<MyApp> {
 
     setState(() {
       _subscriptions.addAll(importedSubscriptions);
+      for (var url in importedSubscriptions) {
+        _validateSubscriptionUrl(url);
+      }
     });
 
     _saveSubscriptions();
@@ -1073,45 +1141,21 @@ class MyAppState extends State<MyApp> {
                         overflow: TextOverflow.ellipsis,
                       ),
 
-                      subtitle: Row(
-                        children: [
-                          if (FileUtils.isLocalFilePath(
-                                _subscriptions[index],
-                              ) &&
-                              !FileUtils.fileExists(_subscriptions[index]))
-                            Padding(
-                              padding: const EdgeInsets.only(right: 4.0),
-                              child: Icon(
-                                Icons.warning_amber_rounded,
-                                size: 14,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
-                          Expanded(
-                            child: Text(
-                              _formatUrlWithFilename(_subscriptions[index]),
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.copyWith(
-                                color:
-                                    (FileUtils.isLocalFilePath(
-                                              _subscriptions[index],
-                                            ) &&
-                                            !FileUtils.fileExists(
-                                              _subscriptions[index],
-                                            ))
-                                        ? Theme.of(context).colorScheme.error
-                                        : null,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                      subtitle: Text(
+                        _formatUrlWithFilename(_subscriptions[index]),
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Validation Status Icon (for both files and URLs)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: _buildValidationIcon(_subscriptions[index]),
+                          ),
+
                           // Play button
                           IconButton(
                             icon:
@@ -1372,6 +1416,28 @@ class MyAppState extends State<MyApp> {
         ],
       ),
     );
+  }
+
+  Widget _buildValidationIcon(String url) {
+    final status = _urlValidationStatus[url];
+    if (status == null) {
+      return const SizedBox(
+        width: 12,
+        height: 12,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    } else if (status == false) {
+      return Tooltip(
+        message: 'Cannot access this URL',
+        child: Icon(
+          Icons.warning_amber_rounded,
+          size: 16,
+          color: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }
 
