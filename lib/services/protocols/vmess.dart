@@ -228,21 +228,36 @@ class VmessProtocol implements Protocol {
         serverInfo['packet-encoding'] = packetEncoding;
       }
 
-      serverInfo['global-padding'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['global-padding']),
-      );
+      final globalPadding = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'global-padding',
+      ]);
+      if (globalPadding != null) {
+        serverInfo['global-padding'] = ProtocolUtils.parseBooleanValue(
+          globalPadding,
+        );
+      }
 
-      serverInfo['authenticated-length'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['authenticated-length']),
-      );
+      final authenticatedLength = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'authenticated-length',
+      ]);
+      if (authenticatedLength != null) {
+        serverInfo['authenticated-length'] = ProtocolUtils.parseBooleanValue(
+          authenticatedLength,
+        );
+      }
 
-      serverInfo['tfo'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['tfo', 'fast-open']),
-      );
+      final tfo = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'tfo',
+        'fast-open',
+      ]);
+      if (tfo != null) {
+        serverInfo['tfo'] = ProtocolUtils.parseBooleanValue(tfo);
+      }
 
-      serverInfo['mptcp'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['mptcp']),
-      );
+      final mptcp = ProtocolUtils.getFirstNonEmptyValue(params, ['mptcp']);
+      if (mptcp != null) {
+        serverInfo['mptcp'] = ProtocolUtils.parseBooleanValue(mptcp);
+      }
 
       return serverInfo;
     } catch (e) {

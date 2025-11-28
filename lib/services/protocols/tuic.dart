@@ -67,17 +67,26 @@ class TuicProtocol implements Protocol {
         ], defaultValue: 'false'),
       );
 
-      serverInfo['disable-sni'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['disable-sni']),
-      );
+      final disableSni = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'disable-sni',
+      ]);
+      if (disableSni != null) {
+        serverInfo['disable-sni'] = ProtocolUtils.parseBooleanValue(disableSni);
+      }
 
-      serverInfo['reduce-rtt'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['reduce-rtt']),
-      );
+      final reduceRtt = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'reduce-rtt',
+      ]);
+      if (reduceRtt != null) {
+        serverInfo['reduce-rtt'] = ProtocolUtils.parseBooleanValue(reduceRtt);
+      }
 
-      serverInfo['fast-open'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['fast-open']),
-      );
+      final fastOpen = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'fast-open',
+      ]);
+      if (fastOpen != null) {
+        serverInfo['fast-open'] = ProtocolUtils.parseBooleanValue(fastOpen);
+      }
 
       final udpRelayMode = ProtocolUtils.getFirstNonEmptyValue(params, [
         'udp-relay-mode',

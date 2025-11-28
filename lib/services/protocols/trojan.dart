@@ -159,13 +159,18 @@ class TrojanProtocol implements Protocol {
         }
       }
 
-      serverInfo['tfo'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['tfo', 'fast-open']),
-      );
+      final tfo = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'tfo',
+        'fast-open',
+      ]);
+      if (tfo != null) {
+        serverInfo['tfo'] = ProtocolUtils.parseBooleanValue(tfo);
+      }
 
-      serverInfo['mptcp'] = ProtocolUtils.parseBooleanValue(
-        ProtocolUtils.getFirstNonEmptyValue(params, ['mptcp']),
-      );
+      final mptcp = ProtocolUtils.getFirstNonEmptyValue(params, ['mptcp']);
+      if (mptcp != null) {
+        serverInfo['mptcp'] = ProtocolUtils.parseBooleanValue(mptcp);
+      }
 
       return serverInfo;
     } catch (e) {

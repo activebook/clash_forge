@@ -194,7 +194,11 @@ class ProxyUrl {
         for (final pair in paramPairs) {
           final keyValue = pair.split('=');
           if (keyValue.length == 2) {
-            params[keyValue[0]] = keyValue[1];
+            try {
+              params[keyValue[0]] = Uri.decodeComponent(keyValue[1]);
+            } catch (e) {
+              params[keyValue[0]] = keyValue[1];
+            }
           }
         }
       }
