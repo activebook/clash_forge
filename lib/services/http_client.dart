@@ -62,16 +62,20 @@ class ProxyService {
       final httpClient = createProxyClient();
 
       try {
-        final request = await httpClient.getUrl(Uri.parse(url));
-        final response = await request.close().timeout(timeout);
+        // Wrap entire operation in timeout to prevent indefinite hangs
+        return await Future(() async {
+          final request = await httpClient.getUrl(Uri.parse(url));
+          final response = await request.close();
 
-        // Check if status code indicates success (2xx or 3xx)
-        final isValid = response.statusCode >= 200 && response.statusCode < 400;
+          // Check if status code indicates success (2xx or 3xx)
+          final isValid =
+              response.statusCode >= 200 && response.statusCode < 400;
 
-        // Drain the response to prevent memory leaks
-        await response.drain();
+          // Drain the response to prevent memory leaks
+          await response.drain();
 
-        return isValid;
+          return isValid;
+        }).timeout(timeout);
       } finally {
         // Always close the client to free resources
         httpClient.close();
