@@ -10,8 +10,8 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'services/url_converter.dart';
 import 'services/loginfo.dart';
 import 'services/file_utils.dart';
+import 'services/http_client.dart';
 import 'themes.dart';
-import 'package:http/http.dart' as http;
 
 // Model class to hold app info
 class AppInfo {
@@ -170,6 +170,7 @@ class MyAppState extends State<MyApp> {
 
     try {
       final uri = Uri.parse(url);
+
       // Only validate http/https URLs
       if (!uri.isScheme('http') && !uri.isScheme('https')) {
         // For other protocols, we assume they are valid or we can't easily check
@@ -179,16 +180,13 @@ class MyAppState extends State<MyApp> {
         return;
       }
 
-      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      // Use ProxyService to validate URL with system proxy support
+      final proxyService = ProxyService();
+      final isValid = await proxyService.validateUrl(url);
 
       if (mounted) {
         setState(() {
-          // We consider 200 OK as valid.
-          // Some servers might return 403/401 but still be valid subscription links with auth,
-          // but usually a simple GET check is a good enough proxy for "reachable".
-          // If strict validation is needed, we might need to adjust this.
-          _urlValidationStatus[url] =
-              response.statusCode >= 200 && response.statusCode < 400;
+          _urlValidationStatus[url] = isValid;
         });
       }
     } catch (e) {
