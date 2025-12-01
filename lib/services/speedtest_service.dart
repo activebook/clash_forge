@@ -75,9 +75,11 @@ class SpeedTestService {
 
   void _cleanup() {
     if (_tempScriptFile != null) {
-      _tempScriptFile!.exists().then((exists) {
+      _tempScriptFile!.exists().then((exists) async {
         if (exists) {
-          _tempScriptFile!.delete().catchError((_) {});
+          try {
+            await _tempScriptFile!.delete();
+          } catch (_) {}
         }
       });
       _tempScriptFile = null;
