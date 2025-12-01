@@ -245,45 +245,33 @@ run_report() {
 
     # FINAL REPORT
     echo "" >&2
-    echo -e "╔══════════════════════════════════════════════════╗" >&2
-    echo -e "║              ${CYAN}NETWORK REPORT${NC}                      ║" >&2
-    echo -e "╠══════════════════════════════════════════════════╣" >&2
+    echo "================================================" >&2
+    echo -e "              ${CYAN}NETWORK REPORT${NC}                " >&2
+    echo "================================================" >&2
     
     # Network Details
-    echo -e "║ ${YELLOW}Network Details${NC}                                  ║" >&2
-    printf "║ %-14s : %-31s ║\n" "Public IP" "$MY_IP" >&2
-    printf "║ %-14s : %-31s ║\n" "Location" "${MY_LOC:0:31}" >&2
-    printf "║ %-14s : %-31s ║\n" "Provider" "${MY_ISP:0:31}" >&2
+    echo -e "${YELLOW}Network Details:${NC}" >&2
+    printf "  %-14s : %s\\n" "Public IP" "$MY_IP" >&2
+    printf "  %-14s : %s\\n" "Location" "${MY_LOC:0:31}" >&2
+    printf "  %-14s : %s\\n" "Provider" "${MY_ISP:0:31}" >&2
     
     if [[ -n "$PROXY" ]]; then
-        printf "║ %-14s : ${PURPLE}%-31s${NC} ║\n" "Proxy" "ON (Active)" >&2
+        printf "  %-14s : ${PURPLE}%s${NC}\\n" "Proxy" "ON (Active)" >&2
     else
-        printf "║ %-14s : %-31s ║\n" "Proxy" "OFF" >&2
+        printf "  %-14s : %s\\n" "Proxy" "OFF" >&2
     fi
 
-    echo -e "╠══════════════════════════════════════════════════╣" >&2
+    echo "" >&2
     
     # Speed Results
-    # echo -e "║ ${YELLOW}Speed Results${NC}                                    ║" >&2
-    # if [[ $count -gt 0 ]]; then
-    #     local total_formatted=$(printf "%.2f" "$total_speed")
-    #     local max=$(printf '%s\n' "${valid_speeds[@]}" | sort -n | tail -1)
-
-    #     printf "║ %-14s : %-31s ║\n" "Latency" "${AVG_PING} ms" >&2
-    #     printf "║ %-14s : ${GREEN}%-31s${NC} ║\n" "Total Speed" "${total_formatted} Mbps" >&2
-    #     printf "║ %-14s : ${GREEN}%-31s${NC} ║\n" "Single Max" "${max} Mbps" >&2
-    # else
-    #     echo -e "║ ${RED}Download tests failed.${NC}                           ║" >&2
-    # fi
-
-    echo -e "║ ${YELLOW}Speed Results (Multi-Source)${NC}                     ║" >&2
+    echo -e "${YELLOW}Speed Results (Multi-Source):${NC}" >&2
     if [[ $count -gt 0 ]]; then
         local avg=$(echo "scale=2; $total_speed / $count" | bc -l)
         avg=$(printf "%.2f" "$avg")
         local max=$(printf '%s\n' "${valid_speeds[@]}" | sort -n | tail -1)
         
-        printf "║ %-14s : %-31s ║\n" "Latency" "${AVG_PING} ms" >&2
-        echo -e "║                                                  ║" >&2
+        printf "  %-14s : %s\\n" "Latency" "${AVG_PING} ms" >&2
+        echo "" >&2
         
         # Show individual server results
         local idx=0
@@ -292,33 +280,33 @@ run_report() {
             if [[ -f "${tmp_dir}/${idx}.txt" ]]; then
                 local speed=$(cat "${tmp_dir}/${idx}.txt")
                 if [[ "$speed" =~ ^[0-9]+(\.[0-9]+)?$ ]] && (( $(echo "$speed > 0" | bc -l) )); then
-                    printf "║ %-14s : ${CYAN}%-31s${NC} ║\n" "${name:0:14}" "${speed} Mbps" >&2
+                    printf "  %-14s : ${CYAN}%s Mbps${NC}\\n" "${name:0:14}" "${speed}" >&2
                 else
-                    printf "║ %-14s : ${RED}%-31s${NC} ║\n" "${name:0:14}" "Failed" >&2
+                    printf "  %-14s : ${RED}%s${NC}\\n" "${name:0:14}" "Failed" >&2
                 fi
             fi
             ((idx++))
         done
         
-        echo -e "║                                                  ║" >&2
-        printf "║ %-14s : ${GREEN}%-31s${NC} ║\n" "Peak Speed" "${max} Mbps" >&2
-        printf "║ %-14s : %-31s ║\n" "Average Speed" "${avg} Mbps" >&2
+        echo "" >&2
+        printf "  %-14s : ${GREEN}%s Mbps${NC}\\n" "Peak Speed" "${max}" >&2
+        printf "  %-14s : %s Mbps\\n" "Average Speed" "${avg}" >&2
         
         # Show aggregate with disclaimer
         local total_formatted=$(printf "%.2f" "$total_speed")
-        printf "║ %-14s : ${PURPLE}%-31s${NC} ║\n" "Aggregate" "${total_formatted} Mbps" >&2
-        echo -e "║ ${PURPLE}ℹ Aggregate = sum of simultaneous downloads${NC}      ║" >&2
+        printf "  %-14s : ${PURPLE}%s Mbps${NC}\\n" "Aggregate" "${total_formatted}" >&2
+        echo -e "  ${PURPLE}ℹ Aggregate = sum of simultaneous downloads${NC}" >&2
     else
-        echo -e "║ ${RED}Download tests failed.${NC}                           ║" >&2
+        echo -e "  ${RED}Download tests failed.${NC}" >&2
     fi
 
-    echo -e "╚══════════════════════════════════════════════════╝" >&2
+    echo "================================================" >&2
 }
 
 main() {
     parse_args "$@"
     
-    echo "==========================================" >&2
+    echo "================================================" >&2
     check_dependencies
     detect_proxy
     
@@ -327,7 +315,7 @@ main() {
     else
         echo -e "${YELLOW}⚠️  Direct Connection (No Proxy)${NC}" >&2
     fi
-    echo "==========================================" >&2
+    echo "================================================" >&2
     echo "" >&2
     
     test_ping

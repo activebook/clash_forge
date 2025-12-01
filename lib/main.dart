@@ -12,6 +12,11 @@ import 'services/loginfo.dart';
 import 'services/file_utils.dart';
 import 'services/http_client.dart';
 import 'themes.dart';
+import 'widgets/log_drawer.dart';
+import 'widgets/batch_control_bar.dart';
+import 'widgets/subscription_input_panel.dart';
+import 'widgets/subscription_list_item.dart';
+import 'widgets/speedtest_dialog.dart';
 
 // Model class to hold app info
 class AppInfo {
@@ -769,52 +774,6 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  Icon _getLogLevelIcon(LogLevel level) {
-    switch (level) {
-      case LogLevel.error:
-        return const Icon(
-          Icons.error_outline,
-          color: Color(0xFFEF5350),
-        ); // Soft Red
-      case LogLevel.warning:
-        return const Icon(
-          Icons.warning_amber,
-          color: Color(0xFFFFA726),
-        ); // Soft Orange
-      case LogLevel.info:
-        return const Icon(
-          Icons.info_outline,
-          color: Color(0xFF29B6F6),
-        ); // Soft Blue
-      case LogLevel.debug:
-        return const Icon(
-          Icons.bug_report,
-          color: Color(0xFF78909C),
-        ); // Soft Blue Grey
-      case LogLevel.success:
-        return const Icon(
-          Icons.check_circle,
-          color: Color(0xFF66BB6A),
-        ); // Soft Green
-      case LogLevel.start:
-        return const Icon(
-          Icons.play_circle_outline,
-          color: Color(0xFF5C6BC0), // Soft Indigo
-        );
-      case LogLevel.file:
-        return const Icon(
-          Icons.file_copy_outlined,
-          color: Color(0xFF7E57C2),
-        ); // Soft Purple
-      default: // LogLevel.normal
-        return const Icon(
-          Icons.circle,
-          size: 12,
-          color: Color(0xFF9CCC65),
-        ); // Soft Lime
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // the context parameter represents the location of MyApp widget in the tree, which is above the MaterialApp you're creating.
@@ -1027,97 +986,25 @@ class MyAppState extends State<MyApp> {
 
   // Create the drawer
   Widget _buildLogDrawer(BuildContext context) {
-    // Track which log entry is being hovered
-    return Drawer(
-      width: MediaQuery.of(context).size.width * 0.70, // 70% of screen width
-      child: Column(
-        children: [
-          AppBar(
-            toolbarHeight: 48,
-            leadingWidth: 40,
-            titleSpacing: 0,
-            automaticallyImplyLeading: false,
-            title: Text('Logs', style: Theme.of(context).textTheme.titleSmall),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () => _scaffoldKey.currentState?.closeDrawer(),
-                //onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-
-          // Log entries list
-          Expanded(
-            child:
-                _logEntries.isEmpty
-                    ? const Center(child: Text('No log entries'))
-                    : ListView.builder(
-                      itemCount: _logEntries.length,
-                      itemBuilder: (context, index) {
-                        return MouseRegion(
-                          onEnter:
-                              (_) => setState(() => _hoveredLogIndex = index),
-                          onExit: (_) {
-                            // Only clear if this item is currently hovered
-                            if (_hoveredLogIndex == index) {
-                              setState(() => _hoveredLogIndex = null);
-                            }
-                          },
-                          child: ListTile(
-                            title:
-                                _hoveredLogIndex == index
-                                    // Expanded view when hovered
-                                    ? Text(_logEntries[index].message)
-                                    // Single line with ellipsis when not hovered
-                                    : Text(
-                                      _logEntries[index].message,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                            subtitle: Text(
-                              _logEntries[index].timestamp,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            leading: _getLogLevelIcon(_logEntries[index].level),
-                          ),
-                        );
-                      },
-                    ),
-          ),
-
-          // Clear logs button
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  clearAllLogs();
-                },
-                icon: const Icon(Icons.clear_all),
-                label: const Text('Clear'),
-                style: ElevatedButton.styleFrom(
-                  iconColor:
-                      Theme.of(context).extension<AppColors>()!.clearAction,
-                  minimumSize: const Size(0, 50),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return LogDrawer(
+      logEntries: _logEntries,
+      hoveredLogIndex: _hoveredLogIndex,
+      onClearLogs: () {
+        HapticFeedback.mediumImpact();
+        clearAllLogs();
+      },
+      onHoverChange: (index) {
+        setState(() {
+          _hoveredLogIndex = index;
+        });
+      },
+      scaffoldKey: _scaffoldKey,
     );
   }
 
   Widget _buildSubscriptionList() {
     return Container(
-      decoration: BoxDecoration(
-        //color: Colors.grey[200],
-        //borderRadius: BorderRadius.circular(8.0),
-      ),
+      decoration: const BoxDecoration(),
       child:
           _subscriptions.isEmpty
               ? const Center(child: Text('No subscriptions yet'))
@@ -1126,86 +1013,16 @@ class MyAppState extends State<MyApp> {
                 itemCount: _subscriptions.length,
                 itemBuilder: (context, index) {
                   final bool isProcessing = _processingItems[index] ?? false;
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 4.0,
-                      horizontal: 8.0,
-                    ),
-                    child: ListTile(
-                      dense: true,
-                      onTap: () {
-                        _editSubscription(index);
-                      },
-                      title: Text(
-                        (_subscriptions[index]),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-
-                      subtitle: Text(
-                        _formatUrlWithFilename(_subscriptions[index]),
-                        style: Theme.of(context).textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Validation Status Icon (for both files and URLs)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: _buildValidationIcon(_subscriptions[index]),
-                          ),
-
-                          // Play button
-                          IconButton(
-                            icon:
-                                isProcessing
-                                    ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.0,
-                                      ),
-                                    )
-                                    : Icon(
-                                      Icons.play_arrow,
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).extension<AppColors>()!.saveAction,
-                                    ),
-                            tooltip: "Process this subscription",
-                            onPressed:
-                                isProcessing
-                                    ? null
-                                    : () => _processUrl(
-                                      _subscriptions[index],
-                                      index,
-                                    ),
-                          ),
-                          // Delete button
-                          Builder(
-                            builder:
-                                (buttonContext) => IconButton(
-                                  icon: Icon(
-                                    Icons.close,
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).extension<AppColors>()!.deleteAction,
-                                  ),
-                                  tooltip: "Delete this subscription",
-                                  onPressed:
-                                      () => _showDeleteConfimMenu(
-                                        index,
-                                        buttonContext,
-                                      ),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  return SubscriptionListItem(
+                    subscription: _subscriptions[index],
+                    index: index,
+                    isProcessing: isProcessing,
+                    validationStatus:
+                        _urlValidationStatus[_subscriptions[index]],
+                    displayName: _formatUrlWithFilename(_subscriptions[index]),
+                    onTap: () => _editSubscription(index),
+                    onProcess: () => _processUrl(_subscriptions[index], index),
+                    onDelete: _showDeleteConfimMenu,
                   );
                 },
               ),
@@ -1213,232 +1030,27 @@ class MyAppState extends State<MyApp> {
   }
 
   Widget _buildBatchProcessBar(BuildContext context) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-        child: Row(
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.folder_open_outlined,
-                color: Theme.of(context).extension<AppColors>()!.folderAction,
-                size: 24,
-              ),
-              onPressed: _selectFolder,
-              tooltip: "Select Folder",
-            ),
-            Expanded(
-              child: TextField(
-                controller: TextEditingController(text: _targetFolderPath),
-                enabled: false,
-                decoration: const InputDecoration(
-                  hintText: "Select Clash Config Folder ...",
-                ),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _isBatchProcessing
-                ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2.5),
-                )
-                : IconButton(
-                  icon: Icon(
-                    Icons.fast_forward,
-                    color:
-                        Theme.of(context).extension<AppColors>()!.forwardAction,
-                    size: 24,
-                  ),
-                  onPressed: _processAllUrls,
-                  tooltip: "Process all URLs",
-                ),
-            IconButton(
-              icon: Icon(
-                Icons.delete_forever_outlined,
-                color: Theme.of(context).extension<AppColors>()!.deleteAction,
-                size: 24,
-              ),
-              onPressed: () {
-                _showDeleteAllConfirmation(context);
-              },
-              tooltip: "Delete all URLs",
-            ),
-          ],
-        ),
-      ),
+    return BatchControlBar(
+      targetFolderPath: _targetFolderPath,
+      isBatchProcessing: _isBatchProcessing,
+      onSelectFolder: _selectFolder,
+      onProcessAll: _processAllUrls,
+      onDeleteAll: () => _showDeleteAllConfirmation(context),
     );
   }
 
   Widget _buildInputPanel(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 0.0),
-      decoration: BoxDecoration(
-        //color: Colors.grey[200],
-        //borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        children: [
-          // URL Input or Add Button
-          (_isAddingNew && _editingIndex == -1)
-              ? Card(
-                elevation: 3,
-                shadowColor: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.2),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.link,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _textController,
-                          decoration: InputDecoration(
-                            hintText:
-                                'Enter subscription URL or drag file here',
-                            errorText:
-                                _newSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? kSupportedUrlMessage
-                                    : null,
-                            errorMaxLines: 3,
-                          ),
-                          onChanged: _validateUrl,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: Icon(
-                          Icons.check_circle,
-                          color:
-                              Theme.of(
-                                context,
-                              ).extension<AppColors>()!.saveAction,
-                        ),
-                        onPressed: _confirmNewSubscription,
-                        tooltip: 'Confirm',
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.cancel,
-                          color:
-                              Theme.of(
-                                context,
-                              ).extension<AppColors>()!.deleteAction,
-                        ),
-                        onPressed: _cancelNewSubscription,
-                        tooltip: 'Cancel',
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              : const SizedBox.shrink(), // Explicit zero-sized widget
-          (_isAddingNew && _editingIndex == -1)
-              ? const SizedBox(height: 8.0)
-              : const SizedBox.shrink(),
-          (!_isAddingNew && _editingIndex != -1)
-              ? Card(
-                elevation: 3,
-                shadowColor: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.2),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.edit,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _textController,
-                          decoration: InputDecoration(
-                            hintText:
-                                'Enter subscription URL or drag file here',
-                            border: InputBorder.none,
-                            errorText:
-                                _editSubscriptionUrl.isNotEmpty && !_isValidUrl
-                                    ? kSupportedUrlMessage
-                                    : null,
-                            errorMaxLines: 3,
-                          ),
-                          onChanged: _validateUrl,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: Icon(
-                          Icons.check_circle,
-                          color:
-                              Theme.of(
-                                context,
-                              ).extension<AppColors>()!.saveAction,
-                        ),
-                        onPressed: _confirmEditSubscription,
-                        tooltip: 'Confirm',
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.cancel,
-                          color:
-                              Theme.of(
-                                context,
-                              ).extension<AppColors>()!.deleteAction,
-                        ),
-                        onPressed: _cancelEditSubscription,
-                        tooltip: 'Cancel',
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              : const SizedBox.shrink(),
-          (!_isAddingNew && _editingIndex != -1)
-              ? const SizedBox(height: 8.0)
-              : const SizedBox.shrink(),
-        ],
-      ),
+    return SubscriptionInputPanel(
+      isAddingNew: _isAddingNew,
+      editingIndex: _editingIndex,
+      textController: _textController,
+      isValidUrl: _isValidUrl,
+      urlValue: _isAddingNew ? _newSubscriptionUrl : _editSubscriptionUrl,
+      onValidate: _validateUrl,
+      onConfirm:
+          _isAddingNew ? _confirmNewSubscription : _confirmEditSubscription,
+      onCancel: _isAddingNew ? _cancelNewSubscription : _cancelEditSubscription,
     );
-  }
-
-  Widget _buildValidationIcon(String url) {
-    final status = _urlValidationStatus[url];
-    if (status == null) {
-      return const SizedBox(
-        width: 12,
-        height: 12,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      );
-    } else if (status == false) {
-      return Tooltip(
-        message: 'Cannot access this URL',
-        child: Icon(
-          Icons.warning_amber_rounded,
-          size: 16,
-          color: Theme.of(context).colorScheme.error,
-        ),
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
   }
 }
 
@@ -1537,51 +1149,6 @@ class _ControlBottomAppBar extends StatelessWidget {
     );
   }
 
-  Future<void> _showQuitConfimMenu(BuildContext buttonContext) async {
-    // Get the position of the button that was clicked
-    final RenderBox buttonBox = buttonContext.findRenderObject() as RenderBox;
-    final Offset position = buttonBox.localToGlobal(Offset.zero);
-    final Size buttonSize = buttonBox.size;
-
-    // Position the popup menu just below and right-aligned with the button
-    final result = await showMenu<bool>(
-      context: buttonContext,
-      position: RelativeRect.fromLTRB(
-        position.dx - 100, // Adjust this to position horizontally
-        position.dy + buttonSize.height, // Just below the button
-        position.dx + buttonSize.width,
-        position.dy,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      items: [
-        PopupMenuItem<bool>(
-          value: null,
-          enabled: false,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            'Want to quit ?',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color:
-                  Theme.of(buttonContext).extension<AppColors>()!.folderAction,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        PopupMenuItem<bool>(height: 40, value: false, child: Text('No')),
-        PopupMenuItem<bool>(height: 40, value: true, child: Text('Yes')),
-      ],
-    );
-
-    if (result == true) {
-      if (Platform.isMacOS) {
-        exit(0); // Clean exit with code 0
-      } else {
-        SystemNavigator.pop(); // For mobile platforms
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -1592,15 +1159,20 @@ class _ControlBottomAppBar extends StatelessWidget {
             builder:
                 (buttonContext) => IconButton(
                   onPressed: () {
-                    // Quit the app
-                    _showQuitConfimMenu(buttonContext);
+                    // Show speedtest dialog
+                    showDialog(
+                      context: buttonContext,
+                      barrierDismissible: false,
+                      builder: (context) => const SpeedTestDialog(),
+                    );
                   },
                   icon: Icon(
-                    Icons.power_settings_new_outlined,
-                    color: Theme.of(context).extension<AppColors>()?.quitAction,
+                    Icons.speed_outlined,
+                    color:
+                        Theme.of(context).extension<AppColors>()?.forwardAction,
                     size: 24,
                   ),
-                  tooltip: 'Quit',
+                  tooltip: 'Network Speed Test',
                 ),
           ),
           const SizedBox(width: 8),
