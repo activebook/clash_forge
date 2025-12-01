@@ -1,5 +1,7 @@
 import 'protocol.dart';
 import 'proxy_url.dart';
+import 'protocol_parser.dart';
+import 'protocol_validator.dart';
 import 'utils.dart';
 
 class TrojanProtocol implements Protocol {
@@ -50,7 +52,7 @@ class TrojanProtocol implements Protocol {
           'short-id',
         ], defaultValue: '');
 
-        if (!ProxyUrl.isValidPublicKey(publicKey)) {
+        if (!ProtocolValidator.isValidPublicKey(publicKey)) {
           return {
             'type': 'trojan',
             'error': 'Trojan security Invalid public key: $publicKey',
@@ -155,4 +157,11 @@ class TrojanProtocol implements Protocol {
       return {'type': 'trojan', 'error': 'Error parsing Trojan URL: $e'};
     }
   }
+}
+
+// ============================================================================
+// Trojan Parser
+// ============================================================================
+class TrojanParser extends CommonProtocolParser {
+  // Trojan uses standard format, no special processing needed
 }

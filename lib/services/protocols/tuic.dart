@@ -1,5 +1,6 @@
 import 'protocol.dart';
 import 'proxy_url.dart';
+import 'protocol_parser.dart';
 import 'utils.dart';
 
 class TuicProtocol implements Protocol {
@@ -105,5 +106,37 @@ class TuicProtocol implements Protocol {
     } catch (e) {
       return {'type': 'tuic', 'error': 'Error parsing TUIC URL: $e'};
     }
+  }
+}
+
+// ============================================================================
+// TUIC Parser - handles UUID:password format
+// ============================================================================
+class TuicParser extends CommonProtocolParser {
+  @override
+  ({String id, Map<String, String> params}) processIdAndParams(
+    String id,
+    Map<String, String> params,
+    String protocol,
+  ) {
+    final colonIndex = id.indexOf(':');
+
+    if (colonIndex != -1) {
+      final uuid = id.substring(0, colonIndex);
+      final password = id.substring(colonIndex + 1);
+
+      if (!UUIDUtils.isValid(uuid)) {
+        throw ArgumentError('TUIC requires valid UUID, got: $uuid');
+      }
+
+      params['uuid'] = uuid;
+      params['password'] = password;
+    } else if (UUIDUtils.isValid(id)) {
+      params['uuid'] = id;
+    } else {
+      throw ArgumentError('TUIC requires valid UUID format');
+    }
+
+    return (id: id, params: params);
   }
 }

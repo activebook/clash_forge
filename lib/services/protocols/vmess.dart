@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'protocol.dart';
 import 'proxy_url.dart';
+import 'protocol_parser.dart';
+import 'protocol_validator.dart';
 import 'utils.dart';
 
 class VmessProtocol implements Protocol {
@@ -48,7 +50,7 @@ class VmessProtocol implements Protocol {
           content = url.substring(protocolSeparator + 3);
         }
 
-        content = ProxyUrl.fixBase64Padding(content);
+        content = Base64Utils.fixPadding(content);
         String decodedContent = utf8.decode(base64.decode(content));
         params = jsonDecode(decodedContent);
       }
@@ -59,19 +61,23 @@ class VmessProtocol implements Protocol {
             'scy',
           ], defaultValue: 'auto')!;
 
-      if (!ProxyUrl.isValidCipher(cipher)) {
+      if (!ProtocolValidator.isValidCipher(cipher)) {
         return {
           'type': 'vmess',
           'error': 'Invalid VMess cipher method: $cipher',
         };
       }
 
+      if (!UUIDUtils.isValid(params['id'])) {
+        throw ArgumentError('Vmess requires valid UUID, got: ${params['id']}');
+      }
+
       Map<String, dynamic> serverInfo = {
         'type': 'vmess',
-        'name': params['ps'] ?? params['name'] ?? '',
-        'server': params['add'] ?? '',
+        'name': params['ps'] ?? params['name'],
+        'server': params['add'],
         'port': int.tryParse(params['port']?.toString() ?? '0') ?? 0,
-        'uuid': params['id'] ?? '',
+        'uuid': params['id'],
         'alterId': int.tryParse(params['aid']?.toString() ?? '0') ?? 0,
         'cipher': cipher,
       };
@@ -87,7 +93,7 @@ class VmessProtocol implements Protocol {
           'short-id',
         ], defaultValue: '');
 
-        if (!ProxyUrl.isValidPublicKey(publicKey)) {
+        if (!ProtocolValidator.isValidPublicKey(publicKey)) {
           return {
             'type': 'vmess',
             'error': 'Vmess security Invalid public key: $publicKey',
@@ -254,5 +260,56 @@ class VmessProtocol implements Protocol {
     } catch (e) {
       return {'type': 'vmess', 'error': 'Error parsing VMess URL: $e'};
     }
+  }
+}
+
+// ============================================================================
+// VMess Parser - handles base64 encoded JSON
+// ============================================================================
+class VmessParser implements ProtocolParser {
+  @override
+  ProxyUrl parse(String url, String protocol) {
+    final protocolSeparator = url.indexOf('://');
+    String urlContent = url.substring(protocolSeparator + 3);
+
+    if (!Base64Utils.isValid(urlContent)) {
+      throw ArgumentError('VMess URL must be base64 encoded JSON');
+    }
+
+    urlContent = Base64Utils.fixPadding(urlContent);
+    final decoded = base64.decode(urlContent);
+    final decodedUrl = utf8.decode(decoded);
+
+    final jsonUrl = jsonDecode(decodedUrl);
+    if (jsonUrl is! Map<String, dynamic>) {
+      throw FormatException('VMess JSON must be an object');
+    }
+
+    // Validate required fields
+    if (!jsonUrl.containsKey('add') || !jsonUrl.containsKey('port')) {
+      throw FormatException('VMess JSON missing required fields (add, port)');
+    }
+
+    Map<String, String> params = {};
+    jsonUrl.forEach((key, value) {
+      params[key] = value.toString();
+    });
+
+    // Parse and validate port
+    int port = int.tryParse(jsonUrl['port']?.toString() ?? '') ?? 0;
+    if (port < 1 || port > 65535) {
+      throw FormatException('VMess JSON invalid port: $port');
+    }
+
+    return ProxyUrl(
+      protocol: protocol,
+      id: jsonUrl['id']?.toString() ?? jsonUrl['uuid']?.toString() ?? '',
+      address: jsonUrl['add']?.toString() ?? '',
+      port: port,
+      params: params,
+      remark: jsonUrl['ps']?.toString(),
+      rawUrl: url,
+      base64: true,
+    );
   }
 }

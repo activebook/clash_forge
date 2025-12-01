@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 //import 'package:http/http.dart' as http;
+import 'package:clash_forge/services/protocols/utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import 'package:yaml_writer/yaml_writer.dart';
@@ -104,7 +105,7 @@ class UrlConverter {
           throw Exception(wgConfig['error']);
         }
         processedContent = await _formatToClashConfig([wgConfig]);
-      } else if (ProxyUrl.checkBase64(content)) {
+      } else if (Base64Utils.isValid(content)) {
         // Decode first
         processedContent = await _processBase64Content(content);
       } else if (_isLineByLineText(content)) {

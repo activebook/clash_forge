@@ -24,7 +24,7 @@ class ProtocolManager {
 
   static Map<String, dynamic> parse(String url) {
     // 1. Sanitize and parse generic URL structure
-    String sanitizedUrl = ProxyUrl.sanitizeUri(url);
+    String sanitizedUrl = UrlSanitizer.sanitize(url);
     ProxyUrl? parsed;
     String err;
     try {

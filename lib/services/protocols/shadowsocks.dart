@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'protocol.dart';
+import 'protocol_parser.dart';
+import 'protocol_validator.dart';
 import 'proxy_url.dart';
+import 'utils.dart';
 
 class ShadowsocksProtocol implements Protocol {
   @override
@@ -53,7 +56,7 @@ class ShadowsocksProtocol implements Protocol {
         final base64Part = ssUrl.substring(5);
         try {
           final decoded = utf8.decode(
-            base64.decode(ProxyUrl.fixBase64Padding(base64Part)),
+            base64.decode(Base64Utils.fixPadding(base64Part)),
           );
           // If decoded string contains another ss://, it's recursive? No.
           // It should be method:password@server:port
@@ -76,10 +79,10 @@ class ShadowsocksProtocol implements Protocol {
         } else {
           // Format: ss://BASE64(method:pass)@server:port
           final userInfo = uri.userInfo;
-          if (ProxyUrl.checkBase64(userInfo)) {
+          if (Base64Utils.isValid(userInfo)) {
             try {
               final decoded = utf8.decode(
-                base64.decode(ProxyUrl.fixBase64Padding(userInfo)),
+                base64.decode(Base64Utils.fixPadding(userInfo)),
               );
               final parts = decoded.split(':');
               if (parts.length >= 2) {
@@ -95,14 +98,14 @@ class ShadowsocksProtocol implements Protocol {
 
       method = method.toLowerCase();
 
-      if (!ProxyUrl.isValidCipher(method)) {
+      if (!ProtocolValidator.isValidCipher(method)) {
         return {
           'type': 'ss',
           'error': 'Unsupported or Legacy cipher detected: $method',
         };
       }
 
-      int? expectedKeyLength = ProxyUrl.getKeyLengthForCipher(method);
+      int? expectedKeyLength = ProtocolValidator.getKeyLengthForCipher(method);
 
       if (method.startsWith('2022-blake3') && expectedKeyLength != null) {
         List<String> keysToCheck =
@@ -202,5 +205,67 @@ class ShadowsocksProtocol implements Protocol {
     } catch (e) {
       return {'type': 'ss', 'error': 'Parse error: $e'};
     }
+  }
+}
+
+// ============================================================================
+// Shadowsocks Parser - handles base64 encoded method:password
+// ============================================================================
+class ShadowsocksParser extends CommonProtocolParser {
+  @override
+  ProxyUrl parse(String url, String protocol) {
+    final protocolSeparator = url.indexOf('://');
+    final urlWithoutRemark = UrlParser.removeRemark(url);
+
+    // Check for legacy format: ss://base64(method:pass@host:port)
+    String processedUrl = urlWithoutRemark;
+    String content = urlWithoutRemark.substring(protocolSeparator + 3);
+
+    if (!content.contains('@') && Base64Utils.isValid(content)) {
+      try {
+        final decoded = utf8.decode(
+          base64.decode(Base64Utils.fixPadding(content)),
+        );
+        if (decoded.contains('@') && decoded.contains(':')) {
+          processedUrl = "$protocol://$decoded";
+        }
+      } catch (_) {}
+    }
+
+    // Use standard parsing
+    final result = super.parse(processedUrl, protocol);
+
+    return result;
+  }
+
+  @override
+  ({String id, Map<String, String> params}) processIdAndParams(
+    String id,
+    Map<String, String> params,
+    String protocol,
+  ) {
+    // Decode base64 encoded method:password
+    if (!Base64Utils.isValid(id) && id.contains(':')) {
+      // Percent-encoded format (SIP022 for AEAD-2022 ciphers)
+      final colonIndex = id.indexOf(':');
+      if (colonIndex != -1) {
+        params['method'] = id.substring(0, colonIndex);
+        params['password'] = id.substring(colonIndex + 1);
+      }
+    } else if (Base64Utils.isValid(id)) {
+      // Base64 format (legacy SIP002 for Stream/AEAD ciphers)
+      try {
+        final decodedId = utf8.decode(
+          base64.decode(Base64Utils.fixPadding(id)),
+        );
+        final colonIndex = decodedId.lastIndexOf(':');
+        if (colonIndex != -1) {
+          params['method'] = decodedId.substring(0, colonIndex);
+          params['password'] = decodedId.substring(colonIndex + 1);
+        }
+      } catch (_) {}
+    }
+
+    return (id: id, params: params);
   }
 }

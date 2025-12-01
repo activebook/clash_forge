@@ -1,5 +1,6 @@
 import 'protocol.dart';
 import 'proxy_url.dart';
+import 'protocol_parser.dart';
 import 'utils.dart';
 
 class Hysteria2Protocol implements Protocol {
@@ -121,4 +122,11 @@ class Hysteria2Protocol implements Protocol {
       return {'type': 'hysteria2', 'error': 'Error parsing Hysteria2 URL: $e'};
     }
   }
+}
+
+// ============================================================================
+// Hysteria Parser (hysteria and hysteria2)
+// ============================================================================
+class HysteriaParser extends CommonProtocolParser {
+  // Hysteria uses standard format, no special processing needed
 }

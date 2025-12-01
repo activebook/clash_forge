@@ -1,5 +1,6 @@
 import 'protocol.dart';
 import 'proxy_url.dart';
+import 'protocol_parser.dart';
 import 'utils.dart';
 
 class AnyTlsProtocol implements Protocol {
@@ -19,6 +20,10 @@ class AnyTlsProtocol implements Protocol {
     try {
       final proxy = parsed ?? ProxyUrl.parse(url);
       if (proxy == null) throw FormatException('Failed to parse URL');
+
+      if (!UUIDUtils.isValid(proxy.id)) {
+        throw ArgumentError('AnyTLS requires valid UUID, got: ${proxy.id}');
+      }
 
       Map<String, dynamic> serverInfo = {
         'type':
@@ -88,4 +93,11 @@ class AnyTlsProtocol implements Protocol {
       return {'type': 'anytls', 'error': 'Error parsing AnyTLS URL: $e'};
     }
   }
+}
+
+// ============================================================================
+// AnyTLS Parser
+// ============================================================================
+class AnyTlsParser extends CommonProtocolParser {
+  // AnyTLS uses standard format, no special processing needed
 }

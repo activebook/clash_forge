@@ -2,7 +2,7 @@ import 'proxy_url.dart';
 
 abstract class Protocol {
   String get name;
-  
+
   /// Returns true if this protocol handler can handle the given URL or ProxyUrl.
   bool canHandle(String url, ProxyUrl? parsed);
 

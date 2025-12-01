@@ -1,5 +1,7 @@
 import 'protocol.dart';
 import 'proxy_url.dart';
+import 'protocol_parser.dart';
+import 'protocol_validator.dart';
 import 'utils.dart';
 
 class VlessProtocol implements Protocol {
@@ -20,6 +22,10 @@ class VlessProtocol implements Protocol {
       // Use the parsed object if available, otherwise parse it
       final proxy = parsed ?? ProxyUrl.parse(url);
       if (proxy == null) throw FormatException('Failed to parse URL');
+
+      if (!UUIDUtils.isValid(proxy.id)) {
+        throw ArgumentError('Vless requires valid UUID, got: ${proxy.id}');
+      }
 
       // Initialize serverInfo with default values
       Map<String, dynamic> serverInfo = {
@@ -43,7 +49,7 @@ class VlessProtocol implements Protocol {
           'short-id',
         ], defaultValue: '');
 
-        if (!ProxyUrl.isValidPublicKey(publicKey)) {
+        if (!ProtocolValidator.isValidPublicKey(publicKey)) {
           return {
             'type': 'vless',
             'error': 'Vless security Invalid public key: $publicKey',
@@ -193,4 +199,11 @@ class VlessProtocol implements Protocol {
       return {'type': 'vless', 'error': 'Error parsing VLESS URL: $e'};
     }
   }
+}
+
+// ============================================================================
+// VLESS Parser
+// ============================================================================
+class VlessParser extends CommonProtocolParser {
+  // VLESS uses standard format, no special processing needed
 }

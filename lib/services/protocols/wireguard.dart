@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'protocol_validator.dart';
 
 class WireGuardParser {
   /// Check if the content looks like a WireGuard config
@@ -47,6 +48,12 @@ class WireGuardParser {
       if (currentSection == 'interface') {
         if (key == 'privatekey') {
           privateKey = value;
+          if (!ProtocolValidator.isValidPublicKey(privateKey)) {
+            return {
+              'type': 'wireguard',
+              'error': 'WireGuard Invalid private key: $privateKey',
+            };
+          }
         } else if (key == 'address') {
           // Handle both IPv4 and IPv6
           final addresses = value.split(',').map((e) => e.trim()).toList();
@@ -76,6 +83,12 @@ class WireGuardParser {
           }
         } else if (key == 'publickey') {
           publicKey = value;
+          if (!ProtocolValidator.isValidPublicKey(publicKey)) {
+            return {
+              'type': 'wireguard',
+              'error': 'WireGuard Invalid public key: $publicKey',
+            };
+          }
         } else if (key == 'presharedkey') {
           preSharedKey = value;
         } else if (key == 'reserved') {
