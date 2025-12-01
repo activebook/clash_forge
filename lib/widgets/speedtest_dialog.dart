@@ -68,6 +68,7 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
 
   @override
   void dispose() {
+    _speedTestService.dispose();
     _subscription?.cancel();
     _scrollController.dispose();
     super.dispose();

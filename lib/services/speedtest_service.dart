@@ -6,12 +6,13 @@ import 'package:path/path.dart' as path;
 
 /// Service that executes the speedtest.sh script and streams its output.
 class SpeedTestService {
+  Process? _currentProcess;
+  File? _tempScriptFile;
+
   /// Runs the speedtest script and returns a stream of output lines.
-  ///
-  /// The script outputs to stderr, so we capture both stderr and stdout.
-  /// Returns a stream that emits each line of output as it becomes available.
   Stream<String> runSpeedTest() async* {
-    File? tempScriptFile;
+    // Cancel any existing process
+    cancel();
 
     try {
       // Load the bundled script asset
@@ -21,7 +22,7 @@ class SpeedTestService {
 
       // Create a temporary file to execute the script
       final tempDir = Directory.systemTemp;
-      tempScriptFile = File(
+      _tempScriptFile = File(
         path.join(
           tempDir.path,
           'speedtest_${DateTime.now().millisecondsSinceEpoch}.sh',
@@ -29,58 +30,63 @@ class SpeedTestService {
       );
 
       // Write script content to temp file
-      await tempScriptFile.writeAsString(scriptContent);
+      await _tempScriptFile!.writeAsString(scriptContent);
 
       // Make the script executable
-      await Process.run('chmod', ['+x', tempScriptFile.path]);
+      await Process.run('chmod', ['+x', _tempScriptFile!.path]);
 
       // Start the bash process
-      final process = await Process.start('bash', [
-        tempScriptFile.path,
+      _currentProcess = await Process.start('bash', [
+        _tempScriptFile!.path,
       ], workingDirectory: tempDir.path);
 
-      // The script outputs to stderr (using '>&2' redirects)
-      // We need to capture both stderr and stdout
-
       // Stream stderr (where the script outputs everything)
-      await for (final output in process.stderr
+      await for (final output in _currentProcess!.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())) {
         yield '$output\n';
       }
 
       // Also capture stdout just in case
-      await for (final output in process.stdout
+      await for (final output in _currentProcess!.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())) {
         yield '$output\n';
       }
 
       // Wait for process to complete
-      final exitCode = await process.exitCode;
-      if (exitCode != 0) {
+      final exitCode = await _currentProcess!.exitCode;
+      if (exitCode != 0 && exitCode != 143) {
+        // 143 is SIGTERM
         yield '\n⚠️ Process exited with code $exitCode\n';
       }
     } catch (e) {
       yield '\n❌ Error running speedtest: $e\n';
     } finally {
-      // Clean up temporary script file
-      if (tempScriptFile != null && await tempScriptFile.exists()) {
-        try {
-          await tempScriptFile.delete();
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-      }
+      _cleanup();
     }
   }
 
   /// Cancels the running speedtest process.
-  /// Note: This is a simple implementation. For production, you'd want to
-  /// track the Process object and kill it explicitly.
   void cancel() {
-    // Implementation note: To properly support cancellation, we'd need to
-    // refactor this to return a Process object or use a StreamController
-    // with proper cleanup.
+    _currentProcess?.kill(ProcessSignal.sigterm);
+    _currentProcess = null;
+  }
+
+  void _cleanup() {
+    if (_tempScriptFile != null) {
+      _tempScriptFile!.exists().then((exists) {
+        if (exists) {
+          _tempScriptFile!.delete().catchError((_) {});
+        }
+      });
+      _tempScriptFile = null;
+    }
+  }
+
+  /// Dispose method for proper cleanup
+  void dispose() {
+    cancel();
+    _cleanup();
   }
 }
