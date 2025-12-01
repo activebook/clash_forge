@@ -9,11 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:clash_forge/main.dart';
+import 'package:clash_forge/models/app_info.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp(appInfo:AppInfo(appName: 'Clash Forge', appVersion: '1.0.0')));
+    await tester.pumpWidget(
+      MyApp(appInfo: AppInfo(appName: 'Clash Forge', appVersion: '1.0.0')),
+    );
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

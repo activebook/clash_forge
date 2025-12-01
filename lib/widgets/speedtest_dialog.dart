@@ -137,13 +137,13 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
               currentColor = const Color(0xFF66BB6A);
               break;
             case 33: // Yellow
-              currentColor = const Color(0xFFFFEE58);
+              currentColor = const Color.fromARGB(255, 247, 239, 165);
               break;
             case 34: // Blue
               currentColor = const Color(0xFF42A5F5);
               break;
             case 35: // Magenta/Purple
-              currentColor = const Color(0xFFAB47BC);
+              currentColor = const Color.fromARGB(255, 241, 170, 253);
               break;
             case 36: // Cyan
               currentColor = const Color(0xFF26C6DA);
