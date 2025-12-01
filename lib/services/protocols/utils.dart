@@ -86,6 +86,16 @@ class Base64Utils {
 }
 
 class UUIDUtils {
+  /*
+Protocol, UUID Requirement, Primary Authentication Method
+VLESS, Yes, UUID
+VMESS, Yes, UUID (and time check)
+TUIC, Yes, UUID + Password (Token derived from both)
+Anytls, Yes (Unique ID), Unique ID (often UUID) + Password
+Trojan, No, Password / Key (Hashed)
+SS / SSR, No, Password
+Hysteria2, No, Password / Token
+  */
   static bool isValid(String str) {
     return RegExp(
       r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
