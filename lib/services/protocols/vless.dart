@@ -9,26 +9,7 @@ class VlessProtocol implements Protocol {
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
-      // UUID format with dashes + VLESS-specific parameters
-      bool encryption =
-          parsed.params.containsKey('encryption') &&
-          parsed.params['encryption'] == 'none';
-      bool security =
-          parsed.params.containsKey('security') &&
-          (parsed.params['security'] == 'reality' ||
-              parsed.params['security'] == 'tls' ||
-              parsed.params['security'] == 'none');
-      // only in vless, type is a network factor
-      bool type =
-          parsed.params.containsKey('type') &&
-          (parsed.params['type'] == 'ws' ||
-              parsed.params['type'] == 'grpc' ||
-              parsed.params['type'] == 'h2');
-      bool feature =
-          !parsed.isBase64 &&
-          ProxyUrl.isUuid(parsed.id) &&
-          (encryption || security || type || parsed.params.containsKey('pbk'));
-      return feature || parsed.protocol == 'vless';
+      return parsed.protocol == 'vless';
     }
     return url.toLowerCase().startsWith('vless://');
   }

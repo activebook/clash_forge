@@ -86,6 +86,23 @@ class ProxyUrl {
     }
   }
 
+  /// ProxyUrl.parse handles:
+  /// Protocol	Format	Works?
+  /// VLESS	vless://UUID@host:port?params	✓ Standard URL
+  /// VMess	vmess://BASE64(JSON)	✓ Special handling
+  /// Trojan	trojan://password@host:port?params	✓ Standard URL
+  /// Shadowsocks	ss://BASE64(method:password)@host:port	✓ Special handling
+  /// ShadowsocksR	ssr://BASE64(server:port:proto:method:obfs:pass/?)	✓ Special handling (URL-safe Base64)
+  /// Hysteria2	hysteria2://password@host:port?params	✓ Standard URL
+  /// TUIC	tuic://uuid:password@host:port?params	✓ Standard URL
+  /// AnyTLS	anytls://uuid@host:port?params	✓ Standard URL
+  /// ProxyUrl.parse CANNOT handle:
+  /// Protocol	Format	Why?
+  /// WireGuard	INI file ([Interface], [Peer])	Not a URL at all
+  /// Remember: this function only handles the URL part of the proxy.
+  /// It doesn't verify the URL or the proxy.
+  /// Don't trust this function; you must verify the URL and the proxy for each protocol itself.
+  /// Protocol.parse is the function that handles the URL part of the proxy.
   static ProxyUrl? parse(String url) {
     try {
       url = sanitizeUri(url);
@@ -94,6 +111,74 @@ class ProxyUrl {
 
       final protocol = url.substring(0, protocolSeparator).trim().toLowerCase();
       String urlContent = url.substring(protocolSeparator + 3);
+
+      // Special handling for SSR (uses URL-safe Base64)
+      if (protocol == 'ssr') {
+        String ssrContent = urlContent
+            .replaceAll('-', '+')
+            .replaceAll('_', '/');
+        // Fix padding
+        while (ssrContent.length % 4 != 0) {
+          ssrContent += '=';
+        }
+
+        try {
+          final decoded = utf8.decode(base64.decode(ssrContent));
+
+          // SSR format: server:port:protocol:method:obfs:password_base64/?params
+          int queryIndex = decoded.indexOf('/?');
+          String mainPart;
+          Map<String, String> params = {};
+
+          if (queryIndex != -1) {
+            mainPart = decoded.substring(0, queryIndex);
+            String queryPart = decoded.substring(queryIndex + 2);
+
+            // Parse query parameters
+            List<String> queryParams = queryPart.split('&');
+            for (var param in queryParams) {
+              int eqIndex = param.indexOf('=');
+              if (eqIndex != -1) {
+                String key = param.substring(0, eqIndex);
+                String value = param.substring(eqIndex + 1);
+                params[key] = value;
+              }
+            }
+          } else {
+            mainPart = decoded;
+          }
+
+          // Parse main parts: server:port:protocol:method:obfs:password_base64
+          List<String> parts = mainPart.split(':');
+          if (parts.length >= 6) {
+            String server = parts[0];
+            int port = int.tryParse(parts[1]) ?? 0;
+            String ssrProtocol = parts[2];
+            String method = parts[3];
+            String obfs = parts[4];
+            String passwordBase64 = parts[5];
+
+            // Store SSR-specific fields in params
+            params['ssr-protocol'] = ssrProtocol;
+            params['method'] = method;
+            params['obfs'] = obfs;
+            params['password-base64'] = passwordBase64;
+
+            return ProxyUrl(
+              protocol: protocol,
+              id: passwordBase64, // Use password as ID
+              address: server,
+              port: port,
+              params: params,
+              remark: params['remarks'], // Will be decoded later if needed
+              rawUrl: url,
+              base64: true,
+            );
+          }
+        } catch (_) {
+          // SSR parsing failed, will fall through to error
+        }
+      }
 
       if (checkBase64(urlContent)) {
         urlContent = fixBase64Padding(urlContent);
@@ -120,7 +205,59 @@ class ProxyUrl {
             );
           }
         } catch (_) {
-          // Not JSON, treat as string
+          // Not JSON - check if it's SSR format
+          if (protocol == 'ssr') {
+            // SSR format: server:port:protocol:method:obfs:password_base64/?params
+            int queryIndex = decodedUrl.indexOf('/?');
+            String mainPart;
+            Map<String, String> params = {};
+
+            if (queryIndex != -1) {
+              mainPart = decodedUrl.substring(0, queryIndex);
+              String queryPart = decodedUrl.substring(queryIndex + 2);
+
+              // Parse query parameters
+              List<String> queryParams = queryPart.split('&');
+              for (var param in queryParams) {
+                int eqIndex = param.indexOf('=');
+                if (eqIndex != -1) {
+                  String key = param.substring(0, eqIndex);
+                  String value = param.substring(eqIndex + 1);
+                  params[key] = value;
+                }
+              }
+            } else {
+              mainPart = decodedUrl;
+            }
+
+            // Parse main parts: server:port:protocol:method:obfs:password_base64
+            List<String> parts = mainPart.split(':');
+            if (parts.length >= 6) {
+              String server = parts[0];
+              int port = int.tryParse(parts[1]) ?? 0;
+              String ssrProtocol = parts[2];
+              String method = parts[3];
+              String obfs = parts[4];
+              String passwordBase64 = parts[5];
+
+              // Store SSR-specific fields in params
+              params['ssr-protocol'] = ssrProtocol;
+              params['method'] = method;
+              params['obfs'] = obfs;
+              params['password-base64'] = passwordBase64;
+
+              return ProxyUrl(
+                protocol: protocol,
+                id: passwordBase64, // Use password as ID
+                address: server,
+                port: port,
+                params: params,
+                remark: params['remarks'], // Will be decoded later if needed
+                rawUrl: url,
+                base64: true,
+              );
+            }
+          }
         }
       }
 

@@ -8,6 +8,9 @@ class ShadowsocksRProtocol implements Protocol {
 
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
+    if (parsed != null) {
+      return parsed.protocol == 'ssr';
+    }
     return url.toLowerCase().startsWith('ssr://');
   }
 
@@ -41,6 +44,56 @@ class ShadowsocksRProtocol implements Protocol {
 
   @override
   Map<String, dynamic> parse(String url, {ProxyUrl? parsed}) {
+    // If ProxyUrl already parsed SSR data, use it
+    if (parsed != null &&
+        parsed.protocol == 'ssr' &&
+        parsed.params.containsKey('ssr-protocol')) {
+      String server = parsed.address;
+      int port = parsed.port;
+      String protocol = parsed.params['ssr-protocol']!;
+      String method = parsed.params['method']!;
+      String obfs = parsed.params['obfs']!;
+      String passwordBase64 = parsed.params['password-base64']!;
+      String password = _decodeBase64(passwordBase64);
+
+      String name = server;
+      if (parsed.params.containsKey('remarks')) {
+        name = _decodeBase64(parsed.params['remarks']!);
+      }
+
+      String protocolParam = '';
+      if (parsed.params.containsKey('protoparam')) {
+        protocolParam = _decodeBase64(parsed.params['protoparam']!);
+      }
+
+      String obfsParam = '';
+      if (parsed.params.containsKey('obfsparam')) {
+        obfsParam = _decodeBase64(parsed.params['obfsparam']!);
+      }
+
+      // Cipher compatibility
+      if (method == 'chacha20-ietf-poly1305') {
+        method = 'chacha20-ietf';
+      } else if (method == 'rc4') {
+        method = 'rc4-md5';
+      }
+
+      return {
+        'name': name,
+        'type': 'ssr',
+        'server': server,
+        'port': port,
+        'cipher': method,
+        'password': password,
+        'protocol': protocol,
+        'obfs': obfs,
+        'protocol-param': protocolParam,
+        'obfs-param': obfsParam,
+        'udp': true,
+      };
+    }
+
+    // Fallback: parse raw SSR URL
     if (!url.startsWith('ssr://')) {
       throw FormatException('Not a ShadowsocksR URL');
     }

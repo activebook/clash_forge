@@ -26,10 +26,13 @@ class ProtocolManager {
     // 1. Sanitize and parse generic URL structure
     String sanitizedUrl = ProxyUrl.sanitizeUri(url);
     ProxyUrl? parsed;
+    String err;
     try {
       parsed = ProxyUrl.parse(sanitizedUrl);
-    } catch (_) {
+      err = parsed.toString();
+    } catch (e) {
       // Parsing might fail for some legacy formats, but we continue to try protocols
+      err = e.toString();
     }
 
     // 2. Find a matching protocol
@@ -39,6 +42,6 @@ class ProtocolManager {
       }
     }
 
-    return {'error': 'Unsupported protocol or invalid URL format'};
+    return {'error': 'Unsupported protocol or invalid URL format:\n$err'};
   }
 }

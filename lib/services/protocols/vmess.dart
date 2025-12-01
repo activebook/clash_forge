@@ -10,16 +10,7 @@ class VmessProtocol implements Protocol {
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
-      // Check for VMESS-specific parameters or structure
-      bool feature =
-          parsed.isBase64 &&
-          (ProxyUrl.isUuid(parsed.id) || parsed.params.containsKey("id")) &&
-          (parsed.params.containsKey('aid') ||
-              parsed.params.containsKey('net') ||
-              parsed.params.containsKey('type') ||
-              (parsed.params.containsKey('tls') &&
-                  parsed.params.containsKey('network')));
-      return feature || parsed.protocol == 'vmess';
+      return parsed.protocol == 'vmess';
     }
     return url.toLowerCase().startsWith('vmess://');
   }

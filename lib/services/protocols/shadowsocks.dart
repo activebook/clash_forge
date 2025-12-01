@@ -9,19 +9,7 @@ class ShadowsocksProtocol implements Protocol {
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
-      // Real Shadowsocks has method:password in base64
-      // This is complex to check perfectly but we can look for non-UUID format
-      // and typical SS parameters
-      bool feature =
-          !ProxyUrl.isUuid(parsed.id) &&
-          (parsed.params.containsKey('method') ||
-              parsed.params.containsKey('cipher') ||
-              parsed.id.contains(
-                ':',
-              ) || // might be method:password not in base64
-              parsed.params.isEmpty) &&
-          (parsed.protocol == "ss");
-      return feature;
+      return parsed.protocol == 'ss';
     }
     return url.toLowerCase().startsWith('ss://');
   }

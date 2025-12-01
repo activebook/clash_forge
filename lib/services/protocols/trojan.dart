@@ -9,29 +9,7 @@ class TrojanProtocol implements Protocol {
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
-      if (parsed.protocol == 'hysteria2' || parsed.protocol == 'hy2') {
-        return false;
-      }
-
-      if (!parsed.isBase64 &&
-          (parsed.params.containsKey('allowInsecure') &&
-              [
-                '0',
-                '1',
-                'true',
-                'false',
-              ].contains(parsed.params['allowInsecure']?.toLowerCase()))) {
-        return true;
-      }
-      if (!parsed.isBase64 && parsed.params.containsKey('sni')) {
-        return true;
-      }
-      bool feature =
-          !parsed.isBase64 &&
-          parsed.params.containsKey('security') &&
-          parsed.params['security'] == 'tls' &&
-          !parsed.params.containsKey('encryption');
-      return feature || parsed.protocol == 'trojan';
+      return parsed.protocol == 'trojan';
     }
     return url.toLowerCase().startsWith('trojan://');
   }

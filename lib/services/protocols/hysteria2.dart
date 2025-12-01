@@ -10,16 +10,11 @@ class Hysteria2Protocol implements Protocol {
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
       bool feature =
-          (parsed.protocol == "hysteria2" || parsed.protocol == "hy2") &&
-          !parsed.isBase64 &&
-          (parsed.params.containsKey('insecure') ||
-              parsed.params.containsKey('sni') ||
-              parsed.params.containsKey('obfs') ||
-              parsed.params.containsKey('mport') ||
-              parsed.params.isEmpty);
+          (parsed.protocol == "hysteria2" || parsed.protocol == "hy2");
       return feature;
     }
-    return url.toLowerCase().startsWith('hysteria2://') || url.toLowerCase().startsWith('hy2://');
+    return url.toLowerCase().startsWith('hysteria2://') ||
+        url.toLowerCase().startsWith('hy2://');
   }
 
   @override
@@ -52,7 +47,9 @@ class Hysteria2Protocol implements Protocol {
         'skip-cert-verify',
         'allowInsecure',
       ], defaultValue: '0');
-      serverInfo['skip-cert-verify'] = ProtocolUtils.parseBooleanValue(insecure);
+      serverInfo['skip-cert-verify'] = ProtocolUtils.parseBooleanValue(
+        insecure,
+      );
 
       final fingerPrint = ProtocolUtils.getFirstNonEmptyValue(params, [
         'fp',
@@ -88,10 +85,7 @@ class Hysteria2Protocol implements Protocol {
 
       serverInfo['udp'] = true;
 
-      final up = ProtocolUtils.getFirstNonEmptyValue(params, [
-        'up',
-        'upmbps',
-      ]);
+      final up = ProtocolUtils.getFirstNonEmptyValue(params, ['up', 'upmbps']);
       if (up != null) {
         serverInfo['up'] = up;
       }
@@ -112,27 +106,19 @@ class Hysteria2Protocol implements Protocol {
         }
       }
 
-      final ca = ProtocolUtils.getFirstNonEmptyValue(params, [
-        'ca',
-        'ca-str',
-      ]);
+      final ca = ProtocolUtils.getFirstNonEmptyValue(params, ['ca', 'ca-str']);
       if (ca != null) {
         serverInfo['ca'] = ca;
       }
 
-      final caStr = ProtocolUtils.getFirstNonEmptyValue(params, [
-        'ca-path',
-      ]);
+      final caStr = ProtocolUtils.getFirstNonEmptyValue(params, ['ca-path']);
       if (caStr != null) {
         serverInfo['ca-str'] = caStr;
       }
 
       return serverInfo;
     } catch (e) {
-      return {
-        'type': 'hysteria2',
-        'error': 'Error parsing Hysteria2 URL: $e',
-      };
+      return {'type': 'hysteria2', 'error': 'Error parsing Hysteria2 URL: $e'};
     }
   }
 }
