@@ -43,10 +43,30 @@ class ProxyUrl {
   }
 
   static String sanitizeUri(String uri) {
-    return uri.replaceAll(
-      RegExp(r"[^\w\-\.\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\%]"),
-      '',
-    );
+    // Trim whitespace (common user error)
+    uri = uri.trim();
+
+    // Remove zero-width spaces and other invisible Unicode characters
+    uri = uri.replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '');
+
+    // Remove HTML tags and entities (e.g., <br/>, &nbsp;, etc.)
+    uri = uri.replaceAll(RegExp(r'<[^>]*>'), '');
+    uri = uri.replaceAll(RegExp(r'&[a-zA-Z]+;'), '');
+    uri = uri.replaceAll(RegExp(r'&#\d+;'), '');
+
+    // Find the protocol position and extract from there
+    final protocolMatch = RegExp(
+      r'(vless|vmess|trojan|ss|ssr|hy2|hysteria2?|tuic|anytls)://',
+      caseSensitive: false,
+    ).firstMatch(uri);
+
+    if (protocolMatch != null) {
+      // Extract everything from the protocol onwards
+      uri = uri.substring(protocolMatch.start);
+    }
+
+    // Don't be too aggressive - let Uri.parse or protocol handlers validate
+    return uri;
   }
 
   static String fixBase64Padding(String input) {
@@ -189,22 +209,39 @@ class ProxyUrl {
         try {
           final jsonUrl = jsonDecode(decodedUrl);
           if (jsonUrl is Map<String, dynamic>) {
+            // Validate required fields for VMess
+            if (!jsonUrl.containsKey('add') || !jsonUrl.containsKey('port')) {
+              throw FormatException(
+                'VMess JSON missing required fields (add, port)',
+              );
+            }
+
             Map<String, String> params = {};
             jsonUrl.forEach((key, value) {
               params[key] = value.toString();
             });
+
+            // Parse and validate port
             int port = int.tryParse(jsonUrl['port']?.toString() ?? '') ?? 0;
+            if (port < 1 || port > 65535) {
+              throw FormatException('VMess JSON invalid port: $port');
+            }
+
             return ProxyUrl(
               protocol: protocol,
-              id: jsonUrl['id']?.toString() ?? '',
+              id:
+                  jsonUrl['id']?.toString() ??
+                  jsonUrl['uuid']?.toString() ??
+                  '',
               address: jsonUrl['add']?.toString() ?? '',
               port: port,
               params: params,
+              remark: jsonUrl['ps']?.toString(), // VMess uses 'ps' for remarks
               rawUrl: url,
               base64: true,
             );
           }
-        } catch (_) {
+        } catch (e) {
           // Not JSON - check if it's SSR format
           if (protocol == 'ssr') {
             // SSR format: server:port:protocol:method:obfs:password_base64/?params
@@ -308,20 +345,68 @@ class ProxyUrl {
         throw ArgumentError('Invalid URL: No @ in URL: [$url]');
       }
 
-      final id = connectionPart.substring(0, atIndex);
-      final serverPart = connectionPart.substring(atIndex + 1);
+      String id = connectionPart.substring(0, atIndex);
 
-      final colonIndex = serverPart.lastIndexOf(':');
-      if (colonIndex == -1) {
-        throw ArgumentError('Invalid URL: No : in URL: [$url]');
+      // Decode URL-encoded characters in userinfo (e.g., Trojan passwords)
+      try {
+        id = Uri.decodeComponent(id);
+      } catch (_) {
+        // If decoding fails, use as-is (backward compatibility)
       }
 
-      final address = serverPart.substring(0, colonIndex);
-      String portPart = serverPart.substring(colonIndex + 1);
-      portPart = portPart.replaceAll(RegExp(r'[^0-9]'), '');
-      final port = int.tryParse(portPart);
-      if (port == null) {
-        throw ArgumentError('Invalid URL: No port in URL: [$url]');
+      final serverPart = connectionPart.substring(atIndex + 1);
+
+      // Parse server address and port, supporting IPv6 bracket notation
+      String address;
+      String portString;
+
+      if (serverPart.startsWith('[')) {
+        // IPv6 with brackets: [2001:db8::1]:443
+        final closeBracket = serverPart.indexOf(']');
+        if (closeBracket == -1) {
+          throw ArgumentError(
+            'Invalid IPv6 address: missing closing bracket in [$serverPart]',
+          );
+        }
+        address = serverPart.substring(1, closeBracket); // Remove brackets
+
+        if (closeBracket + 1 < serverPart.length) {
+          if (serverPart[closeBracket + 1] != ':') {
+            throw ArgumentError(
+              'Invalid IPv6 URL: expected : after ] in [$serverPart]',
+            );
+          }
+          portString = serverPart.substring(closeBracket + 2);
+        } else {
+          throw ArgumentError(
+            'Invalid URL: No port specified after IPv6 address in [$serverPart]',
+          );
+        }
+      } else {
+        // IPv4 or hostname
+        final colonIndex = serverPart.lastIndexOf(':');
+        if (colonIndex == -1) {
+          throw ArgumentError('Invalid URL: No : in URL: [$url]');
+        }
+        address = serverPart.substring(0, colonIndex);
+        portString = serverPart.substring(colonIndex + 1);
+      }
+
+      // Validate port number and range
+      // Strip any trailing non-numeric characters (e.g., "/" from "37416/?...")
+      final originalPortString = portString;
+      portString = portString.replaceAll(RegExp(r'[^0-9]'), '');
+
+      final port = int.tryParse(portString);
+      if (port == null || portString.isEmpty) {
+        throw ArgumentError(
+          'Invalid URL: Port is not a valid number: [$originalPortString]',
+        );
+      }
+      if (port < 1 || port > 65535) {
+        throw ArgumentError(
+          'Invalid URL: Port must be between 1-65535, got: $port',
+        );
       }
 
       Map<String, String> params = {};
@@ -341,15 +426,47 @@ class ProxyUrl {
       }
 
       // SS specific: decode ID if it is base64 and contains method:password
-      if (protocol == 'ss' && checkBase64(id)) {
-        try {
-          final decodedId = utf8.decode(base64.decode(fixBase64Padding(id)));
-          final colonIndex = decodedId.lastIndexOf(':');
+      if (protocol == 'ss') {
+        if (!checkBase64(id) && id.contains(':')) {
+          // Percent-encoded format (SIP022 for AEAD-2022 ciphers)
+          // ID has already been decoded by Uri.decodeComponent earlier
+          final colonIndex = id.indexOf(':');
           if (colonIndex != -1) {
-            params['method'] = decodedId.substring(0, colonIndex);
-            params['password'] = decodedId.substring(colonIndex + 1);
+            params['method'] = id.substring(0, colonIndex);
+            params['password'] = id.substring(colonIndex + 1);
           }
-        } catch (_) {}
+        } else if (checkBase64(id)) {
+          // Base64 format (legacy SIP002 for Stream/AEAD ciphers)
+          try {
+            final decodedId = utf8.decode(base64.decode(fixBase64Padding(id)));
+            final colonIndex = decodedId.lastIndexOf(':');
+            if (colonIndex != -1) {
+              params['method'] = decodedId.substring(0, colonIndex);
+              params['password'] = decodedId.substring(colonIndex + 1);
+            }
+          } catch (_) {}
+        }
+      }
+
+      // TUIC specific: split UUID:password format
+      if (protocol == 'tuic') {
+        final colonIndex = id.indexOf(':');
+        if (colonIndex != -1) {
+          final uuid = id.substring(0, colonIndex);
+          final password = id.substring(colonIndex + 1);
+
+          if (!isUuid(uuid)) {
+            throw ArgumentError('TUIC requires valid UUID, got: $uuid');
+          }
+
+          params['uuid'] = uuid;
+          params['password'] = password;
+        } else if (isUuid(id)) {
+          // UUID only, password might be in query params
+          params['uuid'] = id;
+        } else {
+          throw ArgumentError('TUIC requires valid UUID format');
+        }
       }
 
       return ProxyUrl(
