@@ -50,11 +50,32 @@ class ProtocolManager {
   }
 
   static String _tryDecode(String text) {
-    try {
-      if (text.contains('%')) {
-        return Uri.decodeComponent(text);
+    if (!text.contains('%')) return text;
+
+    // Use regex to decode each percent-encoded sequence individually
+    // This handles mixed encoding (e.g., emoji + %20)
+    String decoded = text;
+    int maxIterations = 3; // Handle double/triple encoding
+
+    for (int i = 0; i < maxIterations; i++) {
+      String nextDecoded = decoded.replaceAllMapped(
+        RegExp(r'%[0-9A-Fa-f]{2}'),
+        (match) {
+          try {
+            return Uri.decodeComponent(match.group(0)!);
+          } catch (_) {
+            return match.group(0)!;
+          }
+        },
+      );
+
+      // Stop if no changes or no more percent-encoded sequences
+      if (nextDecoded == decoded || !nextDecoded.contains('%')) {
+        return nextDecoded;
       }
-    } catch (_) {}
-    return text;
+      decoded = nextDecoded;
+    }
+
+    return decoded;
   }
 }
