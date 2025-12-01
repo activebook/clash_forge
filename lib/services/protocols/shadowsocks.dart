@@ -55,9 +55,7 @@ class ShadowsocksProtocol implements Protocol {
         // Format: ss://BASE64(...)
         final base64Part = ssUrl.substring(5);
         try {
-          final decoded = utf8.decode(
-            base64.decode(Base64Utils.fixPadding(base64Part)),
-          );
+          final decoded = Base64Utils.decodeToUtf8(base64Part);
           // If decoded string contains another ss://, it's recursive? No.
           // It should be method:password@server:port
           uri = Uri.parse('ss://$decoded');
@@ -81,9 +79,7 @@ class ShadowsocksProtocol implements Protocol {
           final userInfo = uri.userInfo;
           if (Base64Utils.isValid(userInfo)) {
             try {
-              final decoded = utf8.decode(
-                base64.decode(Base64Utils.fixPadding(userInfo)),
-              );
+              final decoded = Base64Utils.decodeToUtf8(userInfo);
               final parts = decoded.split(':');
               if (parts.length >= 2) {
                 method = parts[0];
@@ -113,7 +109,7 @@ class ShadowsocksProtocol implements Protocol {
 
         for (String keyStr in keysToCheck) {
           try {
-            List<int> keyBytes = base64.decode(keyStr);
+            List<int> keyBytes = Base64Utils.decodeToBytes(keyStr);
             if (keyBytes.length != expectedKeyLength) {
               return {
                 'type': 'ss',

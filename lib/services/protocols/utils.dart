@@ -44,6 +44,9 @@ class ProtocolUtils {
 // ============================================================================
 class Base64Utils {
   static String fixPadding(String input) {
+    // Convert URL-safe base64 to standard base64
+    input = input.replaceAll('-', '+').replaceAll('_', '/');
+    // Remove any non-base64 characters
     input = input.replaceAll(RegExp(r'[^A-Za-z0-9+/=]'), '');
     switch (input.length % 4) {
       case 1:
@@ -57,6 +60,14 @@ class Base64Utils {
         break;
     }
     return input;
+  }
+
+  static String decodeToUtf8(String input) {
+    try {
+      return utf8.decode(base64.decode(Base64Utils.fixPadding(input)));
+    } catch (e) {
+      throw FormatException('Invalid Base64 string');
+    }
   }
 
   static bool isValid(String content) {
@@ -81,6 +92,14 @@ class Base64Utils {
       return true;
     } catch (_) {
       return false;
+    }
+  }
+
+  static List<int> decodeToBytes(String keyStr) {
+    try {
+      return base64.decode(Base64Utils.fixPadding(keyStr));
+    } catch (e) {
+      throw FormatException('Invalid Base64 string');
     }
   }
 }

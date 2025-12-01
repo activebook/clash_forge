@@ -3,6 +3,7 @@ import 'protocol.dart';
 import 'protocol_parser.dart';
 import 'protocol_validator.dart';
 import 'proxy_url.dart';
+import 'utils.dart';
 
 class ShadowsocksRProtocol implements Protocol {
   @override
@@ -14,34 +15,6 @@ class ShadowsocksRProtocol implements Protocol {
       return parsed.protocol == 'ssr';
     }
     return url.toLowerCase().startsWith('ssr://');
-  }
-
-  String _fixBase64Padding(String input) {
-    var output = input.replaceAll('-', '+').replaceAll('_', '/');
-    switch (output.length % 4) {
-      case 0:
-        break;
-      case 2:
-        output += '==';
-        break;
-      case 3:
-        output += '=';
-        break;
-      default:
-        // Be lenient
-        return input;
-    }
-    return output;
-  }
-
-  String _decodeBase64(String input) {
-    try {
-      return utf8.decode(base64.decode(_fixBase64Padding(input)));
-    } catch (e) {
-      // Return original if fail? Or throw?
-      // In context of parsing, maybe return empty or original
-      return input;
-    }
   }
 
   @override
@@ -56,21 +29,21 @@ class ShadowsocksRProtocol implements Protocol {
       String method = parsed.params['method']!;
       String obfs = parsed.params['obfs']!;
       String passwordBase64 = parsed.params['password-base64']!;
-      String password = _decodeBase64(passwordBase64);
+      String password = Base64Utils.decodeToUtf8(passwordBase64);
 
       String name = server;
       if (parsed.params.containsKey('remarks')) {
-        name = _decodeBase64(parsed.params['remarks']!);
+        name = Base64Utils.decodeToUtf8(parsed.params['remarks']!);
       }
 
       String protocolParam = '';
       if (parsed.params.containsKey('protoparam')) {
-        protocolParam = _decodeBase64(parsed.params['protoparam']!);
+        protocolParam = Base64Utils.decodeToUtf8(parsed.params['protoparam']!);
       }
 
       String obfsParam = '';
       if (parsed.params.containsKey('obfsparam')) {
-        obfsParam = _decodeBase64(parsed.params['obfsparam']!);
+        obfsParam = Base64Utils.decodeToUtf8(parsed.params['obfsparam']!);
       }
 
       // Cipher compatibility
@@ -112,7 +85,7 @@ class ShadowsocksRProtocol implements Protocol {
     String base64Part = url.substring(6);
     String decoded;
     try {
-      decoded = _decodeBase64(base64Part);
+      decoded = Base64Utils.decodeToUtf8(base64Part);
     } catch (e) {
       return {'type': 'ssr', 'error': 'Invalid Base64 in SSR URL'};
     }
@@ -141,7 +114,7 @@ class ShadowsocksRProtocol implements Protocol {
     String method = parts[3];
     String obfs = parts[4];
     String passwordBase64 = parts[5];
-    String password = _decodeBase64(passwordBase64);
+    String password = Base64Utils.decodeToUtf8(passwordBase64);
 
     Map<String, String> params = {};
     if (queryPart.isNotEmpty) {
@@ -158,17 +131,17 @@ class ShadowsocksRProtocol implements Protocol {
 
     String name = server;
     if (params.containsKey('remarks')) {
-      name = _decodeBase64(params['remarks']!);
+      name = Base64Utils.decodeToUtf8(params['remarks']!);
     }
 
     String protocolParam = '';
     if (params.containsKey('protoparam')) {
-      protocolParam = _decodeBase64(params['protoparam']!);
+      protocolParam = Base64Utils.decodeToUtf8(params['protoparam']!);
     }
 
     String obfsParam = '';
     if (params.containsKey('obfsparam')) {
-      obfsParam = _decodeBase64(params['obfsparam']!);
+      obfsParam = Base64Utils.decodeToUtf8(params['obfsparam']!);
     }
 
     // Right now ClashX Meta doesn't support chacha20-ietf-poly1305 and rc4
