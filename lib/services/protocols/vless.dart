@@ -23,8 +23,10 @@ class VlessProtocol implements Protocol {
       final proxy = parsed ?? ProxyUrl.parse(url);
       if (proxy == null) throw FormatException('Failed to parse URL');
 
+      // UUID validation
+      // Popular implementations like Xray (a core often used for VLESS) allow you to use a custom string (e.g., a simple password or username) for the id field in the configuration file.
       if (!UUIDUtils.isValid(proxy.id)) {
-        throw ArgumentError('Vless requires valid UUID, got: ${proxy.id}');
+        // throw ArgumentError('Vless requires valid UUID, got: ${proxy.id}');
       }
 
       // Initialize serverInfo with default values
