@@ -38,10 +38,23 @@ class ProtocolManager {
     // 2. Find a matching protocol
     for (final protocol in _protocols) {
       if (protocol.canHandle(sanitizedUrl, parsed)) {
-        return protocol.parse(sanitizedUrl, parsed: parsed);
+        var result = protocol.parse(sanitizedUrl, parsed: parsed);
+        if (result.containsKey('name') && result['name'] is String) {
+          result['name'] = _tryDecode(result['name']);
+        }
+        return result;
       }
     }
 
     return {'error': 'Unsupported protocol or invalid URL format:\n$err'};
+  }
+
+  static String _tryDecode(String text) {
+    try {
+      if (text.contains('%')) {
+        return Uri.decodeComponent(text);
+      }
+    } catch (_) {}
+    return text;
   }
 }
