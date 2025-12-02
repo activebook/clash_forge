@@ -1,4 +1,4 @@
-import '../lib/services/protocols/wireguard.dart';
+import 'package:clash_forge/services/protocols/wireguard.dart';
 
 void main() {
   print('Running manual WireGuard verification...');

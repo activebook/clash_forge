@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/services/protocols/wireguard.dart';
+import 'package:clash_forge/services/protocols/wireguard.dart';
 
 void main() {
   group('WireGuardParser', () {

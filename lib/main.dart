@@ -199,33 +199,6 @@ class MyAppState extends State<MyApp> {
 
       // For URLs
       final uri = Uri.parse(url);
-      /*
-      // For special protocol URLs (vless, vmess, ss, trojan)
-      if (url.toLowerCase().startsWith('vless://') ||
-          url.toLowerCase().startsWith('vmess://') ||
-          url.toLowerCase().startsWith('ss://') ||
-          url.toLowerCase().startsWith('trojan://')) {
-        // Use the fragment identifier (part after #) if available as it often contains the name/label
-        if (uri.fragment.isNotEmpty) {
-          return onlyFilename ? uri.fragment : "${uri.host}: ${uri.fragment}";
-        }
-
-        // Fallback to host if no fragment
-        return onlyFilename ? uri.host : uri.host;
-      }
-
-      // For standard URLs      
-      if (uri.pathSegments.isNotEmpty) {
-        String filename = uri.pathSegments.last;
-        if (filename.isEmpty) {
-          filename = uri.host;
-        }
-        return onlyFilename ? filename : "${uri.host}: $filename";
-      } else {
-        // If no path segments
-        return onlyFilename ? uri.host : uri.host;
-      }
-      */
 
       final converter = UrlConverter();
       String filename = converter.extractFileNameFromUrlEx(
@@ -786,22 +759,7 @@ class MyAppState extends State<MyApp> {
             key: _scaffoldKey,
             appBar: _buildAppBar(context),
             drawer: _buildLogDrawer(context),
-            endDrawer: SettingsDrawer(
-              initialIsDarkMode: _themeMode == ThemeMode.dark,
-              initialUseDns: _needResolveDNS,
-              initialSelectedDnsProvider: _dnsProvider,
-              onDnsChanged: (value) {
-                // Update your main app state
-                _toggleDNS(value);
-              },
-              onThemeModeChanged: (value) {
-                // Handle theme changes
-                _toggleTheme(value);
-              },
-              onDnsProviderChanged: (selectedDnsProvider) {
-                _toggleDnsProvider(selectedDnsProvider);
-              },
-            ),
+            endDrawer: _buildSettingsDrawer(context),
             body: DropTarget(
               onDragDone: (detail) {
                 if (detail.files.isNotEmpty) {
@@ -981,6 +939,25 @@ class MyAppState extends State<MyApp> {
         });
       },
       scaffoldKey: _scaffoldKey,
+    );
+  }
+
+  Widget _buildSettingsDrawer(BuildContext context) {
+    return SettingsDrawer(
+      initialIsDarkMode: _themeMode == ThemeMode.dark,
+      initialUseDns: _needResolveDNS,
+      initialSelectedDnsProvider: _dnsProvider,
+      onDnsChanged: (value) {
+        // Update your main app state
+        _toggleDNS(value);
+      },
+      onThemeModeChanged: (value) {
+        // Handle theme changes
+        _toggleTheme(value);
+      },
+      onDnsProviderChanged: (selectedDnsProvider) {
+        _toggleDnsProvider(selectedDnsProvider);
+      },
     );
   }
 

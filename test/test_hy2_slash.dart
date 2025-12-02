@@ -1,4 +1,4 @@
-import '../lib/services/protocols/proxy_url.dart';
+import 'package:clash_forge/services/protocols/proxy_url.dart';
 
 void main() {
   print('Testing Hysteria2 URL with trailing slash...\n');

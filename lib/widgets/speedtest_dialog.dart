@@ -131,22 +131,22 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
               currentWeight = FontWeight.bold;
               break;
             case 31: // Red
-              currentColor = const Color(0xFFEF5350);
+              currentColor = const Color.fromARGB(255, 248, 137, 135);
               break;
             case 32: // Green
-              currentColor = const Color(0xFF66BB6A);
+              currentColor = const Color.fromARGB(255, 143, 255, 148);
               break;
             case 33: // Yellow
               currentColor = const Color.fromARGB(255, 247, 239, 165);
               break;
             case 34: // Blue
-              currentColor = const Color(0xFF42A5F5);
+              currentColor = const Color.fromARGB(255, 137, 198, 248);
               break;
             case 35: // Magenta/Purple
               currentColor = const Color.fromARGB(255, 241, 170, 253);
               break;
             case 36: // Cyan
-              currentColor = const Color(0xFF26C6DA);
+              currentColor = const Color.fromARGB(255, 109, 234, 250);
               break;
             case 37: // White
               currentColor = Colors.white;
