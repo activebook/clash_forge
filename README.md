@@ -41,6 +41,7 @@
 
 ### Network Speedtest
 ![Network Speedtest](screenshots/screen2.png)
+![Settings](screenshots/screen7.png) 
 *Network speedtest*
 
 ### How to use
@@ -51,10 +52,7 @@
 ![Logs](screenshots/screen4.png) 
 *Logs*
 
-### Settings
-![Settings](screenshots/screen5.png) 
-*Settings*
-
 ### DNS resolve
+![Settings](screenshots/screen5.png) 
 ![DNS resolve](screenshots/screen6.png) 
 *DNS resolve*
