@@ -37,7 +37,7 @@
 
 ### Main Dashboard
 ![Main Dashboard](screenshots/screen1.png)
-*The main dashboard
+*The main dashboard*
 
 ### Network Speedtest
 ![Network Speedtest](screenshots/screen2.png)
