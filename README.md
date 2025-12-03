@@ -54,3 +54,7 @@
 ### Settings
 ![Settings](screenshots/screen5.png) 
 *Settings*
+
+### DNS resolve
+![DNS resolve](screenshots/screen6.png) 
+*DNS resolve*
