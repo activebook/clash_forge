@@ -78,8 +78,8 @@ proxy-groups:
   - name: Microsoft
     type: select
     proxies:
-      - Direct
       - Select
+      - Direct      
   - name: Apple
     type: select
     proxies:
