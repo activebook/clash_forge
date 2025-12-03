@@ -35,8 +35,22 @@
 
 ## Screenshots
 
-| Light Theme | Dark Theme |
-| ------------ | ------------ |
-| ![Screen 1](screenshots/screen1.png) | ![Screen 2](screenshots/screen2.png) |
-| DNS Setting | Logs |
-| ![Screen 3](screenshots/screen3.png) | ![Screen 4](screenshots/screen4.png) |
+### Main Dashboard
+![Main Dashboard](screenshots/screen1.png)
+*The main dashboard
+
+### Network Speedtest
+![Network Speedtest](screenshots/screen2.png)
+*Network speedtest*
+
+### How to use
+![How to use](screenshots/screen3.png) 
+*How to use*
+
+### Logs
+![Logs](screenshots/screen4.png) 
+*Logs*
+
+### Settings
+![Settings](screenshots/screen5.png) 
+*Settings*
