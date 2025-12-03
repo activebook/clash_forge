@@ -59,7 +59,9 @@ proxy-groups:
     type: url-test
     url: http://www.gstatic.com/generate_204
     interval: 300
-    tolerance: 5000
+    tolerance: 100
+    # if current_latency - candidate_latency > tolerance then switch to candidate.
+    # lazy: true
     proxies:
 #      - want to append here too
   - name: 🌍 Foreign Media

@@ -39,6 +39,14 @@ class ClashService {
       // Trigger ClashX Meta to reload the config
       final reloadResult = await Process.run('open', ['clash://update-config']);
 
+      /*
+        After update-config:
+        ClashX.Meta reloads the config.
+        If a url-test group exists, then:
+        ✓ It retests the nodes immediately.
+        ✓ It switches to the fastest node among the group.
+      */
+
       return reloadResult.exitCode == 0;
     } catch (e) {
       return false;
