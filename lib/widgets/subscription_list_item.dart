@@ -97,14 +97,17 @@ class SubscriptionListItem extends StatelessWidget {
             ),
 
             // Switch Toggle
-            CustomSwitch(
-              value: isActive,
-              onChanged: (value) {
-                if (value) {
-                  onSwitch();
-                }
-                // If value is false, do nothing (can't "deselect" - radio behavior)
-              },
+            Tooltip(
+              message: "Activate this profile in Clash",
+              child: CustomSwitch(
+                value: isActive,
+                onChanged: (value) {
+                  if (value) {
+                    onSwitch();
+                  }
+                  // If value is false, do nothing (can't "deselect" - radio behavior)
+                },
+              ),
             ),
 
             // Delete button

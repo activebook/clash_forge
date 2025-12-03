@@ -34,64 +34,85 @@ class ControlBottomAppBar extends StatelessWidget {
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'How to use',
-                //style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.upload),
-                title: const Text('Import Subscriptions'),
-                subtitle: Text(
-                  'Load subscription URLs from a file, where each line contains a single URL.',
-                  style: Theme.of(context).textTheme.bodySmall,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'How to use',
+                  //style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: const Text('Export Subscriptions'),
-                subtitle: Text(
-                  'Save all added subscription URLs to a file, with each URL on a separate line.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.upload),
+                  title: const Text('Import Subscriptions'),
+                  subtitle: Text(
+                    'Load subscription URLs from a file, where each line contains a single URL.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.fast_forward),
-                title: const Text('Process All Subscriptions'),
-                subtitle: Text(
-                  'Retrieve and format all protocols from all added subscription URLs.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                ListTile(
+                  leading: const Icon(Icons.share),
+                  title: const Text('Export Subscriptions'),
+                  subtitle: Text(
+                    'Save all added subscription URLs to a file, with each URL on a separate line.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.folder_outlined),
-                title: const Text('Subscriptions Target Path'),
-                subtitle: Text(
-                  'Process all subscription protocols in YAML format and save them in the specified folder.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                ListTile(
+                  leading: const Icon(Icons.fast_forward),
+                  title: const Text('Process All Subscriptions'),
+                  subtitle: Text(
+                    'Retrieve and format all protocols from all added subscription URLs.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.notifications_outlined),
-                title: const Text('Logs of processing'),
-                subtitle: Text(
-                  'Logs record all subscription processing results, hover over each log to see the detail.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                ListTile(
+                  leading: const Icon(Icons.toggle_on_outlined),
+                  title: const Text('Switch Profile Activation'),
+                  subtitle: Text(
+                    'Toggle the switch next to each subscription to activate its profile in Clash. Only one profile can be active at a time — switching to a new profile automatically deactivates the previous one.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.format_align_center),
-                title: const Text('Supported Formats'),
-                subtitle: Text(
-                  'Includes VMess, VLess, Trojan, Shadowsocks(R), Hysteria2, TUIC, and AnyTLS protocols. VMess provides secure, efficient data transmission; VLess offers similar benefits with enhanced performance; Trojan is optimized for stealth and reliability; Shadowsocks is renowned for its simplicity and strong encryption; Hysteria2 delivers excellent obfuscation with top performance; TUIC uses QUIC for low latency; and AnyTLS offers versatile TLS wrapping.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                ListTile(
+                  leading: const Icon(Icons.dns_outlined),
+                  title: const Text('Auto-resolve DNS'),
+                  subtitle: Text(
+                    'Enable DNS resolution in Settings to automatically convert server domains to IP addresses. This improves reliability when DNS is blocked but IP addresses remain accessible. Choose DNSPub, Tencent, or CNNIC as your primary DNS provider for optimal performance in China.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 ),
-              ),
-            ],
+                ListTile(
+                  leading: const Icon(Icons.folder_outlined),
+                  title: const Text('Subscriptions Target Path'),
+                  subtitle: Text(
+                    'Process all subscription protocols in YAML format and save them in the specified folder.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.notifications_outlined),
+                  title: const Text('Logs of processing'),
+                  subtitle: Text(
+                    'Logs record all subscription processing results, hover over each log to see the detail.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.format_align_center),
+                  title: const Text('Supported Formats'),
+                  subtitle: Text(
+                    'Includes VMess, VLess, Trojan, Shadowsocks(R), Hysteria2, TUIC, and AnyTLS protocols. VMess provides secure, efficient data transmission; VLess offers similar benefits with enhanced performance; Trojan is optimized for stealth and reliability; Shadowsocks is renowned for its simplicity and strong encryption; Hysteria2 delivers excellent obfuscation with top performance; TUIC uses QUIC for low latency; and AnyTLS offers versatile TLS wrapping.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
