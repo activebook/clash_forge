@@ -11,8 +11,8 @@ class CustomSwitch extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.width = 36.0,
-    this.height = 20.0,
+    this.width = 32.0,
+    this.height = 18.0,
   });
 
   @override
