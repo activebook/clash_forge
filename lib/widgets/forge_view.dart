@@ -361,6 +361,12 @@ class _ForgeViewState extends State<ForgeView> {
                             needResolveDNS:
                                 widget.settingsManager.needResolveDNS,
                             dnsProvider: widget.settingsManager.dnsProvider,
+                            tunEnable: widget.settingsManager.tunEnable,
+                            urlTestInterval:
+                                widget.settingsManager.urlTestInterval,
+                            urlTestTolerance:
+                                widget.settingsManager.urlTestTolerance,
+                            urlTestLazy: widget.settingsManager.urlTestLazy,
                           );
                         },
                         onSwitch:
@@ -418,6 +424,10 @@ class _ForgeViewState extends State<ForgeView> {
               widget.settingsManager.targetFolderPath,
               needResolveDNS: widget.settingsManager.needResolveDNS,
               dnsProvider: widget.settingsManager.dnsProvider,
+              tunEnable: widget.settingsManager.tunEnable,
+              urlTestInterval: widget.settingsManager.urlTestInterval,
+              urlTestTolerance: widget.settingsManager.urlTestTolerance,
+              urlTestLazy: widget.settingsManager.urlTestLazy,
             );
 
             widget.onShowNotification(

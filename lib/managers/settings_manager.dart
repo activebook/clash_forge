@@ -9,11 +9,22 @@ class SettingsManager extends ChangeNotifier {
   String _dnsProvider = 'DNSPub';
   String _targetFolderPath = '';
 
+  // New Settings
+  bool _tunEnable = false;
+  int _urlTestInterval = 300;
+  int _urlTestTolerance = 100;
+  bool _urlTestLazy = true;
+
   // Getters
   ThemeMode get themeMode => _themeMode;
   bool get needResolveDNS => _needResolveDNS;
   String get dnsProvider => _dnsProvider;
   String get targetFolderPath => _targetFolderPath;
+
+  bool get tunEnable => _tunEnable;
+  int get urlTestInterval => _urlTestInterval;
+  int get urlTestTolerance => _urlTestTolerance;
+  bool get urlTestLazy => _urlTestLazy;
 
   // Constructor
   SettingsManager();
@@ -31,6 +42,12 @@ class SettingsManager extends ChangeNotifier {
     _needResolveDNS = prefs.getBool('needResolveDNS') ?? false;
     _dnsProvider = prefs.getString('dnsProvider') ?? 'DNSPub';
     _targetFolderPath = prefs.getString('targetFolder') ?? '';
+
+    _tunEnable = prefs.getBool('tunEnable') ?? false;
+    _urlTestInterval = prefs.getInt('urlTestInterval') ?? 300;
+    _urlTestTolerance = prefs.getInt('urlTestTolerance') ?? 100;
+    _urlTestLazy = prefs.getBool('urlTestLazy') ?? true;
+
     notifyListeners();
   }
 
@@ -55,6 +72,38 @@ class SettingsManager extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _dnsProvider = selectedDnsProvider;
     await prefs.setString('dnsProvider', _dnsProvider);
+    notifyListeners();
+  }
+
+  // Update Tun Enable
+  Future<void> setTunEnable(bool enable) async {
+    final prefs = await SharedPreferences.getInstance();
+    _tunEnable = enable;
+    await prefs.setBool('tunEnable', enable);
+    notifyListeners();
+  }
+
+  // Update URL Test Interval
+  Future<void> setUrlTestInterval(int interval) async {
+    final prefs = await SharedPreferences.getInstance();
+    _urlTestInterval = interval;
+    await prefs.setInt('urlTestInterval', interval);
+    notifyListeners();
+  }
+
+  // Update URL Test Tolerance
+  Future<void> setUrlTestTolerance(int tolerance) async {
+    final prefs = await SharedPreferences.getInstance();
+    _urlTestTolerance = tolerance;
+    await prefs.setInt('urlTestTolerance', tolerance);
+    notifyListeners();
+  }
+
+  // Update URL Test Lazy
+  Future<void> setUrlTestLazy(bool lazy) async {
+    final prefs = await SharedPreferences.getInstance();
+    _urlTestLazy = lazy;
+    await prefs.setBool('urlTestLazy', lazy);
     notifyListeners();
   }
 

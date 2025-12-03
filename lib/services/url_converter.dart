@@ -34,6 +34,17 @@ class UrlConverter {
     _dnsProvider = value;
   }
 
+  // New Settings
+  bool _tunEnable = false;
+  int _urlTestInterval = 300;
+  int _urlTestTolerance = 100;
+  bool _urlTestLazy = true;
+
+  set tunEnable(bool value) => _tunEnable = value;
+  set urlTestInterval(int value) => _urlTestInterval = value;
+  set urlTestTolerance(int value) => _urlTestTolerance = value;
+  set urlTestLazy(bool value) => _urlTestLazy = value;
+
   Future<List<LogInfo>> processSubscription(
     String scriptionUrl,
     String targetFolder,
@@ -196,6 +207,37 @@ class UrlConverter {
           content['proxies'].map((proxy) => proxy['name']).toList(),
         );
       }
+
+      // Apply Tun Setting
+      if (!config.containsKey('tun')) {
+        config['tun'] = {};
+      }
+      // Ensure tun is a map
+      if (config['tun'] is! Map) {
+        config['tun'] = {};
+      }
+      // We need to cast it to Map<String, dynamic> or similar to modify it if it came from YamlMap
+      var tunConfig = Map<String, dynamic>.from(config['tun'] as Map);
+      tunConfig['enable'] = _tunEnable;
+      config['tun'] = tunConfig;
+
+      // Apply URL Test Settings to all url-test groups
+      if (config.containsKey('proxy-groups')) {
+        var groups = config['proxy-groups'] as List;
+        for (int i = 0; i < groups.length; i++) {
+          var group = groups[i];
+          if (group['type'] == 'url-test') {
+            // Make sure it's mutable
+            var mutableGroup = Map<String, dynamic>.from(group);
+            mutableGroup['interval'] = _urlTestInterval;
+            mutableGroup['tolerance'] = _urlTestTolerance;
+            mutableGroup['lazy'] = _urlTestLazy;
+            groups[i] = mutableGroup;
+          }
+        }
+        config['proxy-groups'] = groups;
+      }
+
       // Write the content to the file
       final yamlWriter = YamlWriter();
       final yamlString = yamlWriter.write(config);

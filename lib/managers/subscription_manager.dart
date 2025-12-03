@@ -132,6 +132,10 @@ class SubscriptionManager extends ChangeNotifier {
     String targetFolderPath, {
     bool needResolveDNS = false,
     String dnsProvider = '',
+    bool tunEnable = false,
+    int urlTestInterval = 300,
+    int urlTestTolerance = 100,
+    bool urlTestLazy = true,
   }) async {
     if (targetFolderPath.isEmpty) {
       addLogEntry(
@@ -150,6 +154,10 @@ class SubscriptionManager extends ChangeNotifier {
       final converter = UrlConverter();
       converter.needResolveDns = needResolveDNS;
       converter.dnsProvider = dnsProvider;
+      converter.tunEnable = tunEnable;
+      converter.urlTestInterval = urlTestInterval;
+      converter.urlTestTolerance = urlTestTolerance;
+      converter.urlTestLazy = urlTestLazy;
 
       _configTemplate ??= await rootBundle.loadString('config/template.yaml');
 
@@ -177,6 +185,10 @@ class SubscriptionManager extends ChangeNotifier {
     String targetFolderPath, {
     bool needResolveDNS = false,
     String dnsProvider = '',
+    bool tunEnable = false,
+    int urlTestInterval = 300,
+    int urlTestTolerance = 100,
+    bool urlTestLazy = true,
   }) async {
     if (_subscriptions.isEmpty) {
       addLogEntry(
@@ -210,6 +222,10 @@ class SubscriptionManager extends ChangeNotifier {
           targetFolderPath,
           needResolveDNS: needResolveDNS,
           dnsProvider: dnsProvider,
+          tunEnable: tunEnable,
+          urlTestInterval: urlTestInterval,
+          urlTestTolerance: urlTestTolerance,
+          urlTestLazy: urlTestLazy,
         ),
       );
     }

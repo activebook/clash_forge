@@ -246,9 +246,17 @@ class MyAppState extends State<MyApp> {
           initialIsDarkMode: _settingsManager.themeMode == ThemeMode.dark,
           initialUseDns: _settingsManager.needResolveDNS,
           initialSelectedDnsProvider: _settingsManager.dnsProvider,
+          initialTunEnable: _settingsManager.tunEnable,
+          initialUrlTestInterval: _settingsManager.urlTestInterval,
+          initialUrlTestTolerance: _settingsManager.urlTestTolerance,
+          initialUrlTestLazy: _settingsManager.urlTestLazy,
           onDnsChanged: _settingsManager.toggleDNS,
           onThemeModeChanged: _settingsManager.toggleTheme,
           onDnsProviderChanged: _settingsManager.toggleDnsProvider,
+          onTunEnableChanged: _settingsManager.setTunEnable,
+          onUrlTestIntervalChanged: _settingsManager.setUrlTestInterval,
+          onUrlTestToleranceChanged: _settingsManager.setUrlTestTolerance,
+          onUrlTestLazyChanged: _settingsManager.setUrlTestLazy,
         );
       },
     );

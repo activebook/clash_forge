@@ -69,8 +69,11 @@ class LogDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final drawerWidth = (screenWidth * 0.70).clamp(0.0, 800.0);
+
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.70, // 70% of screen width
+      width: drawerWidth,
       child: Column(
         children: [
           AppBar(
