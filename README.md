@@ -7,6 +7,7 @@
 ### Core Functionality
 - **Convert Subscriptions**: Transform multiple Clash subscriptions into individual YAML config files.
 - **Direct Config Placement**: Generate config files straight into your Clash config folder for immediate use.
+- **Profile Switcher**: Instantly switch between different Clash configurations with a single click. The app reads and updates ClashX Meta's active profile directly.
 - **Import/Export**: Save and share your subscription lists with import and export functionality.
 - **Clear Logs**: Provides detailed logs of the conversion process for transparency and troubleshooting.
 
