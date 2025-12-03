@@ -92,7 +92,7 @@ class SettingsDrawerState extends State<SettingsDrawer> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final drawerWidth = screenWidth.clamp(400.0, 600.0);
+    final drawerWidth = (screenWidth * 0.50).clamp(400.0, 600.0);
 
     return Drawer(
       width: drawerWidth,
