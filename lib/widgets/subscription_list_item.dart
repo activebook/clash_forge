@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import '../themes.dart';
+import 'custom_switch.dart';
 
 /// Widget that displays a single subscription list item.
 ///
 /// Shows the subscription URL, validation status, and action buttons
-/// (play to process, delete to remove).
+/// (switch toggle, process, and delete).
 class SubscriptionListItem extends StatelessWidget {
   final String subscription;
   final int index;
   final bool isProcessing;
   final bool? validationStatus;
   final String displayName;
+  final bool isActive;
   final VoidCallback onTap;
   final VoidCallback onProcess;
+  final VoidCallback onSwitch;
   final Function(int, BuildContext) onDelete;
 
   const SubscriptionListItem({
@@ -22,8 +25,10 @@ class SubscriptionListItem extends StatelessWidget {
     required this.isProcessing,
     required this.validationStatus,
     required this.displayName,
+    required this.isActive,
     required this.onTap,
     required this.onProcess,
+    required this.onSwitch,
     required this.onDelete,
   });
 
@@ -71,7 +76,7 @@ class SubscriptionListItem extends StatelessWidget {
               child: _buildValidationIcon(context),
             ),
 
-            // Play button
+            // Process Button (Play)
             IconButton(
               icon:
                   isProcessing
@@ -89,6 +94,17 @@ class SubscriptionListItem extends StatelessWidget {
                       ),
               tooltip: "Process this subscription",
               onPressed: isProcessing ? null : onProcess,
+            ),
+
+            // Switch Toggle
+            CustomSwitch(
+              value: isActive,
+              onChanged: (value) {
+                if (value) {
+                  onSwitch();
+                }
+                // If value is false, do nothing (can't "deselect" - radio behavior)
+              },
             ),
 
             // Delete button
