@@ -27,6 +27,8 @@
 - **Dark Mode Support**: Seamlessly adapts to your system's appearance preferences.
 - **System Network Proxy Support**: Enables the use of system-level proxies to improve connectivity.
 - **Real-time Validation**: Instant feedback on URL and file path validity as you type.
+- **Network Speed Test**: Check your real-time internet speed directly within the app.
+- **Background Connection Test**: Automatically checks connection quality when switching profiles. A color-coded badge (Green/Yellow/Red) shows your connection speed instantly.
 
 ## Installation
 
