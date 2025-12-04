@@ -13,6 +13,9 @@ class SubscriptionListItem extends StatelessWidget {
   final bool? validationStatus;
   final String displayName;
   final bool isActive;
+  final int? delay; // Delay in milliseconds (null if not tested yet)
+  final bool testFailed; // Whether the delay test failed
+  final VoidCallback? onRetry; // Callback for manual retry
   final VoidCallback onTap;
   final VoidCallback onProcess;
   final VoidCallback onSwitch;
@@ -26,6 +29,9 @@ class SubscriptionListItem extends StatelessWidget {
     required this.validationStatus,
     required this.displayName,
     required this.isActive,
+    this.delay,
+    this.testFailed = false,
+    this.onRetry,
     required this.onTap,
     required this.onProcess,
     required this.onSwitch,
@@ -53,6 +59,123 @@ class SubscriptionListItem extends StatelessWidget {
     }
   }
 
+  /// Builds the delay badge with color coding based on latency
+  Widget _buildDelayBadge(BuildContext context) {
+    if (!isActive) {
+      return const SizedBox.shrink();
+    }
+
+    // Error state - show retry badge
+    if (testFailed && delay == null) {
+      return GestureDetector(
+        onTap: onRetry,
+        child: Tooltip(
+          message: 'Test failed - Tap to retry',
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF9E9E9E), // Grey
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 14,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Retry',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (delay == null) {
+      // Testing in progress
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 10,
+              height: 10,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Testing...',
+              style: TextStyle(
+                fontSize: 11,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Determine color based on delay
+    Color badgeColor;
+    Color textColor;
+    if (delay! < 300) {
+      badgeColor = const Color(0xFF66BB6A); // Green
+      textColor = Colors.white;
+    } else if (delay! < 1000) {
+      badgeColor = const Color(0xFFFFA726); // Yellow/Orange
+      textColor = Colors.white;
+    } else {
+      badgeColor = const Color(0xFFEF5350); // Red
+      textColor = Colors.white;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: badgeColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${delay}ms',
+            style: TextStyle(
+              fontSize: 11,
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(Icons.check_circle, size: 14, color: textColor),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -74,6 +197,12 @@ class SubscriptionListItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: _buildValidationIcon(context),
+            ),
+
+            // Delay Badge (shown when active)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: _buildDelayBadge(context),
             ),
 
             // Process Button (Play)

@@ -339,6 +339,18 @@ class _ForgeViewState extends State<ForgeView> {
                         index: index,
                         isProcessing: isProcessing,
                         isActive: isActive,
+                        delay:
+                            isActive
+                                ? widget.profileManager.activeProfileDelay
+                                : null,
+                        testFailed:
+                            isActive
+                                ? widget.profileManager.delayTestFailed
+                                : false,
+                        onRetry:
+                            isActive
+                                ? widget.profileManager.retryDelayTest
+                                : null,
                         validationStatus:
                             widget
                                 .subscriptionManager
