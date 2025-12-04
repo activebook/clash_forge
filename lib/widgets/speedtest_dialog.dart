@@ -209,6 +209,12 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                         Color(0xFF42A5F5),
                       ),
                     ),
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white70),
+                    onPressed: _runSpeedTest,
+                    tooltip: 'Retest',
                   ),
                 const SizedBox(width: 12),
                 IconButton(
