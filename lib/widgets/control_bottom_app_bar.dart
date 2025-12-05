@@ -88,6 +88,14 @@ class ControlBottomAppBar extends StatelessWidget {
                   ),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.speed_outlined),
+                  title: const Text('Network Speed Test'),
+                  subtitle: Text(
+                    'Multi-threaded speed test with auto proxy scan, parallel CDN downloads, live latency/IP/ISP stats, and color-coded throughput results.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                ListTile(
                   leading: const Icon(Icons.folder_outlined),
                   title: const Text('Subscriptions Target Path'),
                   subtitle: Text(

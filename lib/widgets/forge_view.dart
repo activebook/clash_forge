@@ -9,6 +9,7 @@ import 'subscription_list_item.dart';
 import 'batch_control_bar.dart';
 import 'subscription_input_panel.dart';
 import 'control_bottom_app_bar.dart';
+import 'switching_overlay.dart';
 
 class ForgeView extends StatefulWidget {
   final SubscriptionManager subscriptionManager;
@@ -238,68 +239,72 @@ class _ForgeViewState extends State<ForgeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: DropTarget(
-        onDragDone: (detail) {
-          if (detail.files.isNotEmpty) {
-            final filePath = detail.files.first.path;
-            if (!_isAddingNew && _editingIndex == -1) {
-              setState(() {
-                _isAddingNew = true;
-                _editingIndex = -1;
-              });
+    return SwitchingOverlay(
+      profileManager: widget.profileManager,
+      child: Scaffold(
+        body: DropTarget(
+          onDragDone: (detail) {
+            if (detail.files.isNotEmpty) {
+              final filePath = detail.files.first.path;
+              if (!_isAddingNew && _editingIndex == -1) {
+                setState(() {
+                  _isAddingNew = true;
+                  _editingIndex = -1;
+                });
+              }
+              _textController.text = filePath;
+              _validateInputUrl(filePath);
             }
-            _textController.text = filePath;
-            _validateInputUrl(filePath);
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 8,
-            bottom: 8,
-          ),
-          child: Column(
-            children: [
-              Expanded(flex: 1, child: _buildSubscriptionList()),
-              _buildBatchProcessBar(context),
-              _buildInputPanel(context),
-            ],
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 8,
+              bottom: 8,
+            ),
+            child: Column(
+              children: [
+                Expanded(flex: 1, child: _buildSubscriptionList()),
+                _buildBatchProcessBar(context),
+                _buildInputPanel(context),
+              ],
+            ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addNewSubscription,
-        tooltip: 'Add new subscription',
-        child: const Icon(Icons.add, size: 28),
-      ),
-      floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterDocked,
-      bottomNavigationBar: ControlBottomAppBar(
-        fabLocation: FloatingActionButtonLocation.centerDocked,
-        shape: null,
-        onExport: () async {
-          final path = await widget.subscriptionManager.exportSubscriptions();
-          if (path != null) {
-            widget.onShowNotification('Exported to $path');
-          }
-        },
-        onImport: () async {
-          final count = await widget.subscriptionManager.importSubscriptions();
-          if (count > 0) {
-            widget.onShowNotification('Imported $count subscriptions');
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_scrollController.hasClients) {
-                _scrollController.animateTo(
-                  _scrollController.position.maxScrollExtent,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-              }
-            });
-          }
-        },
+        floatingActionButton: FloatingActionButton(
+          onPressed: _addNewSubscription,
+          tooltip: 'Add new subscription',
+          child: const Icon(Icons.add, size: 28),
+        ),
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniCenterDocked,
+        bottomNavigationBar: ControlBottomAppBar(
+          fabLocation: FloatingActionButtonLocation.centerDocked,
+          shape: null,
+          onExport: () async {
+            final path = await widget.subscriptionManager.exportSubscriptions();
+            if (path != null) {
+              widget.onShowNotification('Exported to $path');
+            }
+          },
+          onImport: () async {
+            final count =
+                await widget.subscriptionManager.importSubscriptions();
+            if (count > 0) {
+              widget.onShowNotification('Imported $count subscriptions');
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_scrollController.hasClients) {
+                  _scrollController.animateTo(
+                    _scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  );
+                }
+              });
+            }
+          },
+        ),
       ),
     );
   }
