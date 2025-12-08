@@ -13,12 +13,23 @@ class AppDelegate: FlutterAppDelegate {
   
   override func applicationDidFinishLaunching(_ notification: Notification) {
     let flutterViewController = self.mainFlutterWindow?.contentViewController as! FlutterViewController
-    let channel = FlutterMethodChannel(name: "com.activebook.clash_forge/proxy_settings",
+    let channelSettings = FlutterMethodChannel(name: "com.activebook.clash_forge/settings",
                                       binaryMessenger: flutterViewController.engine.binaryMessenger)
     
-    channel.setMethodCallHandler { (call, result) in
+    channelSettings.setMethodCallHandler { (call, result) in
       if call.method == "getProxySettings" {
         result(self.getProxySettings())
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
+    let channelFocus = FlutterMethodChannel(name: "com.activebook.clash_forge/focus", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    channelFocus.setMethodCallHandler { (call, result) in
+      if call.method == "activateWindow" {
+        NSRunningApplication.current.activate(options: .activateIgnoringOtherApps)
+        self.mainFlutterWindow?.makeKeyAndOrderFront(nil)
+        result(nil)
       } else {
         result(FlutterMethodNotImplemented)
       }

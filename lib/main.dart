@@ -37,6 +37,9 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   late final AppInfo _appInfo;
+
+  static const channelFocus = MethodChannel('com.activebook.clash_forge/focus');
+
   final SubscriptionManager _subscriptionManager = SubscriptionManager();
   final SettingsManager _settingsManager = SettingsManager();
   final ProfileManager _profileManager = ProfileManager();
@@ -54,6 +57,12 @@ class MyAppState extends State<MyApp> {
     _appInfo = widget.appInfo;
     _subscriptionManager.init();
     _settingsManager.init();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await channelFocus.invokeMethod('activateWindow');
+      } catch (_) {}
+    });
   }
 
   @override

@@ -17,14 +17,14 @@ class ProxyService {
   // Cached proxy settings
   Map<String, dynamic>? _proxySettings;
 
-  static const platform = MethodChannel(
-    'com.activebook.clash_forge/proxy_settings',
+  static const channelSettings = MethodChannel(
+    'com.activebook.clash_forge/settings',
   );
 
   Future<Map<String, dynamic>> getSystemProxySettings() async {
     if (_proxySettings == null) {
       try {
-        final result = await platform.invokeMethod('getProxySettings');
+        final result = await channelSettings.invokeMethod('getProxySettings');
         _proxySettings = Map<String, dynamic>.from(result);
       } on PlatformException catch (_) {
         _proxySettings = {};
