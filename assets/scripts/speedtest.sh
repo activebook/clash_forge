@@ -78,7 +78,7 @@ detect_proxy() {
     log_info "Auto-detecting proxy configuration..."
     
     # Check clash ports first
-    local ports=("7890" "7891" "7892" "1080" "1081" "8080" "8888")
+    local ports=("7890" "7891" "7892" "1080" "1081" "8080" "8888" "12334" "12335")
     for port in "${ports[@]}"; do
         if (echo > /dev/tcp/127.0.0.1/$port) >/dev/null 2>&1; then
             if curl -s --proxy "socks5://127.0.0.1:$port" --max-time 1 "http://www.google.com/generate_204" &>/dev/null; then
