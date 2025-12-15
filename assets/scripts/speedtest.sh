@@ -77,12 +77,7 @@ detect_proxy() {
     if [[ "$AUTO_DETECT_PROXY" != true ]]; then return; fi
     log_info "Auto-detecting proxy configuration..."
     
-    if [[ -n "${ALL_PROXY:-}" ]]; then
-        PROXY="$ALL_PROXY"
-        log_proxy "Found in env: $PROXY"
-        return
-    fi
-    
+    # Check clash ports first
     local ports=("7890" "7891" "7892" "1080" "1081" "8080" "8888")
     for port in "${ports[@]}"; do
         if (echo > /dev/tcp/127.0.0.1/$port) >/dev/null 2>&1; then
@@ -98,6 +93,13 @@ detect_proxy() {
             fi
         fi
     done
+
+    # Check environment variable (not always available)
+    if [[ -n "${ALL_PROXY:-}" ]]; then
+        PROXY="$ALL_PROXY"
+        log_proxy "Found in env: $PROXY"
+        return
+    fi
     log_info "No local proxy detected."
 }
 
