@@ -52,8 +52,13 @@ app.*.map.json
 
 # Env and release
 env
+build_local.sh
+build*.sh
+/dist/
+*.dmg
 *.zip
 *.7z
 *.rar
 *.tar
 *.gz
+SHA256SUMS.txt
