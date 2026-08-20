@@ -24,30 +24,30 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.cardInfoColor,
   });
 
-  // For light theme - Soft & Elegant
+  // For light theme - Vibrant & Clean
   static const light = AppColors(
-    deleteAction: Color(0xFFEF5350), // Soft Red
-    saveAction: Color(0xFF66BB6A), // Soft Green
-    warningAction: Color(0xFFFFA726), // Soft Orange
-    infoAction: Color(0xFF29B6F6), // Soft Light Blue
-    forwardAction: Color(0xFF66BB6A),
-    folderAction: Color(0xFF7E57C2), // Soft Deep Purple
-    quitAction: Color(0xFFD32F2F),
-    clearAction: Color(0xFFE3F2FD),
-    cardInfoColor: Color(0xFFE3F2FD), // Very light blue
+    deleteAction: Color(0xFFF43F5E), // Modern Rose
+    saveAction: Color(0xFF10B981), // Modern Emerald
+    warningAction: Color(0xFFF59E0B), // Modern Amber
+    infoAction: Color(0xFF0EA5E9), // Modern Sky Blue
+    forwardAction: Color(0xFF10B981), // Modern Emerald
+    folderAction: Color(0xFF6366F1), // Modern Indigo
+    quitAction: Color(0xFFE11D48),
+    clearAction: Color(0xFFF1F5F9),
+    cardInfoColor: Color(0xFFF8FAFC),
   );
 
-  // For dark theme - Soft & Elegant
+  // For dark theme - Sleek OLED & Neon Accents
   static const dark = AppColors(
-    deleteAction: Color(0xFFE57373),
-    saveAction: Color(0xFF81C784),
-    warningAction: Color(0xFFFFB74D),
-    infoAction: Color(0xFF4FC3F7),
-    forwardAction: Color(0xFF81C784),
-    folderAction: Color(0xFF9575CD),
-    quitAction: Color(0xFFEF5350),
-    clearAction: Color(0xFF263238),
-    cardInfoColor: Color(0xFF263238), // Dark Blue Grey
+    deleteAction: Color(0xFFFB7185), // Soft Neon Rose
+    saveAction: Color(0xFF34D399), // Soft Neon Emerald
+    warningAction: Color(0xFFFBBF24), // Soft Neon Amber
+    infoAction: Color(0xFF38BDF8), // Soft Neon Sky
+    forwardAction: Color(0xFF34D399),
+    folderAction: Color(0xFF818CF8), // Soft Neon Indigo
+    quitAction: Color(0xFFF43F5E),
+    clearAction: Color(0xFF1E293B),
+    cardInfoColor: Color(0xFF1E222A),
   );
 
   @override
@@ -94,19 +94,18 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 }
 
-/// Soft & Elegant Light Theme
+/// Modern & Elegant Light Theme
 ThemeData macOSLightThemeFollow() {
-  // Soft & Elegant Palette
-  const primaryColor = Color(0xFF5C6BC0); // Indigo 400
-  const secondaryColor = Color(0xFF26A69A); // Teal 400
-  const backgroundColor = Color(0xFFF5F7FA); // Blue Grey 50
+  const primaryColor = Color(0xFF4F46E5); // Modern Indigo
+  const secondaryColor = Color(0xFF10B981); // Emerald
+  const backgroundColor = Color(0xFFF8FAFC); // Slate 50
   const surfaceColor = Colors.white;
-  const errorColor = Color(0xFFEF5350); // Red 400
+  const errorColor = Color(0xFFEF4444); // Red 500
 
   // Typography Colors
-  const titleColor = Color(0xFF37474F); // Blue Grey 800
-  const bodyColor = Color(0xFF546E7A); // Blue Grey 600
-  const labelColor = Color(0xFF78909C); // Blue Grey 400
+  const titleColor = Color(0xFF0F172A); // Slate 900
+  const bodyColor = Color(0xFF334155); // Slate 700
+  const labelColor = Color(0xFF64748B); // Slate 500
 
   return ThemeData.light().copyWith(
     scaffoldBackgroundColor: backgroundColor,
@@ -118,97 +117,89 @@ ThemeData macOSLightThemeFollow() {
       tertiary: backgroundColor,
       surface: surfaceColor,
       error: errorColor,
-      surfaceContainerHighest: const Color(0xFFECEFF1), // Blue Grey 50
+      surfaceContainerHighest: const Color(0xFFF1F5F9),
     ),
 
-    // Enhanced AppBar - Clean & Minimal
     appBarTheme: const AppBarTheme(
       elevation: 0,
       centerTitle: true,
-      backgroundColor: backgroundColor, // Blend with background
+      backgroundColor: backgroundColor,
       surfaceTintColor: Colors.transparent,
       iconTheme: IconThemeData(color: titleColor, size: 22),
       actionsIconTheme: IconThemeData(color: titleColor, size: 22),
       titleTextStyle: TextStyle(
         color: titleColor,
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.5,
+        letterSpacing: -0.2,
       ),
     ),
 
-    // Soft Card Design
     cardTheme: CardThemeData(
       color: surfaceColor,
-      elevation: 0, // Flat design with border or very subtle shadow
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0), // More rounded
-        side: BorderSide(color: Colors.black.withValues(alpha: 0.05), width: 1),
+        borderRadius: BorderRadius.circular(14.0),
+        side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
       ),
     ),
 
-    // Enhanced Bottom App Bar
     bottomAppBarTheme: const BottomAppBarThemeData(
       color: surfaceColor,
       elevation: 0,
-      height: 70.0,
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      height: 68.0,
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       surfaceTintColor: Colors.transparent,
       shape: AutomaticNotchedShape(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
         ),
       ),
     ),
 
-    // Modern Drawer
     drawerTheme: const DrawerThemeData(
       backgroundColor: surfaceColor,
       elevation: 0,
-      width: 280,
+      width: 320,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(18)),
       ),
     ),
 
-    // Floating Action Button
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: primaryColor,
       foregroundColor: Colors.white,
-      elevation: 4,
-      highlightElevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      highlightElevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
 
-    // Soft Buttons
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        elevation: 0, // Flat
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
         ),
       ),
     ),
 
-    // Outlined Button
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: primaryColor,
-        side: BorderSide(color: primaryColor.withValues(alpha: 0.5)),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        side: const BorderSide(color: Color(0xFFCBD5E1)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       ),
     ),
 
-    // Text Button
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: primaryColor,
@@ -217,79 +208,73 @@ ThemeData macOSLightThemeFollow() {
       ),
     ),
 
-    // Input fields - Soft & Airy
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: const Color(0xFFF1F5F9),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: primaryColor, width: 1.5),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: primaryColor, width: 1.5),
       ),
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      hintStyle: TextStyle(color: labelColor),
-      errorStyle: TextStyle(fontSize: 12, color: errorColor),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      hintStyle: const TextStyle(color: labelColor),
+      errorStyle: const TextStyle(fontSize: 12, color: errorColor),
     ),
 
-    // Enhanced text theme
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       titleLarge: TextStyle(
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: FontWeight.w700,
         color: titleColor,
-        letterSpacing: -0.5,
+        letterSpacing: -0.4,
       ),
       titleMedium: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: titleColor,
-      ),
-      titleSmall: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: titleColor,
       ),
-      bodyLarge: TextStyle(fontSize: 16, color: bodyColor, height: 1.5),
-      bodyMedium: TextStyle(fontSize: 14, color: bodyColor, height: 1.5),
+      titleSmall: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: titleColor,
+      ),
+      bodyLarge: TextStyle(fontSize: 15, color: bodyColor, height: 1.45),
+      bodyMedium: TextStyle(fontSize: 13.5, color: bodyColor, height: 1.45),
       bodySmall: TextStyle(fontSize: 12, color: labelColor),
     ),
 
-    // Icon theme
-    iconTheme: IconThemeData(size: 24, color: bodyColor),
+    iconTheme: const IconThemeData(size: 22, color: bodyColor),
 
-    // Divider
-    dividerTheme: DividerThemeData(
-      color: Colors.black.withValues(alpha: 0.06),
+    dividerTheme: const DividerThemeData(
+      color: Color(0xFFE2E8F0),
       thickness: 1,
       space: 1,
     ),
 
-    // Customized Extensions
     extensions: <ThemeExtension<dynamic>>[AppColors.light],
   );
 }
 
-/// Soft & Elegant Dark Theme
+/// Modern & Elegant Dark Theme
 ThemeData macOSDarkThemeFollow() {
-  // Soft & Elegant Dark Palette
-  const primaryColor = Color(0xFF7986CB); // Indigo 300
-  const secondaryColor = Color(0xFF4DB6AC); // Teal 300
-  const backgroundColor = Color(0xFF1A1B1E); // Soft Dark Grey
-  const surfaceColor = Color(0xFF2C2E33); // Lighter Dark Grey
-  const errorColor = Color(0xFFE57373); // Red 300
+  const primaryColor = Color(0xFF6366F1); // Indigo 500
+  const secondaryColor = Color(0xFF34D399); // Emerald 400
+  const backgroundColor = Color(0xFF0F172A); // Slate 900
+  const surfaceColor = Color(0xFF1E293B); // Slate 800
+  const errorColor = Color(0xFFF87171); // Red 400
 
   // Typography Colors
-  const titleColor = Color(0xFFECEFF1); // Blue Grey 50
-  const bodyColor = Color(0xFFB0BEC5); // Blue Grey 200
-  const labelColor = Color(0xFF78909C); // Blue Grey 400
+  const titleColor = Color(0xFFF8FAFC); // Slate 50
+  const bodyColor = Color(0xFFCBD5E1); // Slate 300
+  const labelColor = Color(0xFF94A3B8); // Slate 400
 
   return ThemeData.dark().copyWith(
     scaffoldBackgroundColor: backgroundColor,
@@ -300,10 +285,10 @@ ThemeData macOSDarkThemeFollow() {
       secondary: secondaryColor,
       surface: surfaceColor,
       error: errorColor,
-      surfaceContainerHighest: const Color(0xFF37474F),
+      surfaceContainerHighest: const Color(0xFF334155),
     ),
 
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       elevation: 0,
       backgroundColor: backgroundColor,
       surfaceTintColor: Colors.transparent,
@@ -312,21 +297,21 @@ ThemeData macOSDarkThemeFollow() {
       actionsIconTheme: IconThemeData(color: titleColor, size: 22),
       titleTextStyle: TextStyle(
         color: titleColor,
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.5,
+        letterSpacing: -0.2,
       ),
     ),
 
-    bottomAppBarTheme: BottomAppBarThemeData(
+    bottomAppBarTheme: const BottomAppBarThemeData(
       color: surfaceColor,
       elevation: 0,
-      height: 70.0,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      height: 68.0,
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       surfaceTintColor: Colors.transparent,
-      shape: const AutomaticNotchedShape(
+      shape: AutomaticNotchedShape(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
         ),
       ),
     ),
@@ -334,41 +319,41 @@ ThemeData macOSDarkThemeFollow() {
     drawerTheme: const DrawerThemeData(
       backgroundColor: surfaceColor,
       elevation: 0,
-      width: 280,
+      width: 320,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(18)),
       ),
     ),
 
     cardTheme: CardThemeData(
       color: surfaceColor,
       elevation: 0,
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 1),
+        borderRadius: BorderRadius.circular(14.0),
+        side: const BorderSide(color: Color(0xFF334155), width: 1),
       ),
     ),
 
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: primaryColor,
-      foregroundColor: const Color(0xFF1A1B1E),
-      elevation: 4,
-      highlightElevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      foregroundColor: Colors.white,
+      elevation: 3,
+      highlightElevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
 
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
-        foregroundColor: const Color(0xFF1A1B1E),
+        foregroundColor: Colors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(
-          fontSize: 15,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+          letterSpacing: 0.2,
         ),
       ),
     ),
@@ -376,10 +361,10 @@ ThemeData macOSDarkThemeFollow() {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: primaryColor,
-        side: BorderSide(color: primaryColor.withValues(alpha: 0.5)),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        side: const BorderSide(color: Color(0xFF475569)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       ),
     ),
 
@@ -393,51 +378,51 @@ ThemeData macOSDarkThemeFollow() {
 
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF25282C), // Slightly darker than surface
+      fillColor: const Color(0xFF0F172A),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFF334155)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: primaryColor, width: 1.5),
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: primaryColor, width: 1.5),
       ),
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      hintStyle: TextStyle(color: labelColor),
-      errorStyle: TextStyle(fontSize: 12, color: errorColor),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      hintStyle: const TextStyle(color: labelColor),
+      errorStyle: const TextStyle(fontSize: 12, color: errorColor),
     ),
 
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       titleLarge: TextStyle(
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: FontWeight.w700,
         color: titleColor,
-        letterSpacing: -0.5,
+        letterSpacing: -0.4,
       ),
       titleMedium: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: titleColor,
-      ),
-      titleSmall: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: titleColor,
       ),
-      bodyLarge: TextStyle(fontSize: 16, color: bodyColor, height: 1.5),
-      bodyMedium: TextStyle(fontSize: 14, color: bodyColor, height: 1.5),
+      titleSmall: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: titleColor,
+      ),
+      bodyLarge: TextStyle(fontSize: 15, color: bodyColor, height: 1.45),
+      bodyMedium: TextStyle(fontSize: 13.5, color: bodyColor, height: 1.45),
       bodySmall: TextStyle(fontSize: 12, color: labelColor),
     ),
 
-    iconTheme: IconThemeData(size: 24, color: bodyColor),
+    iconTheme: const IconThemeData(size: 22, color: bodyColor),
 
-    dividerTheme: DividerThemeData(
-      color: Colors.white.withValues(alpha: 0.06),
+    dividerTheme: const DividerThemeData(
+      color: Color(0xFF334155),
       thickness: 1,
       space: 1,
     ),
