@@ -7,8 +7,8 @@ Future<void> testDoHEndpoint(String endpointUrl, String hostname) async {
   final url = endpointUrl.replaceAll(r'$hostname', hostname);
   try {
     final response = await http
-      .get(Uri.parse(url), headers: {'Accept': 'application/dns-json'})
-      .timeout(Duration(milliseconds: 1500));
+        .get(Uri.parse(url), headers: {'Accept': 'application/dns-json'})
+        .timeout(Duration(milliseconds: 1500));
     if (response.statusCode == 200) {
       print('Success: $url is working.');
       // Optionally, decode and inspect the response:
@@ -41,7 +41,6 @@ void test_service() async {
   }
 }
 
-
 void main() async {
   final startTime = DateTime.now();
   final ipAddresses = await getDnsIpAddresses('hajlab.ucdavis.edu');
@@ -59,7 +58,9 @@ void main() async {
   ];
 
   for (var host in testCases) {
-    print('$host is ${isIpAddressFast(host) ? "an IP address" : "a domain name"}');
+    print(
+      '$host is ${isIpAddressFast(host) ? "an IP address" : "a domain name"}',
+    );
   }
 
   //test_service();

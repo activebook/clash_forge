@@ -36,21 +36,33 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
     // Parse speedtest.sh / webrtc output patterns
     final clean = line.replaceAll(RegExp(r'\x1B\[[0-9;]*[mGKHF]'), '');
     if (clean.contains('Max Speed:') || clean.contains('Peak:')) {
-      final match = RegExp(r'(?:Max Speed|Peak):\s*([0-9.]+\s*[MGK]?B/s)', caseSensitive: false).firstMatch(clean);
+      final match = RegExp(
+        r'(?:Max Speed|Peak):\s*([0-9.]+\s*[MGK]?B/s)',
+        caseSensitive: false,
+      ).firstMatch(clean);
       if (match != null) _peakSpeed = match.group(1);
     }
     if (clean.contains('Avg Speed:') || clean.contains('Average:')) {
-      final match = RegExp(r'(?:Avg Speed|Average):\s*([0-9.]+\s*[MGK]?B/s)', caseSensitive: false).firstMatch(clean);
+      final match = RegExp(
+        r'(?:Avg Speed|Average):\s*([0-9.]+\s*[MGK]?B/s)',
+        caseSensitive: false,
+      ).firstMatch(clean);
       if (match != null) _avgSpeed = match.group(1);
     }
     if (clean.contains('Latency:') || clean.contains('Ping:')) {
-      final match = RegExp(r'(?:Latency|Ping):\s*([0-9.]+\s*ms)', caseSensitive: false).firstMatch(clean);
+      final match = RegExp(
+        r'(?:Latency|Ping):\s*([0-9.]+\s*ms)',
+        caseSensitive: false,
+      ).firstMatch(clean);
       if (match != null) _latency = match.group(1);
     }
     if (clean.contains('WebRTC')) {
-      if (clean.toLowerCase().contains('leak') || clean.toLowerCase().contains('warning')) {
+      if (clean.toLowerCase().contains('leak') ||
+          clean.toLowerCase().contains('warning')) {
         _webrtcStatus = 'Leak Detected';
-      } else if (clean.toLowerCase().contains('safe') || clean.toLowerCase().contains('protected') || clean.toLowerCase().contains('ok')) {
+      } else if (clean.toLowerCase().contains('safe') ||
+          clean.toLowerCase().contains('protected') ||
+          clean.toLowerCase().contains('ok')) {
         _webrtcStatus = 'Secure';
       }
     }
@@ -203,7 +215,12 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
     return spans;
   }
 
-  Widget _buildMetricPill(String title, String? value, IconData icon, Color color) {
+  Widget _buildMetricPill(
+    String title,
+    String? value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -295,7 +312,11 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                   ],
                 ),
                 const SizedBox(width: 16),
-                const Icon(Icons.speed_rounded, color: Color(0xFF6366F1), size: 22),
+                const Icon(
+                  Icons.speed_rounded,
+                  color: Color(0xFF6366F1),
+                  size: 22,
+                ),
                 const SizedBox(width: 8),
                 const Text(
                   'Network Speed & Security Test',
@@ -313,7 +334,9 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF6366F1),
+                      ),
                     ),
                   )
                 else
@@ -321,7 +344,10 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                     iconSize: 20,
                     padding: const EdgeInsets.all(6),
                     constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.refresh_rounded, color: Color(0xFF94A3B8)),
+                    icon: const Icon(
+                      Icons.refresh_rounded,
+                      color: Color(0xFF94A3B8),
+                    ),
                     onPressed: _runSpeedTest,
                     tooltip: 'Retest',
                   ),
@@ -330,7 +356,10 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                   iconSize: 20,
                   padding: const EdgeInsets.all(6),
                   constraints: const BoxConstraints(),
-                  icon: const Icon(Icons.copy_rounded, color: Color(0xFF94A3B8)),
+                  icon: const Icon(
+                    Icons.copy_rounded,
+                    color: Color(0xFF94A3B8),
+                  ),
                   onPressed: _outputLines.isEmpty ? null : _copyToClipboard,
                   tooltip: 'Copy output',
                 ),
@@ -339,7 +368,10 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
             const SizedBox(height: 12),
 
             // Live Telemetry Bar
-            if (_peakSpeed != null || _avgSpeed != null || _latency != null || _webrtcStatus != null)
+            if (_peakSpeed != null ||
+                _avgSpeed != null ||
+                _latency != null ||
+                _webrtcStatus != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
                 child: Wrap(
@@ -347,17 +379,34 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                   runSpacing: 8,
                   children: [
                     if (_peakSpeed != null)
-                      _buildMetricPill('PEAK SPEED', _peakSpeed, Icons.bolt_rounded, const Color(0xFF10B981)),
+                      _buildMetricPill(
+                        'PEAK SPEED',
+                        _peakSpeed,
+                        Icons.bolt_rounded,
+                        const Color(0xFF10B981),
+                      ),
                     if (_avgSpeed != null)
-                      _buildMetricPill('AVG SPEED', _avgSpeed, Icons.trending_up_rounded, const Color(0xFF0EA5E9)),
+                      _buildMetricPill(
+                        'AVG SPEED',
+                        _avgSpeed,
+                        Icons.trending_up_rounded,
+                        const Color(0xFF0EA5E9),
+                      ),
                     if (_latency != null)
-                      _buildMetricPill('LATENCY', _latency, Icons.timer_outlined, const Color(0xFF8B5CF6)),
+                      _buildMetricPill(
+                        'LATENCY',
+                        _latency,
+                        Icons.timer_outlined,
+                        const Color(0xFF8B5CF6),
+                      ),
                     if (_webrtcStatus != null)
                       _buildMetricPill(
                         'WEBRTC',
                         _webrtcStatus,
                         Icons.shield_outlined,
-                        _webrtcStatus == 'Secure' ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                        _webrtcStatus == 'Secure'
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFFEF4444),
                       ),
                   ],
                 ),
@@ -372,30 +421,31 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFF1E293B)),
                 ),
-                child: _outputLines.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Initializing speed test engine...',
-                          style: TextStyle(
-                            color: Color(0xFF64748B),
-                            fontSize: 13,
-                            fontFamily: 'monospace',
+                child:
+                    _outputLines.isEmpty
+                        ? const Center(
+                          child: Text(
+                            'Initializing speed test engine...',
+                            style: TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 13,
+                              fontFamily: 'monospace',
+                            ),
                           ),
-                        ),
-                      )
-                    : SingleChildScrollView(
-                        controller: _scrollController,
-                        child: SelectableText.rich(
-                          TextSpan(
-                            children: _parseAnsiText(_outputLines.join()),
-                            style: const TextStyle(
-                              fontFamily: 'Courier',
-                              fontSize: 12.5,
-                              height: 1.45,
+                        )
+                        : SingleChildScrollView(
+                          controller: _scrollController,
+                          child: SelectableText.rich(
+                            TextSpan(
+                              children: _parseAnsiText(_outputLines.join()),
+                              style: const TextStyle(
+                                fontFamily: 'Courier',
+                                fontSize: 12.5,
+                                height: 1.45,
+                              ),
                             ),
                           ),
                         ),
-                      ),
               ),
             ),
 
@@ -411,7 +461,9 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.8,
-                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF34D399)),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF34D399),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -424,7 +476,11 @@ class _SpeedTestDialogState extends State<SpeedTestDialog> {
                       ),
                     ],
                     if (_hasError) ...[
-                      const Icon(Icons.error_outline_rounded, color: Color(0xFFF87171), size: 16),
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        color: Color(0xFFF87171),
+                        size: 16,
+                      ),
                       const SizedBox(width: 6),
                       const Text(
                         'Test encountered an issue. See output for diagnostics.',

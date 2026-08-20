@@ -474,7 +474,8 @@ class UrlConverter {
             // Check if the resolved result is actually an IP address
             if (isIpAddressFast(resolvedIp)) {
               // Preserve original hostname as SNI if TLS is enabled and SNI is missing
-              final bool isTls = server['tls'] == true ||
+              final bool isTls =
+                  server['tls'] == true ||
                   server['security'] == 'tls' ||
                   server['security'] == 'reality';
               if (isTls) {

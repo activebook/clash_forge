@@ -54,7 +54,9 @@ class SubscriptionInputPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVisible = (isAddingNew && editingIndex == -1) || (!isAddingNew && editingIndex != -1);
+    final isVisible =
+        (isAddingNew && editingIndex == -1) ||
+        (!isAddingNew && editingIndex != -1);
     if (!isVisible) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
@@ -105,9 +107,10 @@ class SubscriptionInputPanel extends StatelessWidget {
                     controller: textController,
                     autofocus: true,
                     decoration: InputDecoration(
-                      hintText: isEditing
-                          ? 'Edit subscription link or path...'
-                          : 'Enter subscription URL, proxy link, or drop a file here...',
+                      hintText:
+                          isEditing
+                              ? 'Edit subscription link or path...'
+                              : 'Enter subscription URL, proxy link, or drop a file here...',
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,

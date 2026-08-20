@@ -287,7 +287,8 @@ class _ForgeViewState extends State<ForgeView> {
                   child: Container(
                     margin: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: (isDark ? const Color(0xFF0F172A) : Colors.white).withValues(alpha: 0.88),
+                      color: (isDark ? const Color(0xFF0F172A) : Colors.white)
+                          .withValues(alpha: 0.88),
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: theme.colorScheme.primary,
@@ -295,7 +296,9 @@ class _ForgeViewState extends State<ForgeView> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.25,
+                          ),
                           blurRadius: 24,
                           offset: const Offset(0, 4),
                         ),
@@ -308,7 +311,9 @@ class _ForgeViewState extends State<ForgeView> {
                           Container(
                             padding: const EdgeInsets.all(18),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.15,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -409,9 +414,7 @@ class _ForgeViewState extends State<ForgeView> {
               child: Text(
                 'Add subscription links, single proxy URIs (VLESS, Trojan, SS, Hysteria2), or drag & drop configuration files here.',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  height: 1.4,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
               ),
             ),
             const SizedBox(height: 20),
@@ -436,99 +439,104 @@ class _ForgeViewState extends State<ForgeView> {
         final subscriptions = widget.subscriptionManager.subscriptions;
         return Container(
           decoration: const BoxDecoration(),
-          child: subscriptions.isEmpty
-              ? _buildEmptyState(context)
-              : ReorderableListView.builder(
-                  scrollController: _scrollController,
-                  buildDefaultDragHandles: false,
-                  proxyDecorator: (child, index, animation) {
-                    return AnimatedBuilder(
-                      animation: animation,
-                      builder: (context, child) {
-                        final double elevation = lerpDouble(0, 10, animation.value) ?? 0;
-                        return Material(
-                          color: Colors.transparent,
-                          elevation: elevation,
-                          shadowColor: Colors.black.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(14),
-                          child: child,
-                        );
-                      },
-                      child: child,
-                    );
-                  },
-                  onReorder: (oldIndex, newIndex) {
-                    widget.subscriptionManager.reorderSubscriptions(oldIndex, newIndex);
-                  },
-                  itemCount: subscriptions.length,
-                  itemBuilder: (context, index) {
-                    final bool isProcessing =
-                        widget.subscriptionManager.processingItems[index] ??
-                        false;
-
-                    // Determine if this subscription is the active profile
-                    final profileName = widget.subscriptionManager
-                        .formatUrlWithFilename(
-                          subscriptions[index],
-                          onlyFilename: true,
-                        );
-                    final bool isActive =
-                        widget.profileManager.activeProfile == profileName;
-
-                    return SubscriptionListItem(
-                      key: ValueKey('sub_${subscriptions[index]}_$index'),
-                      subscription: subscriptions[index],
-                      index: index,
-                      isProcessing: isProcessing,
-                      isActive: isActive,
-                      delay:
-                          isActive
-                              ? widget.profileManager.activeProfileDelay
-                              : null,
-                      testFailed:
-                          isActive
-                              ? widget.profileManager.delayTestFailed
-                              : false,
-                      onRetry:
-                          isActive
-                              ? widget.profileManager.retryDelayTest
-                              : null,
-                      validationStatus:
-                          widget
-                              .subscriptionManager
-                              .urlValidationStatus[subscriptions[index]],
-                      displayName: widget.subscriptionManager
-                          .formatUrlWithFilename(subscriptions[index]),
-                      onTap: () => _editSubscription(index),
-                      onProcess: () async {
-                        if (widget.settingsManager.targetFolderPath.isEmpty) {
-                          widget.onShowNotification(
-                            'Target folder does not exist. Please select a folder first.',
-                            status: NotificationStatus.warning,
+          child:
+              subscriptions.isEmpty
+                  ? _buildEmptyState(context)
+                  : ReorderableListView.builder(
+                    scrollController: _scrollController,
+                    buildDefaultDragHandles: false,
+                    proxyDecorator: (child, index, animation) {
+                      return AnimatedBuilder(
+                        animation: animation,
+                        builder: (context, child) {
+                          final double elevation =
+                              lerpDouble(0, 10, animation.value) ?? 0;
+                          return Material(
+                            color: Colors.transparent,
+                            elevation: elevation,
+                            shadowColor: Colors.black.withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(14),
+                            child: child,
                           );
-                          return;
-                        }
-                        await widget.subscriptionManager.processUrl(
-                          subscriptions[index],
-                          index,
-                          widget.settingsManager.targetFolderPath,
-                          needResolveDNS:
-                              widget.settingsManager.needResolveDNS,
-                          dnsProvider: widget.settingsManager.dnsProvider,
-                          tunEnable: widget.settingsManager.tunEnable,
-                          urlTestInterval:
-                              widget.settingsManager.urlTestInterval,
-                          urlTestTolerance:
-                              widget.settingsManager.urlTestTolerance,
-                          urlTestLazy: widget.settingsManager.urlTestLazy,
-                        );
-                      },
-                      onSwitch:
-                          () => _handleSwitchProfile(subscriptions[index]),
-                      onDelete: _showDeleteConfimMenu,
-                    );
-                  },
-                ),
+                        },
+                        child: child,
+                      );
+                    },
+                    onReorder: (oldIndex, newIndex) {
+                      widget.subscriptionManager.reorderSubscriptions(
+                        oldIndex,
+                        newIndex,
+                      );
+                    },
+                    itemCount: subscriptions.length,
+                    itemBuilder: (context, index) {
+                      final bool isProcessing =
+                          widget.subscriptionManager.processingItems[index] ??
+                          false;
+
+                      // Determine if this subscription is the active profile
+                      final profileName = widget.subscriptionManager
+                          .formatUrlWithFilename(
+                            subscriptions[index],
+                            onlyFilename: true,
+                          );
+                      final bool isActive =
+                          widget.profileManager.activeProfile == profileName;
+
+                      return SubscriptionListItem(
+                        key: ValueKey('sub_${subscriptions[index]}_$index'),
+                        subscription: subscriptions[index],
+                        index: index,
+                        isProcessing: isProcessing,
+                        isActive: isActive,
+                        delay:
+                            isActive
+                                ? widget.profileManager.activeProfileDelay
+                                : null,
+                        testFailed:
+                            isActive
+                                ? widget.profileManager.delayTestFailed
+                                : false,
+                        onRetry:
+                            isActive
+                                ? widget.profileManager.retryDelayTest
+                                : null,
+                        validationStatus:
+                            widget
+                                .subscriptionManager
+                                .urlValidationStatus[subscriptions[index]],
+                        displayName: widget.subscriptionManager
+                            .formatUrlWithFilename(subscriptions[index]),
+                        onTap: () => _editSubscription(index),
+                        onProcess: () async {
+                          if (widget.settingsManager.targetFolderPath.isEmpty) {
+                            widget.onShowNotification(
+                              'Target folder does not exist. Please select a folder first.',
+                              status: NotificationStatus.warning,
+                            );
+                            return;
+                          }
+                          await widget.subscriptionManager.processUrl(
+                            subscriptions[index],
+                            index,
+                            widget.settingsManager.targetFolderPath,
+                            needResolveDNS:
+                                widget.settingsManager.needResolveDNS,
+                            dnsProvider: widget.settingsManager.dnsProvider,
+                            tunEnable: widget.settingsManager.tunEnable,
+                            urlTestInterval:
+                                widget.settingsManager.urlTestInterval,
+                            urlTestTolerance:
+                                widget.settingsManager.urlTestTolerance,
+                            urlTestLazy: widget.settingsManager.urlTestLazy,
+                          );
+                        },
+                        onSwitch:
+                            () => _handleSwitchProfile(subscriptions[index]),
+                        onDelete: _showDeleteConfimMenu,
+                      );
+                    },
+                  ),
         );
       },
     );

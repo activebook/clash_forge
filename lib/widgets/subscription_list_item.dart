@@ -46,7 +46,8 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
   bool _isHovered = false;
 
   Widget _buildLeadingIcon(BuildContext context) {
-    final isLocal = widget.subscription.startsWith('/') ||
+    final isLocal =
+        widget.subscription.startsWith('/') ||
         (widget.subscription.length > 2 && widget.subscription[1] == ':');
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -54,7 +55,9 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: (widget.isActive ? primary : Theme.of(context).colorScheme.surfaceContainerHighest)
+        color: (widget.isActive
+                ? primary
+                : Theme.of(context).colorScheme.surfaceContainerHighest)
             .withValues(alpha: widget.isActive ? 0.15 : 0.6),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -62,7 +65,12 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
         child: Icon(
           isLocal ? Icons.description_outlined : Icons.link_rounded,
           size: 18,
-          color: widget.isActive ? primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+          color:
+              widget.isActive
+                  ? primary
+                  : Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -108,7 +116,9 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
             decoration: BoxDecoration(
               color: const Color(0xFF64748B).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFF64748B).withValues(alpha: 0.3)),
+              border: Border.all(
+                color: const Color(0xFF64748B).withValues(alpha: 0.3),
+              ),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
@@ -211,17 +221,21 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
     final appColors = theme.extension<AppColors>()!;
     final isDark = theme.brightness == Brightness.dark;
 
-    final borderColor = widget.isActive
-        ? theme.colorScheme.primary.withValues(alpha: 0.6)
-        : (_isHovered
-            ? (isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1))
-            : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)));
+    final borderColor =
+        widget.isActive
+            ? theme.colorScheme.primary.withValues(alpha: 0.6)
+            : (_isHovered
+                ? (isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1))
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)));
 
-    final cardBg = widget.isActive
-        ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.08 : 0.04)
-        : (_isHovered
-            ? (isDark ? const Color(0xFF26334D).withValues(alpha: 0.5) : const Color(0xFFF1F5F9))
-            : theme.cardTheme.color);
+    final cardBg =
+        widget.isActive
+            ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.08 : 0.04)
+            : (_isHovered
+                ? (isDark
+                    ? const Color(0xFF26334D).withValues(alpha: 0.5)
+                    : const Color(0xFFF1F5F9))
+                : theme.cardTheme.color);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -232,28 +246,35 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(14.0),
-          border: Border.all(color: borderColor, width: widget.isActive ? 1.5 : 1),
-          boxShadow: widget.isActive
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : (_isHovered
+          border: Border.all(
+            color: borderColor,
+            width: widget.isActive ? 1.5 : 1,
+          ),
+          boxShadow:
+              widget.isActive
                   ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null),
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                  : (_isHovered
+                      ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                      : null),
         ),
         child: ListTile(
           dense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 3,
+          ),
           onTap: widget.onTap,
           leading: Row(
             mainAxisSize: MainAxisSize.min,
@@ -267,7 +288,9 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
                     child: Icon(
                       Icons.drag_indicator_rounded,
                       size: 18,
-                      color: (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8))
+                      color: (isDark
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8))
                           .withValues(alpha: _isHovered ? 0.9 : 0.4),
                     ),
                   ),
@@ -284,7 +307,8 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.w500,
+                    fontWeight:
+                        widget.isActive ? FontWeight.w600 : FontWeight.w500,
                     fontSize: 13.5,
                   ),
                 ),
@@ -292,7 +316,10 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
               if (widget.isActive) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 1.5,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(6),
@@ -342,16 +369,17 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
                 iconSize: 20,
                 padding: const EdgeInsets.all(6),
                 constraints: const BoxConstraints(),
-                icon: widget.isProcessing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2.0),
-                      )
-                    : Icon(
-                        Icons.play_arrow_rounded,
-                        color: appColors.saveAction,
-                      ),
+                icon:
+                    widget.isProcessing
+                        ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.0),
+                        )
+                        : Icon(
+                          Icons.play_arrow_rounded,
+                          color: appColors.saveAction,
+                        ),
                 tooltip: "Process this subscription",
                 onPressed: widget.isProcessing ? null : widget.onProcess,
               ),
@@ -373,17 +401,19 @@ class _SubscriptionListItemState extends State<SubscriptionListItem> {
 
               // Delete button
               Builder(
-                builder: (buttonContext) => IconButton(
-                  iconSize: 18,
-                  padding: const EdgeInsets.all(6),
-                  constraints: const BoxConstraints(),
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: appColors.deleteAction.withValues(alpha: 0.8),
-                  ),
-                  tooltip: "Delete this subscription",
-                  onPressed: () => widget.onDelete(widget.index, buttonContext),
-                ),
+                builder:
+                    (buttonContext) => IconButton(
+                      iconSize: 18,
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: appColors.deleteAction.withValues(alpha: 0.8),
+                      ),
+                      tooltip: "Delete this subscription",
+                      onPressed:
+                          () => widget.onDelete(widget.index, buttonContext),
+                    ),
               ),
             ],
           ),

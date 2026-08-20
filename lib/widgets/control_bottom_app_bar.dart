@@ -48,7 +48,10 @@ class ControlBottomAppBar extends StatelessWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  color:
+                      isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFCBD5E1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -84,42 +87,48 @@ class ControlBottomAppBar extends StatelessWidget {
                       icon: Icons.file_upload_outlined,
                       color: const Color(0xFF6366F1),
                       title: 'Import & Batch Management',
-                      subtitle: 'Load subscription URLs from a file (one URL per line) or drag & drop configuration files directly into the window.',
+                      subtitle:
+                          'Load subscription URLs from a file (one URL per line) or drag & drop configuration files directly into the window.',
                       context: context,
                     ),
                     _buildGuideItem(
                       icon: Icons.file_download_outlined,
                       color: const Color(0xFF10B981),
                       title: 'Export Subscriptions',
-                      subtitle: 'Backup and save all configured subscription links and custom paths to an export file.',
+                      subtitle:
+                          'Backup and save all configured subscription links and custom paths to an export file.',
                       context: context,
                     ),
                     _buildGuideItem(
                       icon: Icons.toggle_on_outlined,
                       color: const Color(0xFF0EA5E9),
                       title: 'Profile Activation & Switching',
-                      subtitle: 'Toggle the switch beside any profile to activate it in Clash. Includes automatic real-time latency ping badges.',
+                      subtitle:
+                          'Toggle the switch beside any profile to activate it in Clash. Includes automatic real-time latency ping badges.',
                       context: context,
                     ),
                     _buildGuideItem(
                       icon: Icons.speed_rounded,
                       color: const Color(0xFF8B5CF6),
                       title: 'Multi-threaded Speed & WebRTC Audit',
-                      subtitle: 'Run multi-stream speed testing and WebRTC leak prevention checks with live telemetry cards.',
+                      subtitle:
+                          'Run multi-stream speed testing and WebRTC leak prevention checks with live telemetry cards.',
                       context: context,
                     ),
                     _buildGuideItem(
                       icon: Icons.dns_outlined,
                       color: const Color(0xFFF59E0B),
                       title: 'DNS Resolution Engine',
-                      subtitle: 'Pre-resolve domains using DNSPub, Tencent, Cloudflare, Google, or CNNIC to circumvent DNS poisoning.',
+                      subtitle:
+                          'Pre-resolve domains using DNSPub, Tencent, Cloudflare, Google, or CNNIC to circumvent DNS poisoning.',
                       context: context,
                     ),
                     _buildGuideItem(
                       icon: Icons.hub_outlined,
                       color: const Color(0xFFEC4899),
                       title: 'All Modern Protocols Supported',
-                      subtitle: 'Full support for VLESS, VMess, Trojan, Shadowsocks, ShadowsocksR, Hysteria2, TUIC, AnyTLS, and WireGuard.',
+                      subtitle:
+                          'Full support for VLESS, VMess, Trojan, Shadowsocks, ShadowsocksR, Hysteria2, TUIC, AnyTLS, and WireGuard.',
                       context: context,
                     ),
                   ],
@@ -178,9 +187,7 @@ class ControlBottomAppBar extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    height: 1.35,
-                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(height: 1.35),
                 ),
               ],
             ),
@@ -197,21 +204,23 @@ class ControlBottomAppBar extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Builder(
-            builder: (buttonContext) => IconButton(
-              onPressed: () {
-                showDialog(
-                  context: buttonContext,
-                  barrierDismissible: false,
-                  builder: (context) => const SpeedTestDialog(),
-                );
-              },
-              icon: Icon(
-                Icons.speed_rounded,
-                color: Theme.of(context).extension<AppColors>()?.forwardAction,
-                size: 22,
-              ),
-              tooltip: 'Network Speed Test',
-            ),
+            builder:
+                (buttonContext) => IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: buttonContext,
+                      barrierDismissible: false,
+                      builder: (context) => const SpeedTestDialog(),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.speed_rounded,
+                    color:
+                        Theme.of(context).extension<AppColors>()?.forwardAction,
+                    size: 22,
+                  ),
+                  tooltip: 'Network Speed Test',
+                ),
           ),
           const SizedBox(width: 6),
           Tooltip(
@@ -221,7 +230,10 @@ class ControlBottomAppBar extends StatelessWidget {
               icon: const Icon(Icons.file_upload_outlined, size: 16),
               label: const Text('Import'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
               ),
             ),
           ),
@@ -235,7 +247,10 @@ class ControlBottomAppBar extends StatelessWidget {
               icon: const Icon(Icons.file_download_outlined, size: 16),
               label: const Text('Export'),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
               ),
             ),
           ),

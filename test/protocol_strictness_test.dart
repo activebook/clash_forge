@@ -59,12 +59,15 @@ void main() {
       expect(vless.canHandle(url, parsed), isTrue);
     });
 
-    test('VMess should route VMess scheme and return error for invalid body', () {
-      final url = 'vmess://not-base64-json';
-      expect(vmess.canHandle(url, null), isTrue);
-      final result = vmess.parse(url);
-      expect(result.containsKey('error'), isTrue);
-    });
+    test(
+      'VMess should route VMess scheme and return error for invalid body',
+      () {
+        final url = 'vmess://not-base64-json';
+        expect(vmess.canHandle(url, null), isTrue);
+        final result = vmess.parse(url);
+        expect(result.containsKey('error'), isTrue);
+      },
+    );
 
     test(
       'SSR should handle valid SSR URL (even if ProxyUrl fails to parse it fully)',

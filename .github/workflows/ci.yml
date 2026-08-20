@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-and-test:
+    name: Lint & Test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check code formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze code
+        run: flutter analyze
+
+      - name: Run test suite
+        run: flutter test
+
+  build-macos:
+    name: Build macOS Release (Dry Run)
+    needs: analyze-and-test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS application
+        run: flutter build macos --release
+
+      - name: Verify Universal Binary (Intel x86_64 + Apple Silicon arm64)
+        run: |
+          BINARY_PATH="build/macos/Build/Products/Release/Clash Forge.app/Contents/MacOS/Clash Forge"
+          ARCH_INFO=$(lipo -info "$BINARY_PATH")
+          echo "Architecture info: $ARCH_INFO"
+          echo "$ARCH_INFO" | grep -q "x86_64" || { echo "Missing x86_64 architecture"; exit 1; }
+          echo "$ARCH_INFO" | grep -q "arm64" || { echo "Missing arm64 architecture"; exit 1; }
+          echo "Universal binary verified successfully."

@@ -20,18 +20,21 @@ void main() {
       expect(result['skip-cert-verify'], isTrue);
     });
 
-    test('VMess defaults skip-cert-verify to false and formats h2-opts as list', () {
-      // JSON: {"add":"127.0.0.1","port":"443","id":"05641cf5-58d2-4ba4-a9f1-b3cda0b1fb1d","net":"h2","path":"/h2","host":"example.com","tls":"tls","ps":"VMessTest"}
-      // Base64 encoded:
-      const vmessUrl =
-          'vmess://eyJhZGQiOiIxMjcuMC4wLjEiLCJwb3J0IjoiNDQzIiwiaWQiOiIwNTY0MWNmNS01OGQyLTRiYTQtYTlmMS1iM2NkYTBiMWZiMWQiLCJuZXQiOiJoMiIsInBhdGgiOiIvaDIiLCJob3N0IjoiZXhhbXBsZS5jb20iLCJ0bHMiOiJ0bHMiLCJwcyI6IlZNZXNzVGVzdCJ9';
-      final result = ProtocolManager.parse(vmessUrl);
-      expect(result['type'], equals('vmess'));
-      expect(result['skip-cert-verify'], isFalse);
-      expect(result['tls'], isTrue);
-      expect(result['h2-opts']['host'], equals(['example.com']));
-      expect(result['h2-opts']['path'], equals('/h2'));
-    });
+    test(
+      'VMess defaults skip-cert-verify to false and formats h2-opts as list',
+      () {
+        // JSON: {"add":"127.0.0.1","port":"443","id":"05641cf5-58d2-4ba4-a9f1-b3cda0b1fb1d","net":"h2","path":"/h2","host":"example.com","tls":"tls","ps":"VMessTest"}
+        // Base64 encoded:
+        const vmessUrl =
+            'vmess://eyJhZGQiOiIxMjcuMC4wLjEiLCJwb3J0IjoiNDQzIiwiaWQiOiIwNTY0MWNmNS01OGQyLTRiYTQtYTlmMS1iM2NkYTBiMWZiMWQiLCJuZXQiOiJoMiIsInBhdGgiOiIvaDIiLCJob3N0IjoiZXhhbXBsZS5jb20iLCJ0bHMiOiJ0bHMiLCJwcyI6IlZNZXNzVGVzdCJ9';
+        final result = ProtocolManager.parse(vmessUrl);
+        expect(result['type'], equals('vmess'));
+        expect(result['skip-cert-verify'], isFalse);
+        expect(result['tls'], isTrue);
+        expect(result['h2-opts']['host'], equals(['example.com']));
+        expect(result['h2-opts']['path'], equals('/h2'));
+      },
+    );
 
     test('Trojan defaults skip-cert-verify to false', () {
       final url = 'trojan://pass123@127.0.0.1:443?sni=example.com#TrojanTest';

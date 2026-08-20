@@ -89,9 +89,14 @@ class BatchControlBar extends StatelessWidget {
                       ? "Select Clash Config Output Folder..."
                       : targetFolderPath,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: targetFolderPath.isEmpty
-                        ? theme.colorScheme.onSurface.withValues(alpha: 0.45)
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                    color:
+                        targetFolderPath.isEmpty
+                            ? theme.colorScheme.onSurface.withValues(
+                              alpha: 0.45,
+                            )
+                            : theme.colorScheme.onSurface.withValues(
+                              alpha: 0.85,
+                            ),
                     fontSize: 12.5,
                   ),
                   maxLines: 1,
@@ -103,24 +108,24 @@ class BatchControlBar extends StatelessWidget {
           const SizedBox(width: 8),
           isBatchProcessing
               ? const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              : IconButton(
-                  iconSize: 22,
-                  padding: const EdgeInsets.all(6),
-                  constraints: const BoxConstraints(),
-                  icon: Icon(
-                    Icons.fast_forward_rounded,
-                    color: appColors.forwardAction,
-                  ),
-                  onPressed: onProcessAll,
-                  tooltip: "Process all subscriptions",
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
+              )
+              : IconButton(
+                iconSize: 22,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(),
+                icon: Icon(
+                  Icons.fast_forward_rounded,
+                  color: appColors.forwardAction,
+                ),
+                onPressed: onProcessAll,
+                tooltip: "Process all subscriptions",
+              ),
           const SizedBox(width: 6),
           IconButton(
             iconSize: 20,

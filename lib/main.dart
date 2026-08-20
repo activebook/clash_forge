@@ -104,9 +104,7 @@ class MyAppState extends State<MyApp> {
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 6,
         content: Row(
           children: [
@@ -189,10 +187,7 @@ class MyAppState extends State<MyApp> {
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  primary.withValues(alpha: 0.85),
-                  primary,
-                ],
+                colors: [primary.withValues(alpha: 0.85), primary],
               ),
               borderRadius: BorderRadius.circular(6),
               boxShadow: [
@@ -217,37 +212,40 @@ class MyAppState extends State<MyApp> {
       ),
       leadingWidth: 46,
       leading: Builder(
-        builder: (context) => ListenableBuilder(
-          listenable: _subscriptionManager,
-          builder: (context, _) {
-            return Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: IconButton(
-                iconSize: 20,
-                icon: Badge.count(
-                  count: _subscriptionManager.logEntries.length,
-                  isLabelVisible: _subscriptionManager.logEntries.isNotEmpty,
-                  backgroundColor: const Color(0xFF6366F1),
-                  child: const Icon(Icons.terminal_rounded),
-                ),
-                onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                tooltip: 'Event Logs',
-              ),
-            );
-          },
-        ),
+        builder:
+            (context) => ListenableBuilder(
+              listenable: _subscriptionManager,
+              builder: (context, _) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: IconButton(
+                    iconSize: 20,
+                    icon: Badge.count(
+                      count: _subscriptionManager.logEntries.length,
+                      isLabelVisible:
+                          _subscriptionManager.logEntries.isNotEmpty,
+                      backgroundColor: const Color(0xFF6366F1),
+                      child: const Icon(Icons.terminal_rounded),
+                    ),
+                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                    tooltip: 'Event Logs',
+                  ),
+                );
+              },
+            ),
       ),
       actions: [
         Builder(
-          builder: (context) => Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              iconSize: 20,
-              icon: const Icon(Icons.settings_outlined),
-              tooltip: 'Preferences & Settings',
-              onPressed: () => Scaffold.of(context).openEndDrawer(),
-            ),
-          ),
+          builder:
+              (context) => Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: IconButton(
+                  iconSize: 20,
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: 'Preferences & Settings',
+                  onPressed: () => Scaffold.of(context).openEndDrawer(),
+                ),
+              ),
         ),
       ],
     );

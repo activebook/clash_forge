@@ -30,12 +30,21 @@ class _LogDrawerState extends State<LogDrawer> {
     if (_selectedFilter == 'Errors') {
       return widget.logEntries.where((l) => l.level == LogLevel.error).toList();
     } else if (_selectedFilter == 'Warnings') {
-      return widget.logEntries.where((l) => l.level == LogLevel.warning).toList();
+      return widget.logEntries
+          .where((l) => l.level == LogLevel.warning)
+          .toList();
     } else if (_selectedFilter == 'Success') {
-      return widget.logEntries.where((l) => l.level == LogLevel.success).toList();
+      return widget.logEntries
+          .where((l) => l.level == LogLevel.success)
+          .toList();
     } else if (_selectedFilter == 'Info') {
       return widget.logEntries
-          .where((l) => l.level == LogLevel.info || l.level == LogLevel.start || l.level == LogLevel.file)
+          .where(
+            (l) =>
+                l.level == LogLevel.info ||
+                l.level == LogLevel.start ||
+                l.level == LogLevel.file,
+          )
           .toList();
     }
     return widget.logEntries;
@@ -45,7 +54,9 @@ class _LogDrawerState extends State<LogDrawer> {
     if (widget.logEntries.isEmpty) return;
     final buffer = StringBuffer();
     for (final log in widget.logEntries) {
-      buffer.writeln('[${log.timestamp}] [${log.level.name.toUpperCase()}] ${log.message}');
+      buffer.writeln(
+        '[${log.timestamp}] [${log.level.name.toUpperCase()}] ${log.message}',
+      );
     }
     Clipboard.setData(ClipboardData(text: buffer.toString()));
 
@@ -68,19 +79,47 @@ class _LogDrawerState extends State<LogDrawer> {
   Widget _buildLevelIcon(LogLevel level) {
     switch (level) {
       case LogLevel.error:
-        return const Icon(Icons.error_rounded, color: Color(0xFFF87171), size: 18);
+        return const Icon(
+          Icons.error_rounded,
+          color: Color(0xFFF87171),
+          size: 18,
+        );
       case LogLevel.warning:
-        return const Icon(Icons.warning_amber_rounded, color: Color(0xFFFBBF24), size: 18);
+        return const Icon(
+          Icons.warning_amber_rounded,
+          color: Color(0xFFFBBF24),
+          size: 18,
+        );
       case LogLevel.info:
-        return const Icon(Icons.info_rounded, color: Color(0xFF38BDF8), size: 18);
+        return const Icon(
+          Icons.info_rounded,
+          color: Color(0xFF38BDF8),
+          size: 18,
+        );
       case LogLevel.debug:
-        return const Icon(Icons.bug_report_rounded, color: Color(0xFF94A3B8), size: 18);
+        return const Icon(
+          Icons.bug_report_rounded,
+          color: Color(0xFF94A3B8),
+          size: 18,
+        );
       case LogLevel.success:
-        return const Icon(Icons.check_circle_rounded, color: Color(0xFF34D399), size: 18);
+        return const Icon(
+          Icons.check_circle_rounded,
+          color: Color(0xFF34D399),
+          size: 18,
+        );
       case LogLevel.start:
-        return const Icon(Icons.play_circle_rounded, color: Color(0xFF818CF8), size: 18);
+        return const Icon(
+          Icons.play_circle_rounded,
+          color: Color(0xFF818CF8),
+          size: 18,
+        );
       case LogLevel.file:
-        return const Icon(Icons.file_copy_rounded, color: Color(0xFFA78BFA), size: 18);
+        return const Icon(
+          Icons.file_copy_rounded,
+          color: Color(0xFFA78BFA),
+          size: 18,
+        );
       default:
         return const Icon(Icons.circle, size: 8, color: Color(0xFF94A3B8));
     }
@@ -96,9 +135,12 @@ class _LogDrawerState extends State<LogDrawer> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.primary.withValues(alpha: 0.15)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color:
+              isSelected
+                  ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                  : theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected ? theme.colorScheme.primary : Colors.transparent,
@@ -121,7 +163,10 @@ class _LogDrawerState extends State<LogDrawer> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
-                  color: isSelected ? theme.colorScheme.primary : const Color(0xFF64748B),
+                  color:
+                      isSelected
+                          ? theme.colorScheme.primary
+                          : const Color(0xFF64748B),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -148,22 +193,31 @@ class _LogDrawerState extends State<LogDrawer> {
     final drawerWidth = (screenWidth * 0.50).clamp(420.0, 620.0);
     final filtered = _filteredEntries;
 
-    final errorCount = widget.logEntries.where((l) => l.level == LogLevel.error).length;
-    final warningCount = widget.logEntries.where((l) => l.level == LogLevel.warning).length;
+    final errorCount =
+        widget.logEntries.where((l) => l.level == LogLevel.error).length;
+    final warningCount =
+        widget.logEntries.where((l) => l.level == LogLevel.warning).length;
 
     return Drawer(
       width: drawerWidth,
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       child: Column(
         children: [
           // Drawer Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E293B) : Colors.white,
               border: Border(
                 bottom: BorderSide(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color:
+                      isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                 ),
               ),
             ),
@@ -204,7 +258,8 @@ class _LogDrawerState extends State<LogDrawer> {
                   padding: const EdgeInsets.all(6),
                   constraints: const BoxConstraints(),
                   icon: const Icon(Icons.close_rounded),
-                  onPressed: () => widget.scaffoldKey.currentState?.closeDrawer(),
+                  onPressed:
+                      () => widget.scaffoldKey.currentState?.closeDrawer(),
                   tooltip: 'Close logs',
                 ),
               ],
@@ -213,12 +268,18 @@ class _LogDrawerState extends State<LogDrawer> {
 
           // Filter bar
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 8.0,
+            ),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF161F30) : const Color(0xFFF1F5F9),
               border: Border(
                 bottom: BorderSide(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color:
+                      isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                 ),
               ),
             ),
@@ -242,95 +303,117 @@ class _LogDrawerState extends State<LogDrawer> {
 
           // Log entries list
           Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.terminal_rounded,
-                          size: 40,
-                          color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'No logs found',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+            child:
+                filtered.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.terminal_rounded,
+                            size: 40,
+                            color: const Color(
+                              0xFF94A3B8,
+                            ).withValues(alpha: 0.6),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final item = filtered[index];
-                      final isHovered = widget.hoveredLogIndex == index;
-
-                      return MouseRegion(
-                        onEnter: (_) => widget.onHoverChange(index),
-                        onExit: (_) {
-                          if (widget.hoveredLogIndex == index) {
-                            widget.onHoverChange(null);
-                          }
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 3),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isHovered
-                                ? (isDark ? const Color(0xFF1E293B) : Colors.white)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isHovered
-                                  ? (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1))
-                                  : Colors.transparent,
+                          const SizedBox(height: 10),
+                          Text(
+                            'No logs found',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2.0),
-                                child: _buildLevelIcon(item.level),
+                        ],
+                      ),
+                    )
+                    : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 10,
+                      ),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final item = filtered[index];
+                        final isHovered = widget.hoveredLogIndex == index;
+
+                        return MouseRegion(
+                          onEnter: (_) => widget.onHoverChange(index),
+                          onExit: (_) {
+                            if (widget.hoveredLogIndex == index) {
+                              widget.onHoverChange(null);
+                            }
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  isHovered
+                                      ? (isDark
+                                          ? const Color(0xFF1E293B)
+                                          : Colors.white)
+                                      : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color:
+                                    isHovered
+                                        ? (isDark
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFCBD5E1))
+                                        : Colors.transparent,
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.message,
-                                      style: TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w500,
-                                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF0F172A),
-                                        height: 1.35,
-                                      ),
-                                      maxLines: isHovered ? null : 2,
-                                      overflow: isHovered ? null : TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      item.timestamp,
-                                      style: const TextStyle(
-                                        fontSize: 10.5,
-                                        fontFamily: 'monospace',
-                                        color: Color(0xFF94A3B8),
-                                      ),
-                                    ),
-                                  ],
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2.0),
+                                  child: _buildLevelIcon(item.level),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.message,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w500,
+                                          color:
+                                              isDark
+                                                  ? const Color(0xFFF1F5F9)
+                                                  : const Color(0xFF0F172A),
+                                          height: 1.35,
+                                        ),
+                                        maxLines: isHovered ? null : 2,
+                                        overflow:
+                                            isHovered
+                                                ? null
+                                                : TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item.timestamp,
+                                        style: const TextStyle(
+                                          fontSize: 10.5,
+                                          fontFamily: 'monospace',
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
 
           // Clear logs button
@@ -340,7 +423,10 @@ class _LogDrawerState extends State<LogDrawer> {
               color: isDark ? const Color(0xFF1E293B) : Colors.white,
               border: Border(
                 top: BorderSide(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color:
+                      isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                 ),
               ),
             ),
@@ -352,7 +438,12 @@ class _LogDrawerState extends State<LogDrawer> {
                 label: const Text('Clear All Logs'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  side: BorderSide(color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
+                  side: BorderSide(
+                    color:
+                        isDark
+                            ? const Color(0xFF475569)
+                            : const Color(0xFFCBD5E1),
+                  ),
                 ),
               ),
             ),

@@ -1,0 +1,113 @@
+name: Release macOS
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version_override:
+        description: 'Release version (e.g. v2.0.0)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Publish Release
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run test suite
+        run: flutter test
+
+      - name: Build macOS Universal Release
+        run: flutter build macos --release
+
+      - name: Determine Version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version_override }}" ]; then
+            VERSION="${{ inputs.version_override }}"
+          elif [ -n "${{ github.ref_name }}" ] && [[ "${{ github.ref_name }}" =~ ^v ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//' | tr -d ' ')
+            VERSION="v$PUBSPEC_VERSION"
+          fi
+          # Strip leading 'v' if present for raw number
+          CLEAN_VERSION="${VERSION#v}"
+          echo "tag_name=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          echo "Release Version: $VERSION ($CLEAN_VERSION)"
+
+      - name: Verify Universal Mach-O Binary
+        run: |
+          BINARY_PATH="build/macos/Build/Products/Release/Clash Forge.app/Contents/MacOS/Clash Forge"
+          ARCH_INFO=$(lipo -info "$BINARY_PATH")
+          echo "Architecture info: $ARCH_INFO"
+          echo "$ARCH_INFO" | grep -q "x86_64" || { echo "ERROR: Missing x86_64 architecture"; exit 1; }
+          echo "$ARCH_INFO" | grep -q "arm64" || { echo "ERROR: Missing arm64 architecture"; exit 1; }
+          echo "Universal binary verified: Supports both Intel (x86_64) and Apple Silicon (arm64)."
+
+      - name: Package Distribution Artifacts (.dmg & .zip)
+        run: |
+          mkdir -p dist
+          APP_PATH="build/macos/Build/Products/Release/Clash Forge.app"
+          VERSION_TAG="${{ steps.version.outputs.tag_name }}"
+          
+          DMG_NAME="Clash-Forge-${VERSION_TAG}-macOS-Universal.dmg"
+          ZIP_NAME="Clash-Forge-${VERSION_TAG}-macOS-Universal.zip"
+
+          echo "1. Creating ZIP archive..."
+          ditto -c -k --keepParent "$APP_PATH" "dist/$ZIP_NAME"
+
+          echo "2. Creating DMG installer with Applications shortcut..."
+          DMG_TEMP="build/dmg_temp"
+          rm -rf "$DMG_TEMP"
+          mkdir -p "$DMG_TEMP"
+          cp -R "$APP_PATH" "$DMG_TEMP/"
+          ln -s /Applications "$DMG_TEMP/Applications"
+          
+          hdiutil create -volname "Clash Forge" \
+            -srcfolder "$DMG_TEMP" \
+            -ov -format UDZO \
+            "dist/$DMG_NAME"
+          rm -rf "$DMG_TEMP"
+
+          echo "3. Generating SHA256 checksums..."
+          cd dist
+          shasum -a 256 "$DMG_NAME" "$ZIP_NAME" > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          cd ..
+
+          echo "Packaging completed successfully:"
+          ls -lh dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: Clash Forge ${{ steps.version.outputs.tag_name }} - macOS Universal
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            dist/*.dmg
+            dist/*.zip
+            dist/SHA256SUMS.txt
