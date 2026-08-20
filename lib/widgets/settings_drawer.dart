@@ -16,6 +16,8 @@ class SettingsDrawer extends StatefulWidget {
   final Function(int interval) onUrlTestIntervalChanged;
   final Function(int tolerance) onUrlTestToleranceChanged;
   final Function(bool lazy) onUrlTestLazyChanged;
+  final dynamic updateManager;
+  final VoidCallback? onOpenUpdateDialog;
 
   const SettingsDrawer({
     super.key,
@@ -33,6 +35,8 @@ class SettingsDrawer extends StatefulWidget {
     required this.onUrlTestIntervalChanged,
     required this.onUrlTestToleranceChanged,
     required this.onUrlTestLazyChanged,
+    this.updateManager,
+    this.onOpenUpdateDialog,
   });
 
   @override
@@ -421,6 +425,156 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                           widget.onUrlTestLazyChanged(value);
                         },
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // About & Updates Section
+                  _buildSectionContainer(
+                    title: 'About & Updates',
+                    icon: Icons.info_outline_rounded,
+                    context: context,
+                    children: [
+                      if (widget.updateManager != null)
+                        ListenableBuilder(
+                          listenable: widget.updateManager!,
+                          builder: (context, _) {
+                            final updateMgr = widget.updateManager!;
+                            final hasUpdate = updateMgr.hasUpdate;
+                            final isChecking = updateMgr.isChecking;
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Version ${updateMgr.currentVersion.isNotEmpty ? 'v${updateMgr.currentVersion}' : '2.0.0'}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13.5,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    if (isChecking)
+                                      const SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    else if (hasUpdate)
+                                      ElevatedButton.icon(
+                                        onPressed: widget.onOpenUpdateDialog,
+                                        icon: const Icon(
+                                          Icons.arrow_upward_rounded,
+                                          size: 14,
+                                        ),
+                                        label: Text(
+                                          'Update to ${updateMgr.availableUpdate?.version}',
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(
+                                            0xFF10B981,
+                                          ),
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
+                                          textStyle: const TextStyle(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      )
+                                    else
+                                      OutlinedButton.icon(
+                                        onPressed:
+                                            () => updateMgr.checkForUpdates(
+                                              silent: false,
+                                            ),
+                                        icon: const Icon(
+                                          Icons.refresh_rounded,
+                                          size: 14,
+                                        ),
+                                        label: const Text('Check for Updates'),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 6,
+                                          ),
+                                          textStyle: const TextStyle(
+                                            fontSize: 11.5,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (!hasUpdate &&
+                                    !isChecking &&
+                                    updateMgr.errorMessage == null) ...[
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle_outline_rounded,
+                                        size: 14,
+                                        color: Color(0xFF10B981),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Clash Forge is up to date',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          color: theme.colorScheme.onSurface
+                                              .withValues(alpha: 0.6),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                if (updateMgr.errorMessage != null) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    updateMgr.errorMessage!,
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      color: Color(0xFFEF4444),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
+                        )
+                      else
+                        Row(
+                          children: [
+                            const Text('Clash Forge macOS Universal'),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'v2.0.0',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ],

@@ -10,10 +10,12 @@ import 'models/app_info.dart';
 import 'widgets/log_drawer.dart';
 import 'widgets/settings_drawer.dart';
 import 'widgets/forge_view.dart';
+import 'widgets/update_dialog.dart';
 
 import 'managers/subscription_manager.dart';
 import 'managers/settings_manager.dart';
 import 'managers/profile_manager.dart';
+import 'managers/update_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +45,7 @@ class MyAppState extends State<MyApp> {
   final SubscriptionManager _subscriptionManager = SubscriptionManager();
   final SettingsManager _settingsManager = SettingsManager();
   final ProfileManager _profileManager = ProfileManager();
+  final UpdateManager _updateManager = UpdateManager();
 
   // UI State
   int? _hoveredLogIndex;
@@ -57,6 +60,7 @@ class MyAppState extends State<MyApp> {
     _appInfo = widget.appInfo;
     _subscriptionManager.init();
     _settingsManager.init();
+    _updateManager.init(_appInfo.appVersion);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
@@ -70,6 +74,7 @@ class MyAppState extends State<MyApp> {
     _subscriptionManager.dispose();
     _settingsManager.dispose();
     _profileManager.dispose();
+    _updateManager.dispose();
     super.dispose();
   }
 
@@ -183,30 +188,82 @@ class MyAppState extends State<MyApp> {
             ),
           ),
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [primary.withValues(alpha: 0.85), primary],
-              ),
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: primary.withValues(alpha: 0.25),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
+          ListenableBuilder(
+            listenable: _updateManager,
+            builder: (context, _) {
+              if (_updateManager.hasUpdate) {
+                return InkWell(
+                  onTap: () => _showUpdateDialog(context),
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF10B981), Color(0xFF059669)],
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF10B981,
+                          ).withValues(alpha: 0.35),
+                          blurRadius: 6,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.arrow_upward_rounded,
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "Update to ${_updateManager.availableUpdate?.version}",
+                          style: const TextStyle(
+                            fontSize: 10.5,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [primary.withValues(alpha: 0.85), primary],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primary.withValues(alpha: 0.25),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Text(
-              "v${_appInfo.appVersion}",
-              style: const TextStyle(
-                fontSize: 10.5,
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
-              ),
-            ),
+                child: Text(
+                  "v${_appInfo.appVersion}",
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -251,6 +308,13 @@ class MyAppState extends State<MyApp> {
     );
   }
 
+  void _showUpdateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => UpdateDialog(updateManager: _updateManager),
+    );
+  }
+
   Widget _buildLogDrawer(BuildContext context) {
     return ListenableBuilder(
       listenable: _subscriptionManager,
@@ -292,6 +356,8 @@ class MyAppState extends State<MyApp> {
           onUrlTestIntervalChanged: _settingsManager.setUrlTestInterval,
           onUrlTestToleranceChanged: _settingsManager.setUrlTestTolerance,
           onUrlTestLazyChanged: _settingsManager.setUrlTestLazy,
+          updateManager: _updateManager,
+          onOpenUpdateDialog: () => _showUpdateDialog(context),
         );
       },
     );
