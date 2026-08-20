@@ -2,8 +2,15 @@ name: Release macOS
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*.*.*'
+    paths-ignore:
+      - '**.md'
+      - 'screenshots/**'
+      - 'LICENSE'
+      - '.gitignore'
   workflow_dispatch:
     inputs:
       version_override:
