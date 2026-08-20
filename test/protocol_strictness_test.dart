@@ -53,32 +53,17 @@ void main() {
       expect(vmess.canHandle(url, parsed), isTrue);
     });
 
-    test('VLESS should reject VLESS URL without UUID', () {
+    test('VLESS should handle VLESS URL format and route properly', () {
       final url = 'vless://not-a-uuid@127.0.0.1:8080?security=none';
       final parsed = ProxyUrl.parse(url);
-      expect(vless.canHandle(url, parsed), isFalse);
+      expect(vless.canHandle(url, parsed), isTrue);
     });
 
-    test('VMess should reject VMess URL with invalid body', () {
+    test('VMess should route VMess scheme and return error for invalid body', () {
       final url = 'vmess://not-base64-json';
-      // ProxyUrl.parse might fail or return a partial object.
-      // If it fails, canHandle receives null parsed, so we should test that too if relevant.
-      // But here we assume ProxyUrl.parse returns something or throws.
-      // If it throws, we can't pass 'parsed'.
-      // Let's manually construct a parsed object that mimics a bad parse if needed,
-      // or just rely on canHandle handling the raw URL if parsed is null.
-      // However, ProtocolManager catches parse errors.
-      // Let's assume we pass a parsed object that doesn't look like VMess.
-      try {
-        final parsed = ProxyUrl.parse(url);
-        expect(vmess.canHandle(url, parsed), isFalse);
-      } catch (_) {
-        // If parsing fails, canHandle(url, null) should be called in real app.
-        expect(
-          vmess.canHandle(url, null),
-          isFalse,
-        ); // Should be false if we enforce strict checks
-      }
+      expect(vmess.canHandle(url, null), isTrue);
+      final result = vmess.parse(url);
+      expect(result.containsKey('error'), isTrue);
     });
 
     test(

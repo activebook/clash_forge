@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path;
 class SpeedTestService {
   Process? _currentProcess;
   File? _tempScriptFile;
+  File? _tempWebrtcFile;
 
   /// Runs the speedtest script and returns a stream of output lines.
   Stream<String> runSpeedTest() async* {
@@ -15,25 +16,34 @@ class SpeedTestService {
     cancel();
 
     try {
-      // Load the bundled script asset
+      // Load the bundled script assets
       final scriptContent = await rootBundle.loadString(
         'assets/scripts/speedtest.sh',
       );
+      String? webrtcContent;
+      try {
+        webrtcContent = await rootBundle.loadString(
+          'assets/scripts/webrtc_check.py',
+        );
+      } catch (_) {}
 
       // Create a temporary file to execute the script
       final tempDir = Directory.systemTemp;
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
       _tempScriptFile = File(
-        path.join(
-          tempDir.path,
-          'speedtest_${DateTime.now().millisecondsSinceEpoch}.sh',
-        ),
+        path.join(tempDir.path, 'speedtest_$timestamp.sh'),
       );
 
       // Write script content to temp file
       await _tempScriptFile!.writeAsString(scriptContent);
-
-      // Make the script executable
       await Process.run('chmod', ['+x', _tempScriptFile!.path]);
+
+      // Write webrtc_check.py to temp dir if available
+      if (webrtcContent != null && webrtcContent.isNotEmpty) {
+        _tempWebrtcFile = File(path.join(tempDir.path, 'webrtc_check.py'));
+        await _tempWebrtcFile!.writeAsString(webrtcContent);
+        await Process.run('chmod', ['+x', _tempWebrtcFile!.path]);
+      }
 
       // Start the bash process
       _currentProcess = await Process.start('bash', [
@@ -83,6 +93,16 @@ class SpeedTestService {
         }
       });
       _tempScriptFile = null;
+    }
+    if (_tempWebrtcFile != null) {
+      _tempWebrtcFile!.exists().then((exists) async {
+        if (exists) {
+          try {
+            await _tempWebrtcFile!.delete();
+          } catch (_) {}
+        }
+      });
+      _tempWebrtcFile = null;
     }
   }
 

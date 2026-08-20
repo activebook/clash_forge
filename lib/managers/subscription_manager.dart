@@ -90,6 +90,22 @@ class SubscriptionManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Reorder subscription
+  Future<void> reorderSubscriptions(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 || oldIndex >= _subscriptions.length) return;
+    if (newIndex < 0 || newIndex > _subscriptions.length) return;
+
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    if (oldIndex == newIndex) return;
+
+    final item = _subscriptions.removeAt(oldIndex);
+    _subscriptions.insert(newIndex, item);
+    await _saveSubscriptions();
+    notifyListeners();
+  }
+
   // Validate URL (Async)
   Future<void> validateSubscriptionUrl(String url) async {
     if (url.isEmpty) return;

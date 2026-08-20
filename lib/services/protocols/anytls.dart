@@ -21,8 +21,16 @@ class AnyTlsProtocol implements Protocol {
       final proxy = parsed ?? ProxyUrl.parse(url);
       if (proxy == null) throw FormatException('Failed to parse URL');
 
-      if (!UUIDUtils.isValid(proxy.id)) {
-        throw ArgumentError('AnyTLS requires valid UUID, got: ${proxy.id}');
+      String uuid = proxy.id;
+      String password = proxy.id;
+      if (proxy.id.contains(':')) {
+        final parts = proxy.id.split(':');
+        uuid = parts[0];
+        password = parts.sublist(1).join(':');
+      }
+
+      if (!UUIDUtils.isValid(uuid)) {
+        throw ArgumentError('AnyTLS requires valid UUID, got: $uuid');
       }
 
       Map<String, dynamic> serverInfo = {
@@ -35,8 +43,8 @@ class AnyTlsProtocol implements Protocol {
         'name': proxy.remark ?? proxy.address,
         'server': proxy.address,
         'port': proxy.port,
-        'uuid': proxy.id,
-        'password': proxy.id,
+        'uuid': uuid,
+        'password': password,
       };
 
       final params = proxy.params;

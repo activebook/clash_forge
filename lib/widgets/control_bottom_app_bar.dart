@@ -24,106 +24,169 @@ class ControlBottomAppBar extends StatelessWidget {
       ];
 
   void _showBottomSheet(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     showModalBottomSheet(
       context: context,
-      isScrollControlled:
-          true, //a maximum height limit of approximately 60% of the screen height. If you need a taller sheet, you can use the isScrollControlled: true parameter
+      isScrollControlled: true,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.75,
+            maxHeight: MediaQuery.of(context).size.height * 0.78,
           ),
-          child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag Handle
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.help_outline_rounded,
+                      color: theme.colorScheme.primary,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Clash Forge User Guide',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildGuideItem(
+                      icon: Icons.file_upload_outlined,
+                      color: const Color(0xFF6366F1),
+                      title: 'Import & Batch Management',
+                      subtitle: 'Load subscription URLs from a file (one URL per line) or drag & drop configuration files directly into the window.',
+                      context: context,
+                    ),
+                    _buildGuideItem(
+                      icon: Icons.file_download_outlined,
+                      color: const Color(0xFF10B981),
+                      title: 'Export Subscriptions',
+                      subtitle: 'Backup and save all configured subscription links and custom paths to an export file.',
+                      context: context,
+                    ),
+                    _buildGuideItem(
+                      icon: Icons.toggle_on_outlined,
+                      color: const Color(0xFF0EA5E9),
+                      title: 'Profile Activation & Switching',
+                      subtitle: 'Toggle the switch beside any profile to activate it in Clash. Includes automatic real-time latency ping badges.',
+                      context: context,
+                    ),
+                    _buildGuideItem(
+                      icon: Icons.speed_rounded,
+                      color: const Color(0xFF8B5CF6),
+                      title: 'Multi-threaded Speed & WebRTC Audit',
+                      subtitle: 'Run multi-stream speed testing and WebRTC leak prevention checks with live telemetry cards.',
+                      context: context,
+                    ),
+                    _buildGuideItem(
+                      icon: Icons.dns_outlined,
+                      color: const Color(0xFFF59E0B),
+                      title: 'DNS Resolution Engine',
+                      subtitle: 'Pre-resolve domains using DNSPub, Tencent, Cloudflare, Google, or CNNIC to circumvent DNS poisoning.',
+                      context: context,
+                    ),
+                    _buildGuideItem(
+                      icon: Icons.hub_outlined,
+                      color: const Color(0xFFEC4899),
+                      title: 'All Modern Protocols Supported',
+                      subtitle: 'Full support for VLESS, VMess, Trojan, Shadowsocks, ShadowsocksR, Hysteria2, TUIC, AnyTLS, and WireGuard.',
+                      context: context,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGuideItem({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required BuildContext context,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'How to use',
-                  //style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: const Icon(Icons.upload),
-                  title: const Text('Import Subscriptions'),
-                  subtitle: Text(
-                    'Load subscription URLs from a file, where each line contains a single URL.',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.5,
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.share),
-                  title: const Text('Export Subscriptions'),
-                  subtitle: Text(
-                    'Save all added subscription URLs to a file, with each URL on a separate line.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.fast_forward),
-                  title: const Text('Process All Subscriptions'),
-                  subtitle: Text(
-                    'Retrieve and format all protocols from all added subscription URLs.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.toggle_on_outlined),
-                  title: const Text('Switch Profile Activation'),
-                  subtitle: Text(
-                    'Toggle the switch next to each subscription to activate its profile in Clash. Only one profile can be active at a time — switching to a new profile automatically deactivates the previous one.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.dns_outlined),
-                  title: const Text('Auto-resolve DNS'),
-                  subtitle: Text(
-                    'Enable DNS resolution in Settings to automatically convert server domains to IP addresses. This improves reliability when DNS is blocked but IP addresses remain accessible. Choose DNSPub, Tencent, or CNNIC as your primary DNS provider for optimal performance in China.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.speed_outlined),
-                  title: const Text('Network Speed Test'),
-                  subtitle: Text(
-                    'Multi-threaded speed test with auto proxy scan, parallel CDN downloads, live latency/IP/ISP stats, and color-coded throughput results.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.folder_outlined),
-                  title: const Text('Subscriptions Target Path'),
-                  subtitle: Text(
-                    'Process all subscription protocols in YAML format and save them in the specified folder.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.notifications_outlined),
-                  title: const Text('Logs of processing'),
-                  subtitle: Text(
-                    'Logs record all subscription processing results, hover over each log to see the detail.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.format_align_center),
-                  title: const Text('Supported Formats'),
-                  subtitle: Text(
-                    'Includes VMess, VLess, Trojan, Shadowsocks(R), Hysteria2, TUIC, and AnyTLS protocols. VMess provides secure, efficient data transmission; VLess offers similar benefits with enhanced performance; Trojan is optimized for stealth and reliability; Shadowsocks is renowned for its simplicity and strong encryption; Hysteria2 delivers excellent obfuscation with top performance; TUIC uses QUIC for low latency; and AnyTLS offers versatile TLS wrapping.',
-                    style: Theme.of(context).textTheme.bodySmall,
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -134,32 +197,32 @@ class ControlBottomAppBar extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Builder(
-            builder:
-                (buttonContext) => IconButton(
-                  onPressed: () {
-                    // Show speedtest dialog
-                    showDialog(
-                      context: buttonContext,
-                      barrierDismissible: false,
-                      builder: (context) => const SpeedTestDialog(),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.speed_outlined,
-                    color:
-                        Theme.of(context).extension<AppColors>()?.forwardAction,
-                    size: 24,
-                  ),
-                  tooltip: 'Network Speed Test',
-                ),
+            builder: (buttonContext) => IconButton(
+              onPressed: () {
+                showDialog(
+                  context: buttonContext,
+                  barrierDismissible: false,
+                  builder: (context) => const SpeedTestDialog(),
+                );
+              },
+              icon: Icon(
+                Icons.speed_rounded,
+                color: Theme.of(context).extension<AppColors>()?.forwardAction,
+                size: 22,
+              ),
+              tooltip: 'Network Speed Test',
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Tooltip(
             message: 'Import Subscriptions',
-            child: ElevatedButton.icon(
+            child: OutlinedButton.icon(
               onPressed: onImport,
-              icon: const Icon(Icons.upload_outlined, size: 20),
+              icon: const Icon(Icons.file_upload_outlined, size: 16),
               label: const Text('Import'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
             ),
           ),
 
@@ -167,23 +230,24 @@ class ControlBottomAppBar extends StatelessWidget {
 
           Tooltip(
             message: 'Export Subscriptions',
-            child: ElevatedButton.icon(
+            child: OutlinedButton.icon(
               onPressed: onExport,
-              icon: const Icon(Icons.share_outlined, size: 20),
+              icon: const Icon(Icons.file_download_outlined, size: 16),
               label: const Text('Export'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           IconButton(
-            onPressed: () {
-              _showBottomSheet(context);
-            },
+            onPressed: () => _showBottomSheet(context),
             icon: Icon(
-              Icons.help_outline,
+              Icons.help_outline_rounded,
               color: Theme.of(context).extension<AppColors>()?.folderAction,
-              size: 24,
+              size: 22,
             ),
-            tooltip: 'How to use',
+            tooltip: 'User Guide',
           ),
         ],
       ),

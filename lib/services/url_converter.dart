@@ -73,7 +73,8 @@ class UrlConverter {
             final filePath = scriptionUrl.trim();
             final parentDir = path.basename(path.dirname(filePath));
             final baseName = path.basenameWithoutExtension(filePath);
-            fileName = '${parentDir}_$baseName.yaml';
+            final sanitizedName = _sanitizeFileName('${parentDir}_$baseName');
+            fileName = '$sanitizedName.yaml';
           } else {
             throw Exception('File not found: $scriptionUrl');
           }
@@ -185,7 +186,8 @@ class UrlConverter {
       // Create a mutable copy of the proxy-groups list first
       config['proxy-groups'] = List<dynamic>.from(config['proxy-groups']);
 
-      for (int i = 0; i < 2; i++) {
+      int groupsToPopulate = min(2, (config['proxy-groups'] as List).length);
+      for (int i = 0; i < groupsToPopulate; i++) {
         // Create mutable copy of each group
         config['proxy-groups'][i] = Map<String, dynamic>.from(
           config['proxy-groups'][i],
@@ -461,7 +463,7 @@ class UrlConverter {
 
       if (_needResolveDns) {
         final hostname = server['server'];
-        if (!isIpAddressFast(hostname)) {
+        if (hostname is String && !isIpAddressFast(hostname)) {
           // If not IP address
           final ipAddresses = await getDnsIpAddresses(
             hostname,
@@ -471,6 +473,34 @@ class UrlConverter {
             final resolvedIp = ipAddresses.first;
             // Check if the resolved result is actually an IP address
             if (isIpAddressFast(resolvedIp)) {
+              // Preserve original hostname as SNI if TLS is enabled and SNI is missing
+              final bool isTls = server['tls'] == true ||
+                  server['security'] == 'tls' ||
+                  server['security'] == 'reality';
+              if (isTls) {
+                if (server['sni'] == null || server['sni'].toString().isEmpty) {
+                  server['sni'] = hostname;
+                }
+                if (server['servername'] == null ||
+                    server['servername'].toString().isEmpty) {
+                  server['servername'] = hostname;
+                }
+              }
+
+              // Preserve original hostname for WebSocket headers if present
+              if (server.containsKey('ws-opts') && server['ws-opts'] is Map) {
+                final wsOpts = server['ws-opts'] as Map<String, dynamic>;
+                if (wsOpts.containsKey('headers') && wsOpts['headers'] is Map) {
+                  final headers = wsOpts['headers'] as Map<String, dynamic>;
+                  if (headers['Host'] == null ||
+                      headers['Host'].toString().isEmpty) {
+                    headers['Host'] = hostname;
+                  }
+                } else if (!wsOpts.containsKey('headers')) {
+                  wsOpts['headers'] = {'Host': hostname};
+                }
+              }
+
               server['server'] = resolvedIp;
               _addLog('DNS resolved: $hostname -> $resolvedIp', LogLevel.info);
             } else {

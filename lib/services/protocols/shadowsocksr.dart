@@ -9,6 +9,19 @@ class ShadowsocksRProtocol implements Protocol {
   @override
   String get name => 'ssr';
 
+  static String _safeDecodeBase64(String input) {
+    if (input.isEmpty) return '';
+    try {
+      return Base64Utils.decodeToUtf8(input);
+    } catch (_) {
+      try {
+        return Uri.decodeComponent(input);
+      } catch (_) {
+        return input;
+      }
+    }
+  }
+
   @override
   bool canHandle(String url, ProxyUrl? parsed) {
     if (parsed != null) {
@@ -29,21 +42,21 @@ class ShadowsocksRProtocol implements Protocol {
       String method = parsed.params['method']!;
       String obfs = parsed.params['obfs']!;
       String passwordBase64 = parsed.params['password-base64']!;
-      String password = Base64Utils.decodeToUtf8(passwordBase64);
+      String password = _safeDecodeBase64(passwordBase64);
 
       String name = server;
       if (parsed.params.containsKey('remarks')) {
-        name = Base64Utils.decodeToUtf8(parsed.params['remarks']!);
+        name = _safeDecodeBase64(parsed.params['remarks']!);
       }
 
       String protocolParam = '';
       if (parsed.params.containsKey('protoparam')) {
-        protocolParam = Base64Utils.decodeToUtf8(parsed.params['protoparam']!);
+        protocolParam = _safeDecodeBase64(parsed.params['protoparam']!);
       }
 
       String obfsParam = '';
       if (parsed.params.containsKey('obfsparam')) {
-        obfsParam = Base64Utils.decodeToUtf8(parsed.params['obfsparam']!);
+        obfsParam = _safeDecodeBase64(parsed.params['obfsparam']!);
       }
 
       // Cipher compatibility
@@ -108,13 +121,16 @@ class ShadowsocksRProtocol implements Protocol {
       return {'type': 'ssr', 'error': 'Invalid SSR format: insufficient parts'};
     }
 
-    String server = parts[0];
-    int port = int.tryParse(parts[1]) ?? 0;
-    String protocol = parts[2];
-    String method = parts[3];
-    String obfs = parts[4];
-    String passwordBase64 = parts[5];
-    String password = Base64Utils.decodeToUtf8(passwordBase64);
+    String passwordBase64 = parts.last;
+    String obfs = parts[parts.length - 2];
+    String method = parts[parts.length - 3];
+    String protocol = parts[parts.length - 4];
+    int port = int.tryParse(parts[parts.length - 5]) ?? 0;
+    String server = parts.sublist(0, parts.length - 5).join(':');
+    if (server.startsWith('[') && server.endsWith(']')) {
+      server = server.substring(1, server.length - 1);
+    }
+    String password = _safeDecodeBase64(passwordBase64);
 
     Map<String, String> params = {};
     if (queryPart.isNotEmpty) {
@@ -131,17 +147,17 @@ class ShadowsocksRProtocol implements Protocol {
 
     String name = server;
     if (params.containsKey('remarks')) {
-      name = Base64Utils.decodeToUtf8(params['remarks']!);
+      name = _safeDecodeBase64(params['remarks']!);
     }
 
     String protocolParam = '';
     if (params.containsKey('protoparam')) {
-      protocolParam = Base64Utils.decodeToUtf8(params['protoparam']!);
+      protocolParam = _safeDecodeBase64(params['protoparam']!);
     }
 
     String obfsParam = '';
     if (params.containsKey('obfsparam')) {
-      obfsParam = Base64Utils.decodeToUtf8(params['obfsparam']!);
+      obfsParam = _safeDecodeBase64(params['obfsparam']!);
     }
 
     // Right now ClashX Meta doesn't support chacha20-ietf-poly1305 and rc4
@@ -149,7 +165,6 @@ class ShadowsocksRProtocol implements Protocol {
       method = 'chacha20-ietf';
     } else if (method == 'rc4') {
       method = 'rc4-md5';
-      //return {'type': 'ssr', 'error': 'Unsupported cipher for SSR: $method'};
     }
 
     return {
@@ -177,15 +192,12 @@ class ShadowsocksRParser implements ProtocolParser {
     final protocolSeparator = url.indexOf('://');
     String urlContent = url.substring(protocolSeparator + 3);
 
-    // Convert URL-safe base64 to standard base64
-    String ssrContent = urlContent.replaceAll('-', '+').replaceAll('_', '/');
-
-    // Fix padding
-    while (ssrContent.length % 4 != 0) {
-      ssrContent += '=';
+    String decoded;
+    try {
+      decoded = Base64Utils.decodeToUtf8(urlContent);
+    } catch (e) {
+      throw ArgumentError('Invalid Base64 in SSR URL: $e');
     }
-
-    final decoded = utf8.decode(base64.decode(ssrContent));
 
     // SSR format: server:port:protocol:method:obfs:password_base64/?params
     int queryIndex = decoded.indexOf('/?');
@@ -204,20 +216,23 @@ class ShadowsocksRParser implements ProtocolParser {
     List<String> parts = mainPart.split(':');
     if (parts.length < 6) {
       throw ArgumentError(
-        'Invalid SSR format: expected 6 parts, got ${parts.length}',
+        'Invalid SSR format: expected at least 6 parts, got ${parts.length}',
       );
     }
 
-    String server = parts[0];
-    int port = int.tryParse(parts[1]) ?? 0;
+    String passwordBase64 = parts.last;
+    String obfs = parts[parts.length - 2];
+    String method = parts[parts.length - 3];
+    String ssrProtocol = parts[parts.length - 4];
+    int port = int.tryParse(parts[parts.length - 5]) ?? 0;
+    String server = parts.sublist(0, parts.length - 5).join(':');
+    if (server.startsWith('[') && server.endsWith(']')) {
+      server = server.substring(1, server.length - 1);
+    }
+
     if (port < 1 || port > 65535) {
       throw ArgumentError('Invalid SSR port: $port');
     }
-
-    String ssrProtocol = parts[2];
-    String method = parts[3];
-    String obfs = parts[4];
-    String passwordBase64 = parts[5];
 
     // Store SSR-specific fields in params
     params['ssr-protocol'] = ssrProtocol;

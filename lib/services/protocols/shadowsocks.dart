@@ -52,13 +52,30 @@ class ShadowsocksProtocol implements Protocol {
 
       // --- 1. Parse UserInfo (3 formats) ---
       if (!ssUrl.contains('@')) {
-        // Format: ss://BASE64(...)
-        final base64Part = ssUrl.substring(5);
+        // Format: ss://BASE64(...) or ss://BASE64/?plugin=...
+        final basePartAndQuery = ssUrl.substring(5);
+        String base64Part = basePartAndQuery;
+        String extraQuery = '';
+
+        final queryIndex = basePartAndQuery.indexOf('?');
+        if (queryIndex != -1) {
+          base64Part = basePartAndQuery.substring(0, queryIndex);
+          extraQuery = basePartAndQuery.substring(queryIndex + 1);
+          if (base64Part.endsWith('/')) {
+            base64Part = base64Part.substring(0, base64Part.length - 1);
+          }
+        } else if (base64Part.endsWith('/')) {
+          base64Part = base64Part.substring(0, base64Part.length - 1);
+        }
+
         try {
           final decoded = Base64Utils.decodeToUtf8(base64Part);
-          // If decoded string contains another ss://, it's recursive? No.
-          // It should be method:password@server:port
-          uri = Uri.parse('ss://$decoded');
+          String fullDecoded = 'ss://$decoded';
+          if (extraQuery.isNotEmpty) {
+            fullDecoded +=
+                fullDecoded.contains('?') ? '&$extraQuery' : '?$extraQuery';
+          }
+          uri = Uri.parse(fullDecoded);
           final userInfoParts = uri.userInfo.split(':');
           if (userInfoParts.length >= 2) {
             method = userInfoParts[0];
@@ -254,7 +271,7 @@ class ShadowsocksParser extends CommonProtocolParser {
         final decodedId = utf8.decode(
           base64.decode(Base64Utils.fixPadding(id)),
         );
-        final colonIndex = decodedId.lastIndexOf(':');
+        final colonIndex = decodedId.indexOf(':');
         if (colonIndex != -1) {
           params['method'] = decodedId.substring(0, colonIndex);
           params['password'] = decodedId.substring(colonIndex + 1);
