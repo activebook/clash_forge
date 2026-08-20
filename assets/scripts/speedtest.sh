@@ -64,7 +64,7 @@ parse_args() {
 }
 
 check_dependencies() {
-    local deps=(curl ping awk bc)
+    local deps=(curl ping awk bc jq python3)
     for cmd in "${deps[@]}"; do
         if ! command -v "$cmd" &>/dev/null; then
             log_error "Missing required command: $cmd"
@@ -78,7 +78,7 @@ detect_proxy() {
     log_info "Auto-detecting proxy configuration..."
     
     # Check clash ports first
-    local ports=("7890" "7891" "7892" "1080" "1081" "8080" "8888" "12334" "12335")
+    local ports=("7890" "7891" "7892" "1080" "1081" "8080" "8888")
     for port in "${ports[@]}"; do
         if (echo > /dev/tcp/127.0.0.1/$port) >/dev/null 2>&1; then
             if curl -s --proxy "socks5://127.0.0.1:$port" --max-time 1 "http://www.google.com/generate_204" &>/dev/null; then
@@ -108,24 +108,48 @@ detect_proxy() {
 # ==========================================
 
 get_ip_info() {
-    log_info "Fetching Network Information..."
+    log_info "Fetching Detailed Network Information..."
     
-    local cmd=(curl -s --max-time 5)
+    local cmd=(curl -s --max-time 10)
     if [[ -n "$PROXY" ]]; then cmd+=(--proxy "$PROXY"); fi
-    cmd+=("ipinfo.io/json")
+    cmd+=("https://ipwho.is/")
 
     local json
     json=$("${cmd[@]}" 2>/dev/null)
 
-    MY_IP=$(echo "$json" | awk -F'"' '/"ip":/ {print $4}')
-    MY_CITY=$(echo "$json" | awk -F'"' '/"city":/ {print $4}')
-    MY_REGION=$(echo "$json" | awk -F'"' '/"region":/ {print $4}')
-    MY_COUNTRY=$(echo "$json" | awk -F'"' '/"country":/ {print $4}')
-    MY_ISP=$(echo "$json" | awk -F'"' '/"org":/ {print $4}')
+    if [[ -z "$json" ]] || [[ "$(echo "$json" | jq -r '.success')" != "true" ]]; then
+        log_warning "Failed to fetch info from ipwho.is, trying fallback..."
+        # Fallback to ipinfo.io if ipwho.is fails
+        local fallback_cmd=(curl -s --max-time 5)
+        if [[ -n "$PROXY" ]]; then fallback_cmd+=(--proxy "$PROXY"); fi
+        fallback_cmd+=("ipinfo.io/json")
+        json=$("${fallback_cmd[@]}" 2>/dev/null)
+        
+        MY_IP=$(echo "$json" | jq -r '.ip // "Unknown"')
+        MY_CITY=$(echo "$json" | jq -r '.city // "Unknown"')
+        MY_REGION=$(echo "$json" | jq -r '.region // "Unknown"')
+        MY_COUNTRY=$(echo "$json" | jq -r '.country // "Unknown"')
+        MY_CONTINENT="Unknown"
+        MY_ISP=$(echo "$json" | jq -r '.org // "Unknown"')
+        MY_ASN="Unknown"
+        MY_TIMEZONE=$(echo "$json" | jq -r '.timezone // "Unknown"')
+        MY_FLAG=""
+    else
+        MY_IP=$(echo "$json" | jq -r '.ip // "Unknown"')
+        MY_CITY=$(echo "$json" | jq -r '.city // "Unknown"')
+        MY_REGION=$(echo "$json" | jq -r '.region // "Unknown"')
+        MY_COUNTRY=$(echo "$json" | jq -r '.country // "Unknown"')
+        MY_CONTINENT=$(echo "$json" | jq -r '.continent // "Unknown"')
+        MY_ISP=$(echo "$json" | jq -r '.connection.isp // "Unknown"')
+        MY_ASN=$(echo "$json" | jq -r '.connection.asn // "Unknown"')
+        MY_TIMEZONE=$(echo "$json" | jq -r '.timezone.id // "Unknown"')
+        MY_FLAG=$(echo "$json" | jq -r '.flag.emoji // ""')
+    fi
 
-    MY_IP=${MY_IP:-"Unknown"}
-    MY_ISP=${MY_ISP:-"Unknown"}
-    MY_LOC="${MY_CITY:-Unknown}, ${MY_COUNTRY:-Unknown}"
+    MY_LOC="${MY_CITY}, ${MY_COUNTRY}"
+    
+    log_info "Performing WebRTC Leak Check (UDP)..."
+    WEBRTC_IP=$(python3 webrtc_check.py 2>/dev/null || echo "Unknown")
 }
 
 test_ping() {
@@ -194,6 +218,8 @@ run_report() {
         "https://speed.cloudflare.com/__down?bytes=${bytes_size}|Cloudflare CDN"
         "http://speedtest.tele2.net/${FILE_SIZE}.zip|Tele2 (Europe)"
         "https://proof.ovh.net/files/${FILE_SIZE/MB/Mb}.dat|OVH Hosting"
+        "https://hnd-jp-ping.vultr.com/vultr.com.100MB.bin|Vultr (Tokyo)"
+        "https://storage.googleapis.com/chromium-browser-snapshots/Linux_x64/1399000/chrome-linux.zip|YouTube/Google"
     )
 
     local total_speed=0
@@ -254,8 +280,23 @@ run_report() {
     # Network Details
     echo -e "${YELLOW}Network Details:${NC}" >&2
     printf "  %-14s : %s\\n" "Public IP" "$MY_IP" >&2
-    printf "  %-14s : %s\\n" "Location" "${MY_LOC:0:31}" >&2
-    printf "  %-14s : %s\\n" "Provider" "${MY_ISP:0:31}" >&2
+    printf "  %-14s : %s %s\\n" "Location" "$MY_FLAG" "$MY_LOC" >&2
+    printf "  %-14s : %s (%s)\\n" "Region" "$MY_REGION" "$MY_CONTINENT" >&2
+    printf "  %-14s : %s (AS%s)\\n" "Provider" "$MY_ISP" "$MY_ASN" >&2
+    printf "  %-14s : %s\\n" "Timezone" "$MY_TIMEZONE" >&2
+    
+    # WebRTC Leak Check
+    if [[ "$WEBRTC_IP" != "Unknown" ]]; then
+        if [[ "$MY_IP" != "$WEBRTC_IP" ]]; then
+            printf "  %-14s : ${RED}%s${NC} (via UDP)\\n" "WebRTC IP" "$WEBRTC_IP" >&2
+            printf "  %-14s : ${RED}⚠️  LEAK DETECTED${NC}\\n" "Leak Status" >&2
+        else
+            printf "  %-14s : ${GREEN}%s${NC}\\n" "WebRTC IP" "$WEBRTC_IP" >&2
+            printf "  %-14s : ${GREEN}SECURE${NC}\\n" "Leak Status" >&2
+        fi
+    else
+        printf "  %-14s : ${YELLOW}Check Failed${NC}\\n" "WebRTC IP" >&2
+    fi
     
     if [[ -n "$PROXY" ]]; then
         printf "  %-14s : ${PURPLE}%s${NC}\\n" "Proxy" "ON (Active)" >&2
