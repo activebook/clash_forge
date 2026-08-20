@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'protocol.dart';
 import 'protocol_parser.dart';
 import 'protocol_validator.dart';

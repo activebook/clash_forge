@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../themes.dart';
-import '../constants.dart';
 
 class SettingsDrawer extends StatefulWidget {
   final bool initialUseDns;
@@ -98,17 +96,24 @@ class SettingsDrawerState extends State<SettingsDrawer> {
 
     return Drawer(
       width: drawerWidth,
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       child: Column(
         children: [
           // Drawer Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E293B) : Colors.white,
               border: Border(
                 bottom: BorderSide(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color:
+                      isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                 ),
               ),
             ),
@@ -163,15 +168,25 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                         dense: true,
                         title: const Text(
                           'Dark Mode',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                          ),
                         ),
                         subtitle: Text(
-                          _isDarkMode ? 'OLED Slate dark mode active' : 'Clean light mode active',
+                          _isDarkMode
+                              ? 'OLED Slate dark mode active'
+                              : 'Clean light mode active',
                           style: theme.textTheme.bodySmall,
                         ),
                         secondary: Icon(
-                          _isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                          color: _isDarkMode ? const Color(0xFF818CF8) : const Color(0xFFF59E0B),
+                          _isDarkMode
+                              ? Icons.dark_mode_rounded
+                              : Icons.light_mode_rounded,
+                          color:
+                              _isDarkMode
+                                  ? const Color(0xFF818CF8)
+                                  : const Color(0xFFF59E0B),
                           size: 20,
                         ),
                         value: _isDarkMode,
@@ -195,7 +210,10 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                         dense: true,
                         title: const Text(
                           'Auto-Resolve DNS',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                          ),
                         ),
                         subtitle: Text(
                           'Pre-resolve domains to IPs to prevent local DNS poisoning',
@@ -219,25 +237,32 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                         Wrap(
                           spacing: 6,
                           runSpacing: 6,
-                          children: _dnsProviders.map((provider) {
-                            final isSelected = _selectedDnsProvider == provider;
-                            return ChoiceChip(
-                              label: Text(provider),
-                              labelStyle: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                color: isSelected ? Colors.white : null,
-                              ),
-                              selected: isSelected,
-                              selectedColor: theme.colorScheme.primary,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() => _selectedDnsProvider = provider);
-                                  widget.onDnsProviderChanged(provider);
-                                }
-                              },
-                            );
-                          }).toList(),
+                          children:
+                              _dnsProviders.map((provider) {
+                                final isSelected =
+                                    _selectedDnsProvider == provider;
+                                return ChoiceChip(
+                                  label: Text(provider),
+                                  labelStyle: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight:
+                                        isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                    color: isSelected ? Colors.white : null,
+                                  ),
+                                  selected: isSelected,
+                                  selectedColor: theme.colorScheme.primary,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(
+                                        () => _selectedDnsProvider = provider,
+                                      );
+                                      widget.onDnsProviderChanged(provider);
+                                    }
+                                  },
+                                );
+                              }).toList(),
                         ),
                       ],
                     ],
@@ -255,7 +280,10 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                         dense: true,
                         title: const Text(
                           'Enable TUN Mode',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                          ),
                         ),
                         subtitle: Text(
                           'Route all operating system traffic via virtual adapter',
@@ -278,15 +306,33 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildPresetButton('Responsive', 30, 50, false, context),
+                            child: _buildPresetButton(
+                              'Responsive',
+                              30,
+                              50,
+                              false,
+                              context,
+                            ),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: _buildPresetButton('Balanced', 60, 100, false, context),
+                            child: _buildPresetButton(
+                              'Balanced',
+                              60,
+                              100,
+                              false,
+                              context,
+                            ),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: _buildPresetButton('Stable', 300, 150, true, context),
+                            child: _buildPresetButton(
+                              'Stable',
+                              300,
+                              150,
+                              true,
+                              context,
+                            ),
                           ),
                         ],
                       ),
@@ -299,7 +345,10 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                               children: [
                                 const Text(
                                   'Test Interval (s)',
-                                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12.5),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12.5,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 TextField(
@@ -326,7 +375,10 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                               children: [
                                 const Text(
                                   'Tolerance (ms)',
-                                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12.5),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12.5,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 TextField(
@@ -354,7 +406,10 @@ class SettingsDrawerState extends State<SettingsDrawer> {
                         dense: true,
                         title: const Text(
                           'Lazy URL-Test',
-                          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                          ),
                         ),
                         subtitle: Text(
                           'Test latency only when node group is accessed',
@@ -377,8 +432,17 @@ class SettingsDrawerState extends State<SettingsDrawer> {
     );
   }
 
-  Widget _buildPresetButton(String label, int interval, int tolerance, bool lazy, BuildContext context) {
-    final isCurrent = _urlTestInterval == interval && _urlTestTolerance == tolerance && _urlTestLazy == lazy;
+  Widget _buildPresetButton(
+    String label,
+    int interval,
+    int tolerance,
+    bool lazy,
+    BuildContext context,
+  ) {
+    final isCurrent =
+        _urlTestInterval == interval &&
+        _urlTestTolerance == tolerance &&
+        _urlTestLazy == lazy;
     final theme = Theme.of(context);
 
     return InkWell(
@@ -387,9 +451,12 @@ class SettingsDrawerState extends State<SettingsDrawer> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isCurrent
-              ? theme.colorScheme.primary.withValues(alpha: 0.15)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color:
+              isCurrent
+                  ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                  : theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isCurrent ? theme.colorScheme.primary : Colors.transparent,
