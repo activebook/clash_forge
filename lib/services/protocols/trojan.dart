@@ -88,7 +88,7 @@ class TrojanProtocol implements Protocol {
         ProtocolUtils.getFirstNonEmptyValue(params, [
           'skip-cert-verify',
           'allowInsecure',
-        ], defaultValue: 'true'),
+        ], defaultValue: 'false'),
       );
 
       final network = ProtocolUtils.getFirstNonEmptyValue(params, [
@@ -113,8 +113,15 @@ class TrojanProtocol implements Protocol {
             'headers': {'host': host},
           };
         } else {
+          final h2Opts = <String, dynamic>{};
           if (path != null && path.isNotEmpty) {
-            serverInfo['h2-opts'] = {'path': path, 'host': host};
+            h2Opts['path'] = path;
+          }
+          if (host != null && host.isNotEmpty) {
+            h2Opts['host'] = [host];
+          }
+          if (h2Opts.isNotEmpty) {
+            serverInfo['h2-opts'] = h2Opts;
           }
         }
       } else if (network == 'grpc') {

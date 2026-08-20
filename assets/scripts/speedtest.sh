@@ -64,7 +64,7 @@ parse_args() {
 }
 
 check_dependencies() {
-    local deps=(curl ping awk bc jq python3)
+    local deps=(curl ping awk bc)
     for cmd in "${deps[@]}"; do
         if ! command -v "$cmd" &>/dev/null; then
             log_error "Missing required command: $cmd"
@@ -117,39 +117,91 @@ get_ip_info() {
     local json
     json=$("${cmd[@]}" 2>/dev/null)
 
-    if [[ -z "$json" ]] || [[ "$(echo "$json" | jq -r '.success')" != "true" ]]; then
+    local is_success=""
+    if command -v jq &>/dev/null; then
+        is_success=$(echo "$json" | jq -r '.success // "false"' 2>/dev/null)
+    else
+        is_success=$(echo "$json" | grep -o '"success":[ ]*true' | head -1)
+        [[ -n "$is_success" ]] && is_success="true"
+    fi
+
+    if [[ -z "$json" ]] || [[ "$is_success" != "true" ]]; then
         log_warning "Failed to fetch info from ipwho.is, trying fallback..."
         # Fallback to ipinfo.io if ipwho.is fails
         local fallback_cmd=(curl -s --max-time 5)
         if [[ -n "$PROXY" ]]; then fallback_cmd+=(--proxy "$PROXY"); fi
-        fallback_cmd+=("ipinfo.io/json")
+        fallback_cmd+=("https://ipinfo.io/json")
         json=$("${fallback_cmd[@]}" 2>/dev/null)
         
-        MY_IP=$(echo "$json" | jq -r '.ip // "Unknown"')
-        MY_CITY=$(echo "$json" | jq -r '.city // "Unknown"')
-        MY_REGION=$(echo "$json" | jq -r '.region // "Unknown"')
-        MY_COUNTRY=$(echo "$json" | jq -r '.country // "Unknown"')
-        MY_CONTINENT="Unknown"
-        MY_ISP=$(echo "$json" | jq -r '.org // "Unknown"')
-        MY_ASN="Unknown"
-        MY_TIMEZONE=$(echo "$json" | jq -r '.timezone // "Unknown"')
-        MY_FLAG=""
+        if command -v jq &>/dev/null; then
+            MY_IP=$(echo "$json" | jq -r '.ip // "Unknown"')
+            MY_CITY=$(echo "$json" | jq -r '.city // "Unknown"')
+            MY_REGION=$(echo "$json" | jq -r '.region // "Unknown"')
+            MY_COUNTRY=$(echo "$json" | jq -r '.country // "Unknown"')
+            MY_CONTINENT="Unknown"
+            MY_ISP=$(echo "$json" | jq -r '.org // "Unknown"')
+            MY_ASN="Unknown"
+            MY_TIMEZONE=$(echo "$json" | jq -r '.timezone // "Unknown"')
+            MY_FLAG=""
+        else
+            MY_IP=$(echo "$json" | sed -n 's/.*"ip"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_CITY=$(echo "$json" | sed -n 's/.*"city"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_REGION=$(echo "$json" | sed -n 's/.*"region"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_COUNTRY=$(echo "$json" | sed -n 's/.*"country"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_CONTINENT="Unknown"
+            MY_ISP=$(echo "$json" | sed -n 's/.*"org"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_ASN="Unknown"
+            MY_TIMEZONE=$(echo "$json" | sed -n 's/.*"timezone"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_FLAG=""
+        fi
     else
-        MY_IP=$(echo "$json" | jq -r '.ip // "Unknown"')
-        MY_CITY=$(echo "$json" | jq -r '.city // "Unknown"')
-        MY_REGION=$(echo "$json" | jq -r '.region // "Unknown"')
-        MY_COUNTRY=$(echo "$json" | jq -r '.country // "Unknown"')
-        MY_CONTINENT=$(echo "$json" | jq -r '.continent // "Unknown"')
-        MY_ISP=$(echo "$json" | jq -r '.connection.isp // "Unknown"')
-        MY_ASN=$(echo "$json" | jq -r '.connection.asn // "Unknown"')
-        MY_TIMEZONE=$(echo "$json" | jq -r '.timezone.id // "Unknown"')
-        MY_FLAG=$(echo "$json" | jq -r '.flag.emoji // ""')
+        if command -v jq &>/dev/null; then
+            MY_IP=$(echo "$json" | jq -r '.ip // "Unknown"')
+            MY_CITY=$(echo "$json" | jq -r '.city // "Unknown"')
+            MY_REGION=$(echo "$json" | jq -r '.region // "Unknown"')
+            MY_COUNTRY=$(echo "$json" | jq -r '.country // "Unknown"')
+            MY_CONTINENT=$(echo "$json" | jq -r '.continent // "Unknown"')
+            MY_ISP=$(echo "$json" | jq -r '.connection.isp // "Unknown"')
+            MY_ASN=$(echo "$json" | jq -r '.connection.asn // "Unknown"')
+            MY_TIMEZONE=$(echo "$json" | jq -r '.timezone.id // "Unknown"')
+            MY_FLAG=$(echo "$json" | jq -r '.flag.emoji // ""')
+        else
+            MY_IP=$(echo "$json" | sed -n 's/.*"ip"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_CITY=$(echo "$json" | sed -n 's/.*"city"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_REGION=$(echo "$json" | sed -n 's/.*"region"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_COUNTRY=$(echo "$json" | sed -n 's/.*"country"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_CONTINENT=$(echo "$json" | sed -n 's/.*"continent"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_ISP=$(echo "$json" | sed -n 's/.*"isp"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_ASN=$(echo "$json" | sed -n 's/.*"asn"[ ]*:[ ]*\([0-9]*\).*/\1/p')
+            MY_TIMEZONE=$(echo "$json" | sed -n 's/.*"id"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+            MY_FLAG=$(echo "$json" | sed -n 's/.*"emoji"[ ]*:[ ]*"\([^"]*\)".*/\1/p')
+        fi
     fi
+
+    [[ -z "$MY_IP" ]] && MY_IP="Unknown"
+    [[ -z "$MY_CITY" ]] && MY_CITY="Unknown"
+    [[ -z "$MY_COUNTRY" ]] && MY_COUNTRY="Unknown"
+    [[ -z "$MY_REGION" ]] && MY_REGION="Unknown"
+    [[ -z "$MY_CONTINENT" ]] && MY_CONTINENT="Unknown"
+    [[ -z "$MY_ISP" ]] && MY_ISP="Unknown"
+    [[ -z "$MY_ASN" ]] && MY_ASN="Unknown"
+    [[ -z "$MY_TIMEZONE" ]] && MY_TIMEZONE="Unknown"
 
     MY_LOC="${MY_CITY}, ${MY_COUNTRY}"
     
     log_info "Performing WebRTC Leak Check (UDP)..."
-    WEBRTC_IP=$(python3 webrtc_check.py 2>/dev/null || echo "Unknown")
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if command -v python3 &>/dev/null; then
+        if [[ -f "${script_dir}/webrtc_check.py" ]]; then
+            WEBRTC_IP=$(python3 "${script_dir}/webrtc_check.py" 2>/dev/null || echo "Unknown")
+        elif [[ -f "webrtc_check.py" ]]; then
+            WEBRTC_IP=$(python3 webrtc_check.py 2>/dev/null || echo "Unknown")
+        else
+            WEBRTC_IP="Unknown"
+        fi
+    else
+        WEBRTC_IP="Unknown"
+    fi
 }
 
 test_ping() {

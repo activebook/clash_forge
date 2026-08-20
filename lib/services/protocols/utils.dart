@@ -32,8 +32,12 @@ class ProtocolUtils {
       return value == 1;
     }
     if (value is String) {
-      String lowercased = value.toLowerCase();
-      return lowercased == 'true' || lowercased == '1' || lowercased == 'yes';
+      String lowercased = value.toLowerCase().trim();
+      return lowercased == 'true' ||
+          lowercased == '1' ||
+          lowercased == 'yes' ||
+          lowercased == 'tls' ||
+          lowercased == 'reality';
     }
     return false;
   }

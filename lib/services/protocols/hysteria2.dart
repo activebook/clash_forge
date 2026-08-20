@@ -107,12 +107,19 @@ class Hysteria2Protocol implements Protocol {
         }
       }
 
-      final ca = ProtocolUtils.getFirstNonEmptyValue(params, ['ca', 'ca-str']);
+      final ca = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'ca',
+        'ca-path',
+        'ca-file',
+      ]);
       if (ca != null) {
         serverInfo['ca'] = ca;
       }
 
-      final caStr = ProtocolUtils.getFirstNonEmptyValue(params, ['ca-path']);
+      final caStr = ProtocolUtils.getFirstNonEmptyValue(params, [
+        'ca-str',
+        'ca-cert',
+      ]);
       if (caStr != null) {
         serverInfo['ca-str'] = caStr;
       }

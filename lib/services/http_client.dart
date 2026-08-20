@@ -21,8 +21,10 @@ class ProxyService {
     'com.activebook.clash_forge/settings',
   );
 
-  Future<Map<String, dynamic>> getSystemProxySettings() async {
-    if (_proxySettings == null) {
+  Future<Map<String, dynamic>> getSystemProxySettings({
+    bool forceRefresh = false,
+  }) async {
+    if (_proxySettings == null || forceRefresh) {
       try {
         final result = await channelSettings.invokeMethod('getProxySettings');
         _proxySettings = Map<String, dynamic>.from(result);
@@ -31,6 +33,10 @@ class ProxyService {
       }
     }
     return _proxySettings!;
+  }
+
+  void clearProxyCache() {
+    _proxySettings = null;
   }
 
   HttpClient createProxyClient() {

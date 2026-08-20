@@ -7,12 +7,15 @@ class ProtocolValidator {
   static bool isValidPublicKey(String? key) {
     if (key == null) return false;
     try {
-      if (key.isEmpty || key.length < 43 || key.length > 44) return false;
-      String paddedKey = key;
+      final trimmed = key.trim();
+      if (trimmed.isEmpty || trimmed.length < 43 || trimmed.length > 44) {
+        return false;
+      }
+      String paddedKey = trimmed.replaceAll('-', '+').replaceAll('_', '/');
       while (paddedKey.length % 4 != 0) {
         paddedKey += '=';
       }
-      final bytes = base64Url.decode(paddedKey);
+      final bytes = base64.decode(paddedKey);
       return bytes.length == 32;
     } catch (e) {
       return false;

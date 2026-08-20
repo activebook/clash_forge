@@ -76,10 +76,23 @@ class WireGuardParser {
         }
       } else if (currentSection == 'peer') {
         if (key == 'endpoint') {
-          final endpointParts = value.split(':');
-          if (endpointParts.length >= 2) {
-            server = endpointParts[0];
-            port = int.tryParse(endpointParts[1]) ?? 0;
+          if (value.startsWith('[')) {
+            final closeBracket = value.indexOf(']');
+            if (closeBracket != -1) {
+              server = value.substring(1, closeBracket);
+              final remaining = value.substring(closeBracket + 1);
+              if (remaining.startsWith(':')) {
+                port = int.tryParse(remaining.substring(1).trim()) ?? 0;
+              }
+            }
+          } else {
+            final colonIndex = value.lastIndexOf(':');
+            if (colonIndex != -1) {
+              server = value.substring(0, colonIndex).trim();
+              port = int.tryParse(value.substring(colonIndex + 1).trim()) ?? 0;
+            } else {
+              server = value.trim();
+            }
           }
         } else if (key == 'publickey') {
           publicKey = value;
@@ -121,15 +134,8 @@ class WireGuardParser {
       if (preSharedKey.isNotEmpty) 'pre-shared-key': preSharedKey,
       if (reserved.isNotEmpty) 'reserved': reserved,
       if (mtu > 0) 'mtu': mtu,
-      'remote-dns-resolve':
-          true, // CRITICAL: Enable remote DNS resolution through tunnel
-      'dns': [
-        'https://doh.pub/dns-query', // DoH Pub
-        'https://dns.pub/dns-query', // DNS Pub
-        'https://1.12.12.12/dns-query', // Tencent DoH
-        'https://120.53.53.53/dns-query', // CNNIC DoH
-        ...configDns,
-      ],
+      'remote-dns-resolve': true,
+      if (configDns.isNotEmpty) 'dns': configDns,
       'udp': true, // WireGuard is always UDP
     };
   }

@@ -44,10 +44,10 @@ Endpoint = usa2.vpnjantit.com:1024
         equals('h1Qr9B2JHc+S/c3l8rP8PbR01ZUOe4nCY7Smf4BHank='),
       );
       expect(result['udp'], isTrue);
+      expect(result['dns'], equals(['1.1.1.1', '8.8.8.8']));
+      expect(result['mtu'], equals(1280));
 
-      // Verify ignored fields are NOT present
-      expect(result.containsKey('dns'), isFalse);
-      expect(result.containsKey('mtu'), isFalse);
+      // Verify unmapped/ignored fields like AllowedIPs are NOT present
       expect(result.containsKey('allowed-ips'), isFalse);
     });
 
@@ -55,14 +55,29 @@ Endpoint = usa2.vpnjantit.com:1024
       const mixedCaseConfig = '''
 [interface]
 address = 10.0.0.1/32
-privatekey = key1
+privatekey = eGxwn4aHprX28sYcAW3JjbEi+K+hvkkbCbNu/VlTWVo=
 
 [PEER]
 endpoint = server.com:51820
-publickey = key2
+publickey = h1Qr9B2JHc+S/c3l8rP8PbR01ZUOe4nCY7Smf4BHank=
 ''';
       final result = WireGuardParser.parse(mixedCaseConfig);
       expect(result['server'], equals('server.com'));
+      expect(result['port'], equals(51820));
+    });
+
+    test('parse handles IPv6 endpoint with brackets', () {
+      const ipv6Config = '''
+[Interface]
+Address = 10.0.0.1/32
+PrivateKey = eGxwn4aHprX28sYcAW3JjbEi+K+hvkkbCbNu/VlTWVo=
+
+[Peer]
+Endpoint = [2606:4700:d0::a29f:c001]:51820
+PublicKey = h1Qr9B2JHc+S/c3l8rP8PbR01ZUOe4nCY7Smf4BHank=
+''';
+      final result = WireGuardParser.parse(ipv6Config);
+      expect(result['server'], equals('2606:4700:d0::a29f:c001'));
       expect(result['port'], equals(51820));
     });
 
