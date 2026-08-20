@@ -49,35 +49,11 @@ With one-click profile activation, real-time connection latency testing, smart D
 
 ## Visual Overview
 
-### 1. Main Workspace
-Manage, test, and activate all your proxy subscriptions in a unified dashboard.
-<div align="center">
-  <img src="screenshots/main_window.png" alt="Clash Forge Main Workspace" width="780" />
-</div>
-
-<br/>
-
-### 2. Network Speed and Privacy Audit
-Run multi-stream speed tests with live performance metrics and WebRTC leak verification.
-<div align="center">
-  <img src="screenshots/speedtest.png" alt="Speed Test and WebRTC Audit" width="780" />
-</div>
-
-<br/>
-
-### 3. Preferences and DNS Configuration
-Configure DNS providers, appearance settings, and Clash profile tuning in organized sections.
-<div align="center">
-  <img src="screenshots/settings.png" alt="Settings and DNS Configuration" width="780" />
-</div>
-
-<br/>
-
-### 4. Activity Logs
-Inspect detailed conversion and network event logs with log-level filtering and one-click copy.
-<div align="center">
-  <img src="screenshots/loggings.png" alt="Activity and Event Logs" width="780" />
-</div>
+| **Main Workspace** | **Speed Test & Privacy Audit** |
+| :---: | :---: |
+| <img src="screenshots/main_window.png" alt="Main Workspace" width="460" /> | <img src="screenshots/speedtest.png" alt="Speed Test and Privacy Audit" width="460" /> |
+| **Preferences & DNS Configuration** | **Activity & Event Logs** |
+| <img src="screenshots/settings.png" alt="Preferences and DNS Configuration" width="460" /> | <img src="screenshots/loggings.png" alt="Activity and Event Logs" width="460" /> |
 
 ---
 
